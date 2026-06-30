@@ -7,6 +7,7 @@ import seaborn as sns
 import warnings
 from PIL import Image
 import os
+import re
 warnings.filterwarnings('ignore')
 
 st.set_page_config(page_title="Ariidae Classification System", page_icon="🐟", layout="wide")
@@ -174,7 +175,8 @@ ARIIDAE_SPECIES = {
         "features": "Long barbels, compressed body",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/arius_gagora.png"
+        "image_path": "images/arius_gagora.png",
+        "short_name": "A.GAGORA"
     },
     "Arius leptonotacanthus": {
         "scientific": "Arius leptonotacanthus",
@@ -185,7 +187,8 @@ ARIIDAE_SPECIES = {
         "features": "Thin dorsal spine, elongated body",
         "conservation": "Data Deficient",
         "data_source": "Simulated",
-        "image_path": "images/arius_leptonotacanthus.png"
+        "image_path": "images/arius_leptonotacanthus.png",
+        "short_name": "A.LEPTONOTACANTHUS"
     },
     "Arius maculatus": {
         "scientific": "Arius maculatus",
@@ -196,7 +199,8 @@ ARIIDAE_SPECIES = {
         "features": "Dark spots on body, 4 pairs of barbels",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "image_path": "images/arius_maculatus.png"
+        "image_path": "images/arius_maculatus.png",
+        "short_name": "A.MACULATUS"
     },
     "Arius oetik": {
         "scientific": "Arius oetik",
@@ -207,7 +211,8 @@ ARIIDAE_SPECIES = {
         "features": "Small size, slender body",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/arius_oetik.png"
+        "image_path": "images/arius_oetik.png",
+        "short_name": "A.OETIK"
     },
     "Arius venosus": {
         "scientific": "Arius venosus",
@@ -218,7 +223,8 @@ ARIIDAE_SPECIES = {
         "features": "Distinctive veined pattern on head",
         "conservation": "Data Deficient",
         "data_source": "Real ✅",
-        "image_path": "images/arius_venosus.png"
+        "image_path": "images/arius_venosus.png",
+        "short_name": "A.VENOSUS"
     },
     "Cryptarius truncatus": {
         "scientific": "Cryptarius truncatus",
@@ -229,7 +235,8 @@ ARIIDAE_SPECIES = {
         "features": "Truncated head shape",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "image_path": "images/cryptarius_truncatus.png"
+        "image_path": "images/cryptarius_truncatus.png",
+        "short_name": "C.TRUNCATUS"
     },
     "Hexanematichthys sagor": {
         "scientific": "Hexanematichthys sagor",
@@ -240,7 +247,8 @@ ARIIDAE_SPECIES = {
         "features": "Long maxillary barbels, small eyes",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/hexanematichthys_sagor.png"
+        "image_path": "images/hexanematichthys_sagor.png",
+        "short_name": "H.SAGOR"
     },
     "Nemapteryx macronotacantha": {
         "scientific": "Nemapteryx macronotacantha",
@@ -251,7 +259,8 @@ ARIIDAE_SPECIES = {
         "features": "Prominent dorsal spine",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "image_path": "images/nemapteryx_macronotacantha.png"
+        "image_path": "images/nemapteryx_macronotacantha.png",
+        "short_name": "N.MACRONOTACANTHA"
     },
     "Nemapteryx nenga": {
         "scientific": "Nemapteryx nenga",
@@ -262,7 +271,8 @@ ARIIDAE_SPECIES = {
         "features": "Small size, compressed body",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "image_path": "images/nemapteryx_nenga.png"
+        "image_path": "images/nemapteryx_nenga.png",
+        "short_name": "N.NENGA"
     },
     "Osteogeneiosus militaris": {
         "scientific": "Osteogeneiosus militaris",
@@ -273,7 +283,8 @@ ARIIDAE_SPECIES = {
         "features": "Bony head shield, elongated body",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "image_path": "images/osteogeneiosus_militaris.png"
+        "image_path": "images/osteogeneiosus_militaris.png",
+        "short_name": "O.MILITARIS"
     },
     "Plicofollis argyropleuron": {
         "scientific": "Plicofollis argyropleuron",
@@ -284,7 +295,8 @@ ARIIDAE_SPECIES = {
         "features": "Silver longitudinal band",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/plicofollis_argyropleuron.png"
+        "image_path": "images/plicofollis_argyropleuron.png",
+        "short_name": "P.ARGYROPLEURON"
     },
     "Plicofollis layardi": {
         "scientific": "Plicofollis layardi",
@@ -295,17 +307,51 @@ ARIIDAE_SPECIES = {
         "features": "Rugose head, long barbels",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/plicofollis_layardi.png"
+        "image_path": "images/plicofollis_layardi.png",
+        "short_name": "P.LAYARDI"
     }
 }
 
 # ============================================
-# FUNCTION TO DISPLAY FISH IMAGE (SUPPORTS PNG)
+# FUNCTION TO FIND SPECIES BY SHORT NAME OR FULL NAME
+# ============================================
+
+def find_species_key(search_name):
+    """Find the full species name from either short name or full name"""
+    search_name = search_name.upper().strip()
+    
+    # First try exact match with short_name
+    for key, info in ARIIDAE_SPECIES.items():
+        if info.get('short_name', '').upper() == search_name:
+            return key
+    
+    # Then try to match scientific name
+    for key, info in ARIIDAE_SPECIES.items():
+        if info.get('scientific', '').upper() == search_name:
+            return key
+    
+    # Then try partial match
+    for key in ARIIDAE_SPECIES.keys():
+        if search_name in key.upper():
+            return key
+    
+    # Default return None if not found
+    return None
+
+# ============================================
+# FUNCTION TO DISPLAY FISH IMAGE
 # ============================================
 
 def display_fish_image(species_name):
     """Display fish image for a given species - supports PNG format"""
-    species_info = ARIIDAE_SPECIES.get(species_name, {})
+    # Try to find the correct species key
+    species_key = find_species_key(species_name)
+    
+    if species_key is None:
+        st.info(f"📸 Species '{species_name}' not found in library. Please check the species name.")
+        return None
+    
+    species_info = ARIIDAE_SPECIES.get(species_key, {})
     image_path = species_info.get('image_path', '')
     
     # Check if the image file exists
@@ -314,12 +360,19 @@ def display_fish_image(species_name):
             image = Image.open(image_path)
             return image
         except Exception as e:
-            st.warning(f"Could not load image for {species_name}: {e}")
+            st.warning(f"Could not load image for {species_key}: {e}")
             return None
     else:
-        # If image doesn't exist, show placeholder with species name
-        st.info(f"📸 Image for {species_name} will be available soon. Please add PNG image at: {image_path}")
+        # If image doesn't exist, show placeholder
+        st.info(f"📸 Image for {species_key} will be available soon. Please add PNG image at: {image_path}")
         return None
+
+def get_species_info(species_name):
+    """Get full species info from either short name or full name"""
+    species_key = find_species_key(species_name)
+    if species_key:
+        return ARIIDAE_SPECIES.get(species_key, {})
+    return {}
 
 # ============================================
 # MODEL PERFORMANCE DATA
@@ -798,9 +851,16 @@ with tab2:
             try:
                 input_data = np.array([[head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal]])
                 
-                prediction = predict_hybrid_real(input_data, models, models_loaded)
+                prediction_raw = predict_hybrid_real(input_data, models, models_loaded)
                 
-                species_info = ARIIDAE_SPECIES.get(prediction, {})
+                # Get full species info using the find_species_key function
+                species_key = find_species_key(prediction_raw)
+                if species_key:
+                    prediction = species_key
+                else:
+                    prediction = prediction_raw
+                
+                species_info = get_species_info(prediction)
                 data_source = species_info.get('data_source', 'Unknown')
                 
                 confidence_badge = "✅ High Confidence (Real-trained species)" if data_source == "Real ✅" else "⚠️ Reference Species"
@@ -845,10 +905,15 @@ with tab2:
                             svm_pred = models['svm_real'].predict(models['scaler_real'].transform(input_data))[0]
                             knn_pred = models['knn_real'].predict(models['scaler_real'].transform(input_data))[0]
                             
+                            # Get full names for predictions
+                            dt_pred_full = find_species_key(dt_pred) or dt_pred
+                            svm_pred_full = find_species_key(svm_pred) or svm_pred
+                            knn_pred_full = find_species_key(knn_pred) or knn_pred
+                            
                             st.markdown("### 📊 Model Comparison for This Input")
                             comparison_df = pd.DataFrame({
                                 'Model': ['Decision Tree', 'SVM', 'KNN', '🏆 HYBRID CART-SVM'],
-                                'Prediction': [dt_pred, svm_pred, knn_pred, prediction],
+                                'Prediction': [dt_pred_full, svm_pred_full, knn_pred_full, prediction],
                                 'Model Accuracy': ['76.9%', '84.6%', '80.8%', '92.3%']
                             })
                             st.dataframe(comparison_df, use_container_width=True, hide_index=True)
@@ -896,9 +961,16 @@ with tab2:
                 input_data_sim = np.array([[head_sim, body_sim, eye_sim, snout_sim, maxillary_sim, 
                                               mandibullary_sim, mental_sim, dorsal_sim, anal_sim]])
                 
-                prediction = predict_hybrid_sim(input_data_sim, models, models_loaded)
+                prediction_raw = predict_hybrid_sim(input_data_sim, models, models_loaded)
                 
-                species_info = ARIIDAE_SPECIES.get(prediction, {})
+                # Get full species info using the find_species_key function
+                species_key = find_species_key(prediction_raw)
+                if species_key:
+                    prediction = species_key
+                else:
+                    prediction = prediction_raw
+                
+                species_info = get_species_info(prediction)
                 data_source = species_info.get('data_source', 'Unknown')
                 
                 confidence_badge = "✅ High Confidence" if data_source == "Real ✅" else "📊 Simulated Reference"
