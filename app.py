@@ -150,7 +150,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ============================================
-# SPECIES INFORMATION WITH IMAGE PATHS
+# SPECIES INFORMATION WITH IMAGE PATHS (PNG FORMAT)
 # ============================================
 
 # 6 Real species used for Hybrid CART-SVM training (MODE 1)
@@ -163,7 +163,7 @@ REAL_SPECIES_TRAINED = [
     "Osteogeneiosus militaris"
 ]
 
-# Complete 12 Ariidae Species Library with image paths
+# Complete 12 Ariidae Species Library with image paths (PNG format)
 ARIIDAE_SPECIES = {
     "Arius gagora": {
         "scientific": "Arius gagora",
@@ -174,7 +174,7 @@ ARIIDAE_SPECIES = {
         "features": "Long barbels, compressed body",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/arius_gagora.png"  # Ganti dengan path gambar sebenar
+        "image_path": "images/arius_gagora.png"
     },
     "Arius leptonotacanthus": {
         "scientific": "Arius leptonotacanthus",
@@ -295,20 +295,20 @@ ARIIDAE_SPECIES = {
         "features": "Rugose head, long barbels",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/plicofollis_layardi.ppg"
+        "image_path": "images/plicofollis_layardi.png"
     }
 }
 
 # ============================================
-# FUNCTION TO DISPLAY FISH IMAGE
+# FUNCTION TO DISPLAY FISH IMAGE (SUPPORTS PNG)
 # ============================================
 
 def display_fish_image(species_name):
-    """Display fish image for a given species"""
+    """Display fish image for a given species - supports PNG format"""
     species_info = ARIIDAE_SPECIES.get(species_name, {})
     image_path = species_info.get('image_path', '')
     
-    # Try to load and display image
+    # Check if the image file exists
     if image_path and os.path.exists(image_path):
         try:
             image = Image.open(image_path)
@@ -318,7 +318,7 @@ def display_fish_image(species_name):
             return None
     else:
         # If image doesn't exist, show placeholder with species name
-        st.info(f"📸 Image for {species_name} will be available soon. Please add image at: {image_path}")
+        st.info(f"📸 Image for {species_name} will be available soon. Please add PNG image at: {image_path}")
         return None
 
 # ============================================
@@ -671,7 +671,7 @@ with tab1:
         - ✅ **9 Measurements** - Easy data collection
         - ✅ **Real-time Prediction** - Instant results
         - ✅ **Optimized Pipeline** - Feature selection + PCA + SVM
-        - ✅ **Fish Images** - Visual identification for each species
+        - ✅ **Fish Images** - Visual identification for each species (PNG format)
         
         #### Model Comparison (Real Data - 6 Species):
         - 🌿 Decision Tree (CART): 76.9%
@@ -747,7 +747,7 @@ with tab1:
         for fisheries management and conservation efforts.</p>
         <p><strong>✅ Hybrid CART-SVM Optimization:</strong> The model uses CART for feature selection, 
         PCA for dimensionality reduction, and optimized SVM (GridSearchCV) for final classification.</p>
-        <p><strong>📸 Visual Identification:</strong> Each species comes with real fish images for visual confirmation.</p>
+        <p><strong>📸 Visual Identification:</strong> Each species comes with real fish images in PNG format for visual confirmation.</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -822,7 +822,7 @@ with tab2:
                 if fish_image:
                     st.image(fish_image, caption=f"{prediction} - {species_info.get('common', '')}", use_container_width=True)
                 else:
-                    st.info(f"📸 Image for {prediction} will be available soon. Please add image to: images/ folder")
+                    st.info(f"📸 Image for {prediction} will be available soon. Please add PNG image to: images/ folder")
                 
                 if species_info:
                     with st.expander("📖 View Species Information"):
@@ -919,7 +919,7 @@ with tab2:
                 if fish_image:
                     st.image(fish_image, caption=f"{prediction} - {species_info.get('common', '')}", use_container_width=True)
                 else:
-                    st.info(f"📸 Image for {prediction} will be available soon. Please add image to: images/ folder")
+                    st.info(f"📸 Image for {prediction} will be available soon. Please add PNG image to: images/ folder")
                 
                 if species_info:
                     with st.expander("📖 View Species Information"):
@@ -1221,6 +1221,6 @@ st.markdown("""
     <p>📊 Optimization: Feature Selection + PCA + GridSearchCV | Hybrid CART-SVM BEST in BOTH modes!</p>
     <p>📈 5-Fold CV: Real (91.76% ± 0.65%) | Simulated (95.42% ± 0.62%)</p>
     <p>🔬 Top Features: Body Depth (0.185) > Head Length (0.162) > Maxillary Barbell (0.148)</p>
-    <p>📸 Visual identification with real fish images included!</p>
+    <p>📸 Visual identification with real fish images in PNG format!</p>
 </div>
 """, unsafe_allow_html=True)
