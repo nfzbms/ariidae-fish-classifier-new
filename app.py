@@ -174,7 +174,7 @@ ARIIDAE_SPECIES = {
         "features": "Long barbels, compressed body",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/arius_gagora.jpg"  # Ganti dengan path gambar sebenar
+        "image_path": "images/arius_gagora.png"  # Ganti dengan path gambar sebenar
     },
     "Arius leptonotacanthus": {
         "scientific": "Arius leptonotacanthus",
@@ -185,7 +185,7 @@ ARIIDAE_SPECIES = {
         "features": "Thin dorsal spine, elongated body",
         "conservation": "Data Deficient",
         "data_source": "Simulated",
-        "image_path": "images/arius_leptonotacanthus.jpg"
+        "image_path": "images/arius_leptonotacanthus.png"
     },
     "Arius maculatus": {
         "scientific": "Arius maculatus",
@@ -196,7 +196,7 @@ ARIIDAE_SPECIES = {
         "features": "Dark spots on body, 4 pairs of barbels",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "image_path": "images/arius_maculatus.jpg"
+        "image_path": "images/arius_maculatus.png"
     },
     "Arius oetik": {
         "scientific": "Arius oetik",
@@ -207,7 +207,7 @@ ARIIDAE_SPECIES = {
         "features": "Small size, slender body",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/arius_oetik.jpg"
+        "image_path": "images/arius_oetik.png"
     },
     "Arius venosus": {
         "scientific": "Arius venosus",
@@ -218,7 +218,7 @@ ARIIDAE_SPECIES = {
         "features": "Distinctive veined pattern on head",
         "conservation": "Data Deficient",
         "data_source": "Real ✅",
-        "image_path": "images/arius_venosus.jpg"
+        "image_path": "images/arius_venosus.png"
     },
     "Cryptarius truncatus": {
         "scientific": "Cryptarius truncatus",
@@ -229,7 +229,7 @@ ARIIDAE_SPECIES = {
         "features": "Truncated head shape",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "image_path": "images/cryptarius_truncatus.jpg"
+        "image_path": "images/cryptarius_truncatus.png"
     },
     "Hexanematichthys sagor": {
         "scientific": "Hexanematichthys sagor",
@@ -240,7 +240,7 @@ ARIIDAE_SPECIES = {
         "features": "Long maxillary barbels, small eyes",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/hexanematichthys_sagor.jpg"
+        "image_path": "images/hexanematichthys_sagor.png"
     },
     "Nemapteryx macronotacantha": {
         "scientific": "Nemapteryx macronotacantha",
@@ -251,7 +251,7 @@ ARIIDAE_SPECIES = {
         "features": "Prominent dorsal spine",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "image_path": "images/nemapteryx_macronotacantha.jpg"
+        "image_path": "images/nemapteryx_macronotacantha.png"
     },
     "Nemapteryx nenga": {
         "scientific": "Nemapteryx nenga",
@@ -262,7 +262,7 @@ ARIIDAE_SPECIES = {
         "features": "Small size, compressed body",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "image_path": "images/nemapteryx_nenga.jpg"
+        "image_path": "images/nemapteryx_nenga.png"
     },
     "Osteogeneiosus militaris": {
         "scientific": "Osteogeneiosus militaris",
@@ -273,7 +273,7 @@ ARIIDAE_SPECIES = {
         "features": "Bony head shield, elongated body",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "image_path": "images/osteogeneiosus_militaris.jpg"
+        "image_path": "images/osteogeneiosus_militaris.png"
     },
     "Plicofollis argyropleuron": {
         "scientific": "Plicofollis argyropleuron",
@@ -284,7 +284,7 @@ ARIIDAE_SPECIES = {
         "features": "Silver longitudinal band",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/plicofollis_argyropleuron.jpg"
+        "image_path": "images/plicofollis_argyropleuron.png"
     },
     "Plicofollis layardi": {
         "scientific": "Plicofollis layardi",
@@ -295,7 +295,7 @@ ARIIDAE_SPECIES = {
         "features": "Rugose head, long barbels",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/plicofollis_layardi.jpg"
+        "image_path": "images/plicofollis_layardi.ppg"
     }
 }
 
