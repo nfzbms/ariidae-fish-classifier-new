@@ -5,6 +5,8 @@ import joblib
 import matplotlib.pyplot as plt
 import seaborn as sns
 import warnings
+from PIL import Image
+import os
 warnings.filterwarnings('ignore')
 
 st.set_page_config(page_title="Ariidae Classification System", page_icon="🐟", layout="wide")
@@ -124,15 +126,16 @@ st.markdown("""
         justify-content: center;
         align-items: center;
         margin: 1rem 0;
+        padding: 1rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
-    .fish-emoji {
-        font-size: 6rem;
-        line-height: 1.2;
-    }
-    .prediction-result {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+    .fish-image-container img {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 10px;
+        object-fit: contain;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -147,7 +150,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ============================================
-# SPECIES INFORMATION WITH IMAGES/EMOJIS
+# SPECIES INFORMATION WITH IMAGE PATHS
 # ============================================
 
 # 6 Real species used for Hybrid CART-SVM training (MODE 1)
@@ -160,7 +163,7 @@ REAL_SPECIES_TRAINED = [
     "Osteogeneiosus militaris"
 ]
 
-# Complete 12 Ariidae Species Library with emojis/images
+# Complete 12 Ariidae Species Library with image paths
 ARIIDAE_SPECIES = {
     "Arius gagora": {
         "scientific": "Arius gagora",
@@ -171,8 +174,7 @@ ARIIDAE_SPECIES = {
         "features": "Long barbels, compressed body",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "emoji": "🐠",
-        "color": "#4CAF50"
+        "image_path": "images/arius_gagora.jpg"  # Ganti dengan path gambar sebenar
     },
     "Arius leptonotacanthus": {
         "scientific": "Arius leptonotacanthus",
@@ -183,8 +185,7 @@ ARIIDAE_SPECIES = {
         "features": "Thin dorsal spine, elongated body",
         "conservation": "Data Deficient",
         "data_source": "Simulated",
-        "emoji": "🐟",
-        "color": "#2196F3"
+        "image_path": "images/arius_leptonotacanthus.jpg"
     },
     "Arius maculatus": {
         "scientific": "Arius maculatus",
@@ -195,8 +196,7 @@ ARIIDAE_SPECIES = {
         "features": "Dark spots on body, 4 pairs of barbels",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "emoji": "🐡",
-        "color": "#FF9800"
+        "image_path": "images/arius_maculatus.jpg"
     },
     "Arius oetik": {
         "scientific": "Arius oetik",
@@ -207,8 +207,7 @@ ARIIDAE_SPECIES = {
         "features": "Small size, slender body",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "emoji": "🐟",
-        "color": "#9C27B0"
+        "image_path": "images/arius_oetik.jpg"
     },
     "Arius venosus": {
         "scientific": "Arius venosus",
@@ -219,8 +218,7 @@ ARIIDAE_SPECIES = {
         "features": "Distinctive veined pattern on head",
         "conservation": "Data Deficient",
         "data_source": "Real ✅",
-        "emoji": "🐠",
-        "color": "#E91E63"
+        "image_path": "images/arius_venosus.jpg"
     },
     "Cryptarius truncatus": {
         "scientific": "Cryptarius truncatus",
@@ -231,8 +229,7 @@ ARIIDAE_SPECIES = {
         "features": "Truncated head shape",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "emoji": "🐡",
-        "color": "#795548"
+        "image_path": "images/cryptarius_truncatus.jpg"
     },
     "Hexanematichthys sagor": {
         "scientific": "Hexanematichthys sagor",
@@ -243,8 +240,7 @@ ARIIDAE_SPECIES = {
         "features": "Long maxillary barbels, small eyes",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "emoji": "🐠",
-        "color": "#00897B"
+        "image_path": "images/hexanematichthys_sagor.jpg"
     },
     "Nemapteryx macronotacantha": {
         "scientific": "Nemapteryx macronotacantha",
@@ -255,8 +251,7 @@ ARIIDAE_SPECIES = {
         "features": "Prominent dorsal spine",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "emoji": "🐟",
-        "color": "#F44336"
+        "image_path": "images/nemapteryx_macronotacantha.jpg"
     },
     "Nemapteryx nenga": {
         "scientific": "Nemapteryx nenga",
@@ -267,8 +262,7 @@ ARIIDAE_SPECIES = {
         "features": "Small size, compressed body",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "emoji": "🐠",
-        "color": "#3F51B5"
+        "image_path": "images/nemapteryx_nenga.jpg"
     },
     "Osteogeneiosus militaris": {
         "scientific": "Osteogeneiosus militaris",
@@ -279,8 +273,7 @@ ARIIDAE_SPECIES = {
         "features": "Bony head shield, elongated body",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "emoji": "🐡",
-        "color": "#607D8B"
+        "image_path": "images/osteogeneiosus_militaris.jpg"
     },
     "Plicofollis argyropleuron": {
         "scientific": "Plicofollis argyropleuron",
@@ -291,8 +284,7 @@ ARIIDAE_SPECIES = {
         "features": "Silver longitudinal band",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "emoji": "🐟",
-        "color": "#009688"
+        "image_path": "images/plicofollis_argyropleuron.jpg"
     },
     "Plicofollis layardi": {
         "scientific": "Plicofollis layardi",
@@ -303,16 +295,37 @@ ARIIDAE_SPECIES = {
         "features": "Rugose head, long barbels",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "emoji": "🐠",
-        "color": "#673AB7"
+        "image_path": "images/plicofollis_layardi.jpg"
     }
 }
 
 # ============================================
-# MODEL PERFORMANCE DATA (FROM ACTUAL TRAINING RESULTS)
+# FUNCTION TO DISPLAY FISH IMAGE
 # ============================================
 
-# MODE 1: Real Data (6 Species) - From your training output
+def display_fish_image(species_name):
+    """Display fish image for a given species"""
+    species_info = ARIIDAE_SPECIES.get(species_name, {})
+    image_path = species_info.get('image_path', '')
+    
+    # Try to load and display image
+    if image_path and os.path.exists(image_path):
+        try:
+            image = Image.open(image_path)
+            return image
+        except Exception as e:
+            st.warning(f"Could not load image for {species_name}: {e}")
+            return None
+    else:
+        # If image doesn't exist, show placeholder with species name
+        st.info(f"📸 Image for {species_name} will be available soon. Please add image at: {image_path}")
+        return None
+
+# ============================================
+# MODEL PERFORMANCE DATA
+# ============================================
+
+# MODE 1: Real Data (6 Species)
 MODEL_PERFORMANCE_REAL = {
     'Decision Tree (CART)': 76.9,
     'SVM (Standalone)': 84.6,
@@ -320,7 +333,7 @@ MODEL_PERFORMANCE_REAL = {
     '🏆 HYBRID CART-SVM': 92.3
 }
 
-# MODE 2: Simulated Data (12 Species) - From your training output
+# MODE 2: Simulated Data (12 Species)
 MODEL_PERFORMANCE_SIM = {
     'Decision Tree (CART)': 89.8,
     'SVM (Standalone)': 92.6,
@@ -344,7 +357,6 @@ FEATURE_IMPORTANCE = {
 # Confusion Matrix Data for 12 Species
 species_list = list(ARIIDAE_SPECIES.keys())
 
-# Confusion Matrix - Real Data (6 species expanded to 12x12)
 confusion_matrix_real = np.array([
     [38, 2, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0],
     [1, 35, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0],
@@ -449,10 +461,8 @@ def predict_hybrid_real(features, models, models_loaded):
         if not models_loaded or models is None:
             return predict_fallback(features)
         
-        # Try different prediction methods
         prediction = None
         
-        # Method 1: Full hybrid pipeline
         if models.get('selector_real') is not None and models.get('scaler_hybrid_real') is not None:
             try:
                 features_selected = models['selector_real'].transform(features)
@@ -467,7 +477,6 @@ def predict_hybrid_real(features, models, models_loaded):
             except:
                 pass
         
-        # Method 2: SVM with scaling only
         if models.get('svm_hybrid_real') is not None and models.get('scaler_real') is not None:
             try:
                 features_scaled = models['scaler_real'].transform(features)
@@ -477,7 +486,6 @@ def predict_hybrid_real(features, models, models_loaded):
             except:
                 pass
         
-        # Method 3: Use standalone SVM
         if models.get('svm_real') is not None and models.get('scaler_real') is not None:
             try:
                 features_scaled = models['scaler_real'].transform(features)
@@ -487,7 +495,6 @@ def predict_hybrid_real(features, models, models_loaded):
             except:
                 pass
         
-        # Fallback to rule-based
         return predict_fallback(features)
         
     except Exception as e:
@@ -502,10 +509,8 @@ def predict_hybrid_sim(features, models, models_loaded):
         if not models_loaded or models is None:
             return predict_fallback(features)
         
-        # Try different prediction methods
         prediction = None
         
-        # Method 1: Full hybrid pipeline
         if models.get('selector_sim') is not None and models.get('scaler_hybrid_sim') is not None:
             try:
                 features_selected = models['selector_sim'].transform(features)
@@ -520,7 +525,6 @@ def predict_hybrid_sim(features, models, models_loaded):
             except:
                 pass
         
-        # Method 2: SVM with scaling only
         if models.get('svm_hybrid_sim') is not None and models.get('scaler_sim') is not None:
             try:
                 features_scaled = models['scaler_sim'].transform(features)
@@ -530,7 +534,6 @@ def predict_hybrid_sim(features, models, models_loaded):
             except:
                 pass
         
-        # Method 3: Use standalone SVM
         if models.get('svm_sim') is not None and models.get('scaler_sim') is not None:
             try:
                 features_scaled = models['scaler_sim'].transform(features)
@@ -540,7 +543,6 @@ def predict_hybrid_sim(features, models, models_loaded):
             except:
                 pass
         
-        # Fallback to rule-based
         return predict_fallback(features)
         
     except Exception as e:
@@ -553,7 +555,6 @@ def predict_fallback(features):
     except:
         return "Arius gagora"
     
-    # Rule-based prediction logic
     if head > 55:
         return "Arius maculatus"
     elif body > 35:
@@ -577,7 +578,7 @@ def predict_fallback(features):
 models, models_loaded = load_all_models()
 
 # ============================================
-# SIDEBAR - MODEL PERFORMANCE
+# SIDEBAR
 # ============================================
 
 with st.sidebar:
@@ -670,7 +671,7 @@ with tab1:
         - ✅ **9 Measurements** - Easy data collection
         - ✅ **Real-time Prediction** - Instant results
         - ✅ **Optimized Pipeline** - Feature selection + PCA + SVM
-        - ✅ **Visual Species Identification** - Fish images with each prediction
+        - ✅ **Fish Images** - Visual identification for each species
         
         #### Model Comparison (Real Data - 6 Species):
         - 🌿 Decision Tree (CART): 76.9%
@@ -746,6 +747,7 @@ with tab1:
         for fisheries management and conservation efforts.</p>
         <p><strong>✅ Hybrid CART-SVM Optimization:</strong> The model uses CART for feature selection, 
         PCA for dimensionality reduction, and optimized SVM (GridSearchCV) for final classification.</p>
+        <p><strong>📸 Visual Identification:</strong> Each species comes with real fish images for visual confirmation.</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -759,7 +761,7 @@ with tab2:
     sub_tab1, sub_tab2 = st.tabs(["📏 Mode 1: Real Data (6 Species) - 92.3%", "📈 Mode 2: Simulated Data (12 Species) - 95.4%"])
     
     # ============================================
-    # MODE 1: REAL DATA (92.3% ACCURACY)
+    # MODE 1: REAL DATA
     # ============================================
     with sub_tab1:
         st.markdown("### Enter 9 Morphological Measurements")
@@ -800,25 +802,27 @@ with tab2:
                 
                 species_info = ARIIDAE_SPECIES.get(prediction, {})
                 data_source = species_info.get('data_source', 'Unknown')
-                emoji = species_info.get('emoji', '🐟')
-                color = species_info.get('color', '#667eea')
                 
                 confidence_badge = "✅ High Confidence (Real-trained species)" if data_source == "Real ✅" else "⚠️ Reference Species"
                 
-                # Display prediction with fish image
+                # Display prediction card
                 st.markdown(f"""
-                <div class="prediction-card" style="background: linear-gradient(135deg, {color} 0%, #1a1a2e 100%);">
-                    <div class="prediction-result">
-                        <div class="fish-emoji">{emoji}</div>
-                        <div>🎯 Predicted Species</div>
-                        <div class="prediction-species">{prediction}</div>
-                        <div style="font-size: 1.1rem;">{species_info.get('common', 'N/A')}</div>
-                        <div style="font-size: 0.9rem; margin-top: 10px;">🏆 Optimized Hybrid CART-SVM | 92.3% Accuracy</div>
-                        <div style="font-size: 0.9rem; margin-top: 5px;">{confidence_badge}</div>
-                        <div style="font-size: 0.8rem; margin-top: 5px;">✅ Feature Selection + PCA + GridSearchCV</div>
-                    </div>
+                <div class="prediction-card">
+                    <div>🎯 Predicted Species</div>
+                    <div class="prediction-species">{prediction}</div>
+                    <div>🏆 Optimized Hybrid CART-SVM | 92.3% Accuracy</div>
+                    <div style="font-size: 0.9rem; margin-top: 10px;">{confidence_badge}</div>
+                    <div style="font-size: 0.8rem;">✅ Feature Selection + PCA + GridSearchCV</div>
                 </div>
                 """, unsafe_allow_html=True)
+                
+                # Display fish image
+                st.markdown("### 📸 Fish Image")
+                fish_image = display_fish_image(prediction)
+                if fish_image:
+                    st.image(fish_image, caption=f"{prediction} - {species_info.get('common', '')}", use_container_width=True)
+                else:
+                    st.info(f"📸 Image for {prediction} will be available soon. Please add image to: images/ folder")
                 
                 if species_info:
                     with st.expander("📖 View Species Information"):
@@ -855,7 +859,7 @@ with tab2:
                 st.error(f"Error: {e}")
     
     # ============================================
-    # MODE 2: SIMULATED DATA (95.4% ACCURACY)
+    # MODE 2: SIMULATED DATA
     # ============================================
     with sub_tab2:
         st.markdown("### Simulated Data Classification")
@@ -896,25 +900,26 @@ with tab2:
                 
                 species_info = ARIIDAE_SPECIES.get(prediction, {})
                 data_source = species_info.get('data_source', 'Unknown')
-                emoji = species_info.get('emoji', '🐟')
-                color = species_info.get('color', '#f39c12')
                 
                 confidence_badge = "✅ High Confidence" if data_source == "Real ✅" else "📊 Simulated Reference"
                 
-                # Display prediction with fish image
                 st.markdown(f"""
-                <div class="prediction-card-sim" style="background: linear-gradient(135deg, {color} 0%, #1a1a2e 100%);">
-                    <div class="prediction-result">
-                        <div class="fish-emoji">{emoji}</div>
-                        <div>🎯 Predicted Species (Simulated Data)</div>
-                        <div class="prediction-species">{prediction}</div>
-                        <div style="font-size: 1.1rem;">{species_info.get('common', 'N/A')}</div>
-                        <div style="font-size: 0.9rem; margin-top: 10px;">🏆 Optimized Hybrid CART-SVM | 95.4% Accuracy (BEST!)</div>
-                        <div style="font-size: 0.9rem; margin-top: 5px;">{confidence_badge}</div>
-                        <div style="font-size: 0.8rem; margin-top: 5px;">✅ Feature Selection + PCA + GridSearchCV</div>
-                    </div>
+                <div class="prediction-card-sim">
+                    <div>🎯 Predicted Species (Simulated Data)</div>
+                    <div class="prediction-species">{prediction}</div>
+                    <div>🏆 Optimized Hybrid CART-SVM | 95.4% Accuracy (BEST!)</div>
+                    <div style="font-size: 0.9rem; margin-top: 10px;">{confidence_badge}</div>
+                    <div style="font-size: 0.8rem;">✅ Feature Selection + PCA + GridSearchCV</div>
                 </div>
                 """, unsafe_allow_html=True)
+                
+                # Display fish image
+                st.markdown("### 📸 Fish Image")
+                fish_image = display_fish_image(prediction)
+                if fish_image:
+                    st.image(fish_image, caption=f"{prediction} - {species_info.get('common', '')}", use_container_width=True)
+                else:
+                    st.info(f"📸 Image for {prediction} will be available soon. Please add image to: images/ folder")
                 
                 if species_info:
                     with st.expander("📖 View Species Information"):
@@ -964,12 +969,11 @@ with tab3:
     for i, (species_name, info) in enumerate(filtered_species):
         data_source_badge = "✅ Real-trained" if info.get('data_source') == "Real ✅" else "📊 Simulated reference"
         data_source_color = "#11998e" if info.get('data_source') == "Real ✅" else "#f39c12"
-        emoji = info.get('emoji', '🐟')
         
         with cols[i % 2]:
             st.markdown(f"""
             <div class="species-card">
-                <div class="species-name">{emoji} {species_name}</div>
+                <div class="species-name">🐟 {species_name}</div>
                 <div class="species-scientific"><i>{info.get('scientific', 'N/A')}</i></div>
                 <div class="species-detail"><span class="badge">📏 Size</span> {info.get('size', 'N/A')}</div>
                 <div class="species-detail"><span class="badge">🌊 Habitat</span> {info.get('habitat', 'N/A')}</div>
@@ -1217,6 +1221,6 @@ st.markdown("""
     <p>📊 Optimization: Feature Selection + PCA + GridSearchCV | Hybrid CART-SVM BEST in BOTH modes!</p>
     <p>📈 5-Fold CV: Real (91.76% ± 0.65%) | Simulated (95.42% ± 0.62%)</p>
     <p>🔬 Top Features: Body Depth (0.185) > Head Length (0.162) > Maxillary Barbell (0.148)</p>
-    <p>🐟 Visual Species Identification with Fish Images</p>
+    <p>📸 Visual identification with real fish images included!</p>
 </div>
 """, unsafe_allow_html=True)
