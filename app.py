@@ -8,6 +8,7 @@ import warnings
 from PIL import Image
 import os
 import glob
+import re
 warnings.filterwarnings('ignore')
 
 st.set_page_config(page_title="Ariidae Classification System", page_icon="🐟", layout="wide")
@@ -176,7 +177,7 @@ REAL_SPECIES_TRAINED = [
     "Osteogeneiosus militaris"
 ]
 
-# Complete 12 Ariidae Species Library with image paths
+# Complete 12 Ariidae Species Library
 ARIIDAE_SPECIES = {
     "Arius gagora": {
         "scientific": "Arius gagora",
@@ -186,7 +187,8 @@ ARIIDAE_SPECIES = {
         "diet": "Carnivorous - small fish, crustaceans",
         "features": "Long barbels, compressed body",
         "conservation": "Least Concern",
-        "data_source": "Simulated"
+        "data_source": "Simulated",
+        "short_name": "A.GAGORA"
     },
     "Arius leptonotacanthus": {
         "scientific": "Arius leptonotacanthus",
@@ -196,7 +198,8 @@ ARIIDAE_SPECIES = {
         "diet": "Omnivorous - insects, plants",
         "features": "Thin dorsal spine, elongated body",
         "conservation": "Data Deficient",
-        "data_source": "Simulated"
+        "data_source": "Simulated",
+        "short_name": "A.LEPTONOTACANTHUS"
     },
     "Arius maculatus": {
         "scientific": "Arius maculatus",
@@ -206,7 +209,8 @@ ARIIDAE_SPECIES = {
         "diet": "Carnivorous - small fish, crustaceans",
         "features": "Dark spots on body, 4 pairs of barbels",
         "conservation": "Least Concern",
-        "data_source": "Real ✅"
+        "data_source": "Real ✅",
+        "short_name": "A.MACULATUS"
     },
     "Arius oetik": {
         "scientific": "Arius oetik",
@@ -216,7 +220,8 @@ ARIIDAE_SPECIES = {
         "diet": "Carnivorous - small fish",
         "features": "Small size, slender body",
         "conservation": "Least Concern",
-        "data_source": "Simulated"
+        "data_source": "Simulated",
+        "short_name": "A.OETIK"
     },
     "Arius venosus": {
         "scientific": "Arius venosus",
@@ -226,7 +231,8 @@ ARIIDAE_SPECIES = {
         "diet": "Omnivorous - small fish, algae",
         "features": "Distinctive veined pattern on head",
         "conservation": "Data Deficient",
-        "data_source": "Real ✅"
+        "data_source": "Real ✅",
+        "short_name": "A.VENOSUS"
     },
     "Cryptarius truncatus": {
         "scientific": "Cryptarius truncatus",
@@ -236,7 +242,8 @@ ARIIDAE_SPECIES = {
         "diet": "Carnivorous - insects, worms",
         "features": "Truncated head shape",
         "conservation": "Least Concern",
-        "data_source": "Real ✅"
+        "data_source": "Real ✅",
+        "short_name": "C.TRUNCATUS"
     },
     "Hexanematichthys sagor": {
         "scientific": "Hexanematichthys sagor",
@@ -246,7 +253,8 @@ ARIIDAE_SPECIES = {
         "diet": "Omnivorous - fish, plants, insects",
         "features": "Long maxillary barbels, small eyes",
         "conservation": "Least Concern",
-        "data_source": "Simulated"
+        "data_source": "Simulated",
+        "short_name": "H.SAGOR"
     },
     "Nemapteryx macronotacantha": {
         "scientific": "Nemapteryx macronotacantha",
@@ -256,7 +264,8 @@ ARIIDAE_SPECIES = {
         "diet": "Carnivorous - small crustaceans",
         "features": "Prominent dorsal spine",
         "conservation": "Least Concern",
-        "data_source": "Real ✅"
+        "data_source": "Real ✅",
+        "short_name": "N.MACRONOTACANTHA"
     },
     "Nemapteryx nenga": {
         "scientific": "Nemapteryx nenga",
@@ -266,7 +275,8 @@ ARIIDAE_SPECIES = {
         "diet": "Omnivorous - small fish, plants",
         "features": "Small size, compressed body",
         "conservation": "Least Concern",
-        "data_source": "Real ✅"
+        "data_source": "Real ✅",
+        "short_name": "N.NENGA"
     },
     "Osteogeneiosus militaris": {
         "scientific": "Osteogeneiosus militaris",
@@ -276,7 +286,8 @@ ARIIDAE_SPECIES = {
         "diet": "Carnivorous - fish, shrimp",
         "features": "Bony head shield, elongated body",
         "conservation": "Least Concern",
-        "data_source": "Real ✅"
+        "data_source": "Real ✅",
+        "short_name": "O.MILITARIS"
     },
     "Plicofollis argyropleuron": {
         "scientific": "Plicofollis argyropleuron",
@@ -286,7 +297,8 @@ ARIIDAE_SPECIES = {
         "diet": "Carnivorous - crustaceans",
         "features": "Silver longitudinal band",
         "conservation": "Least Concern",
-        "data_source": "Simulated"
+        "data_source": "Simulated",
+        "short_name": "P.ARGYROPLEURON"
     },
     "Plicofollis layardi": {
         "scientific": "Plicofollis layardi",
@@ -296,43 +308,103 @@ ARIIDAE_SPECIES = {
         "diet": "Carnivorous - small fish",
         "features": "Rugose head, long barbels",
         "conservation": "Least Concern",
-        "data_source": "Simulated"
+        "data_source": "Simulated",
+        "short_name": "P.LAYARDI"
     }
 }
+
+# ============================================
+# FUNCTION TO FIND SPECIES KEY FROM SHORT NAME
+# ============================================
+
+def find_species_key(search_name):
+    """Find the full species name from short name or full name"""
+    search_name = str(search_name).upper().strip()
+    
+    # First try exact match with short_name
+    for key, info in ARIIDAE_SPECIES.items():
+        if info.get('short_name', '').upper() == search_name:
+            return key
+    
+    # Then try to match scientific name
+    for key, info in ARIIDAE_SPECIES.items():
+        if info.get('scientific', '').upper() == search_name:
+            return key
+    
+    # Then try partial match
+    for key in ARIIDAE_SPECIES.keys():
+        if search_name in key.upper():
+            return key
+    
+    return None
 
 # ============================================
 # FUNCTION TO GET IMAGE PATH FOR SPECIES
 # ============================================
 
 def get_image_path(species_name):
-    """Get image path for a species - tries multiple naming conventions"""
-    # Convert species name to filename format
-    # Example: "Arius maculatus" -> "arius_maculatus"
-    filename = species_name.lower().replace(' ', '_')
+    """Get image path for a species - handles both short and full names"""
+    # Try to find the full species name
+    full_name = find_species_key(species_name)
+    if full_name is None:
+        full_name = species_name
     
-    # Try different extensions and paths
-    possible_paths = [
-        f"images/{filename}.png",
-        f"images/{filename}.jpg",
-        f"images/{filename}.jpeg",
-        f"images/{species_name.lower().replace(' ', '_')}.png",
-        f"images/{species_name.lower().replace(' ', '_')}.jpg",
-    ]
+    # Get the species info
+    species_info = ARIIDAE_SPECIES.get(full_name, {})
+    scientific_name = species_info.get('scientific', full_name)
     
-    # Also try without "arius_" prefix for some species
-    if "arius" in filename:
-        alt_name = filename.replace("arius_", "")
-        possible_paths.extend([
-            f"images/{alt_name}.png",
-            f"images/{alt_name}.jpg",
-        ])
+    # Generate possible filenames
+    possible_filenames = []
+    
+    # 1. From scientific name (lowercase with underscores)
+    sci_name = scientific_name.lower().replace(' ', '_')
+    possible_filenames.append(sci_name)
+    
+    # 2. From full name (lowercase with underscores)
+    full_name_lower = full_name.lower().replace(' ', '_')
+    possible_filenames.append(full_name_lower)
+    
+    # 3. From short name (lowercase with dot removed)
+    short_name = species_info.get('short_name', '').lower().replace('.', '_')
+    if short_name:
+        possible_filenames.append(short_name)
+    
+    # 4. From short name without prefix (e.g., "venosus")
+    if short_name and '_' in short_name:
+        parts = short_name.split('_')
+        if len(parts) > 1:
+            possible_filenames.append(parts[1])
+    
+    # 5. From scientific name without genus (e.g., "venosus")
+    if '_' in sci_name:
+        parts = sci_name.split('_')
+        if len(parts) > 1:
+            possible_filenames.append(parts[1])
+    
+    # Remove duplicates
+    possible_filenames = list(dict.fromkeys(possible_filenames))
+    
+    # Try different paths and extensions
+    extensions = ['.png', '.jpg', '.jpeg']
+    paths_to_try = []
+    
+    for filename in possible_filenames:
+        for ext in extensions:
+            paths_to_try.append(f"images/{filename}{ext}")
+            paths_to_try.append(f"images/{filename}{ext.upper()}")
+    
+    # Also try without "arius_" prefix
+    for filename in possible_filenames:
+        if filename.startswith('arius_'):
+            alt_name = filename.replace('arius_', '')
+            for ext in extensions:
+                paths_to_try.append(f"images/{alt_name}{ext}")
     
     # Check all possible paths
-    for path in possible_paths:
+    for path in paths_to_try:
         if os.path.exists(path):
             return path
     
-    # If no image found, return None
     return None
 
 # ============================================
@@ -341,6 +413,12 @@ def get_image_path(species_name):
 
 def display_fish_image(species_name):
     """Display fish image for a given species"""
+    # Try to find the full species name
+    full_name = find_species_key(species_name)
+    if full_name is None:
+        full_name = species_name
+    
+    species_info = ARIIDAE_SPECIES.get(full_name, {})
     image_path = get_image_path(species_name)
     
     if image_path:
@@ -351,9 +429,10 @@ def display_fish_image(species_name):
             st.warning(f"Could not load image: {e}")
             return None
     else:
-        # Show debug info
+        # Show debug info with correct expected path
+        sci_name = species_info.get('scientific', species_name).lower().replace(' ', '_')
         st.info(f"📸 Image not found for: {species_name}")
-        st.info(f"Expected filename: images/{species_name.lower().replace(' ', '_')}.png")
+        st.info(f"Expected filename: images/{sci_name}.png")
         st.info("Please add the image file to the 'images' folder.")
         return None
 
@@ -364,19 +443,15 @@ def display_fish_image(species_name):
 def calculate_confidence(features, model, scaler):
     """Calculate confidence score based on distance to decision boundary"""
     try:
-        # Scale features
         features_scaled = scaler.transform(features)
         
-        # Get decision function (distance to hyperplane)
         if hasattr(model, 'decision_function'):
             decision_values = model.decision_function(features_scaled)
             if len(decision_values.shape) > 1:
-                # Multi-class: get max confidence
                 confidence = np.max(decision_values, axis=1)[0]
             else:
                 confidence = np.abs(decision_values[0])
             
-            # Normalize to 0-100%
             confidence_score = 100 * (1 / (1 + np.exp(-confidence / 2)))
             return min(98, max(60, confidence_score))
         else:
@@ -862,7 +937,14 @@ with tab2:
             try:
                 input_data = np.array([[head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal]])
                 
-                prediction = predict_hybrid_real(input_data, models, models_loaded)
+                prediction_raw = predict_hybrid_real(input_data, models, models_loaded)
+                
+                # Get full species name
+                full_name = find_species_key(prediction_raw)
+                if full_name:
+                    prediction = full_name
+                else:
+                    prediction = prediction_raw
                 
                 species_info = ARIIDAE_SPECIES.get(prediction, {})
                 data_source = species_info.get('data_source', 'Unknown')
@@ -916,7 +998,8 @@ with tab2:
                     st.image(fish_image, caption=f"{prediction} - {species_info.get('common', '')}", use_container_width=True)
                 else:
                     st.warning(f"⚠️ Image not found for {prediction}")
-                    st.info(f"Please add image file: images/{prediction.lower().replace(' ', '_')}.png")
+                    sci_name = species_info.get('scientific', prediction).lower().replace(' ', '_')
+                    st.info(f"Please add image file: images/{sci_name}.png")
                 
                 if species_info:
                     with st.expander("📖 View Species Information"):
@@ -939,10 +1022,14 @@ with tab2:
                             svm_pred = models['svm_real'].predict(models['scaler_real'].transform(input_data))[0]
                             knn_pred = models['knn_real'].predict(models['scaler_real'].transform(input_data))[0]
                             
+                            dt_full = find_species_key(dt_pred) or dt_pred
+                            svm_full = find_species_key(svm_pred) or svm_pred
+                            knn_full = find_species_key(knn_pred) or knn_pred
+                            
                             st.markdown("### 📊 Model Comparison for This Input")
                             comparison_df = pd.DataFrame({
                                 'Model': ['Decision Tree', 'SVM', 'KNN', '🏆 HYBRID CART-SVM'],
-                                'Prediction': [dt_pred, svm_pred, knn_pred, prediction],
+                                'Prediction': [dt_full, svm_full, knn_full, prediction],
                                 'Model Accuracy': ['76.9%', '84.6%', '80.8%', '92.3%']
                             })
                             st.dataframe(comparison_df, use_container_width=True, hide_index=True)
@@ -990,12 +1077,19 @@ with tab2:
                 input_data_sim = np.array([[head_sim, body_sim, eye_sim, snout_sim, maxillary_sim, 
                                               mandibullary_sim, mental_sim, dorsal_sim, anal_sim]])
                 
-                prediction = predict_hybrid_sim(input_data_sim, models, models_loaded)
+                prediction_raw = predict_hybrid_sim(input_data_sim, models, models_loaded)
+                
+                # Get full species name
+                full_name = find_species_key(prediction_raw)
+                if full_name:
+                    prediction = full_name
+                else:
+                    prediction = prediction_raw
                 
                 species_info = ARIIDAE_SPECIES.get(prediction, {})
                 data_source = species_info.get('data_source', 'Unknown')
                 
-                # Calculate confidence score for simulated data
+                # Calculate confidence score
                 confidence = 85.0
                 if models_loaded and models is not None:
                     if models.get('svm_hybrid_sim') is not None and models.get('scaler_sim') is not None:
@@ -1044,7 +1138,8 @@ with tab2:
                     st.image(fish_image, caption=f"{prediction} - {species_info.get('common', '')}", use_container_width=True)
                 else:
                     st.warning(f"⚠️ Image not found for {prediction}")
-                    st.info(f"Please add image file: images/{prediction.lower().replace(' ', '_')}.png")
+                    sci_name = species_info.get('scientific', prediction).lower().replace(' ', '_')
+                    st.info(f"Please add image file: images/{sci_name}.png")
                 
                 if species_info:
                     with st.expander("📖 View Species Information"):
