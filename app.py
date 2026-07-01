@@ -146,6 +146,32 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ============================================
+# 15 FEATURES DEFINITION
+# ============================================
+
+FEATURES_15 = [
+    'Head_length',
+    'Body_depth',
+    'Eye_diameter',
+    'Snout_length',
+    'Maxillary_barbell_length',
+    'Mandibullary_barbell_length',
+    'Mental_barbell_length',
+    'Dorsal_fin_ray',
+    'Anal_fin_ray',
+    'Pre_dorsal_length',
+    'Pre_pelvic_length',
+    'Pectoral_fin_ray',
+    'Head_width',
+    'Inter_orbital_space',
+    'Total_length'
+]
+
+print("📊 15 Features:")
+for i, f in enumerate(FEATURES_15, 1):
+    print(f"   {i}. {f}")
+
+# ============================================
 # SPECIES INFORMATION
 # ============================================
 
@@ -326,12 +352,12 @@ FEATURE_IMPORTANCE = {
     'Mental_barbell_length': 0.052,
     'Dorsal_fin_ray': 0.088,
     'Anal_fin_ray': 0.058,
-    'Head_depth': 0.042,
-    'Body_width': 0.038,
-    'Predorsal_length': 0.025,
-    'Prepelvic_length': 0.020,
+    'Pre_dorsal_length': 0.025,
+    'Pre_pelvic_length': 0.020,
     'Pectoral_fin_ray': 0.030,
-    'Caudal_peduncle_depth': 0.018
+    'Head_width': 0.038,
+    'Inter_orbital_space': 0.018,
+    'Total_length': 0.042
 }
 
 # Confusion Matrix Data for 12 Species
@@ -570,7 +596,7 @@ def predict_hybrid_sim_15(features, models, models_loaded):
 def predict_fallback_real_15(features):
     """Fallback prediction for real data"""
     try:
-        head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, head_depth, body_width, predorsal, prepelvic, pectoral, caudal = features[0]
+        head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total = features[0]
     except:
         return "Arius maculatus"
     
@@ -592,27 +618,27 @@ def predict_fallback_real_15(features):
 def predict_fallback_sim_15(features):
     """Fallback prediction for simulated data"""
     try:
-        head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, head_depth, body_width, predorsal, prepelvic, pectoral, caudal = features[0]
+        head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total = features[0]
     except:
         return "Arius gagora"
     
     species_means_sim = {
-        "Arius gagora": [50, 30, 6.5, 15, 38, 25, 9, 18, 15, 22, 18, 28, 20, 16, 8],
-        "Arius leptonotacanthus": [40, 25, 5.5, 12, 30, 20, 7, 16, 13, 18, 14, 22, 16, 12, 6],
-        "Arius maculatus": [58, 38, 6.0, 18, 45, 32, 10, 20, 16, 28, 24, 32, 24, 20, 10],
-        "Arius oetik": [35, 22, 5.0, 10, 25, 18, 6, 15, 12, 15, 12, 18, 14, 10, 5],
-        "Arius venosus": [48, 32, 6.0, 15, 38, 27, 8, 18, 15, 24, 20, 28, 20, 16, 8],
-        "Cryptarius truncatus": [32, 25, 8.0, 12, 28, 22, 7, 15, 12, 16, 14, 20, 16, 12, 6],
-        "Hexanematichthys sagor": [50, 32, 4.5, 16, 48, 32, 10, 22, 17, 26, 20, 30, 22, 18, 8],
-        "Nemapteryx macronotacantha": [42, 28, 5.5, 14, 33, 24, 8, 22, 14, 20, 16, 24, 18, 14, 7],
-        "Nemapteryx nenga": [35, 24, 5.0, 11, 30, 20, 7, 17, 13, 16, 12, 20, 16, 12, 6],
-        "Osteogeneiosus militaris": [55, 38, 6.0, 18, 42, 30, 9, 21, 18, 28, 22, 32, 24, 20, 10],
-        "Plicofollis argyropleuron": [48, 30, 6.0, 15, 38, 27, 8, 19, 15, 24, 18, 28, 20, 16, 8],
-        "Plicofollis layardi": [45, 30, 6.0, 14, 42, 30, 8, 19, 15, 22, 18, 26, 20, 16, 8]
+        "Arius gagora": [50, 30, 6.5, 15, 38, 25, 9, 18, 15, 28, 20, 16, 18, 8, 45],
+        "Arius leptonotacanthus": [40, 25, 5.5, 12, 30, 20, 7, 16, 13, 22, 16, 12, 14, 6, 35],
+        "Arius maculatus": [58, 38, 6.0, 18, 45, 32, 10, 20, 16, 32, 24, 20, 24, 10, 50],
+        "Arius oetik": [35, 22, 5.0, 10, 25, 18, 6, 15, 12, 18, 14, 10, 12, 5, 30],
+        "Arius venosus": [48, 32, 6.0, 15, 38, 27, 8, 18, 15, 28, 20, 16, 20, 8, 42],
+        "Cryptarius truncatus": [32, 25, 8.0, 12, 28, 22, 7, 15, 12, 20, 16, 12, 14, 6, 35],
+        "Hexanematichthys sagor": [50, 32, 4.5, 16, 48, 32, 10, 22, 17, 30, 22, 18, 20, 8, 45],
+        "Nemapteryx macronotacantha": [42, 28, 5.5, 14, 33, 24, 8, 22, 14, 24, 18, 14, 16, 7, 38],
+        "Nemapteryx nenga": [35, 24, 5.0, 11, 30, 20, 7, 17, 13, 20, 16, 12, 12, 6, 32],
+        "Osteogeneiosus militaris": [55, 38, 6.0, 18, 42, 30, 9, 21, 18, 32, 24, 20, 22, 10, 48],
+        "Plicofollis argyropleuron": [48, 30, 6.0, 15, 38, 27, 8, 19, 15, 28, 20, 16, 18, 8, 40],
+        "Plicofollis layardi": [45, 30, 6.0, 14, 42, 30, 8, 19, 15, 26, 20, 16, 18, 8, 38]
     }
     
-    input_values = [head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, head_depth, body_width, predorsal, prepelvic, pectoral, caudal]
-    weights = [0.15, 0.17, 0.07, 0.12, 0.13, 0.08, 0.05, 0.09, 0.06, 0.04, 0.04, 0.03, 0.02, 0.03, 0.02]
+    input_values = [head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total]
+    weights = [0.15, 0.17, 0.07, 0.12, 0.13, 0.08, 0.05, 0.09, 0.06, 0.02, 0.02, 0.03, 0.04, 0.02, 0.04]
     
     distances = {}
     for species, means in species_means_sim.items():
@@ -726,6 +752,23 @@ with tab1:
         - ✅ **Optimized Pipeline** - Feature selection + PCA + SVM
         - ✅ **Fish Images** - Visual identification for each species
         
+        #### 15 Features Used:
+        1. Head Length
+        2. Body Depth
+        3. Eye Diameter
+        4. Snout Length
+        5. Maxillary Barbell Length
+        6. Mandibullary Barbell Length
+        7. Mental Barbell Length
+        8. Dorsal Fin Ray
+        9. Anal Fin Ray
+        10. Pre-dorsal Length
+        11. Pre-pelvic Length
+        12. Pectoral Fin Ray
+        13. Head Width
+        14. Inter-orbital Space
+        15. Total Length
+        
         #### Model Comparison (Real Data - 6 Species):
         - 🌿 Decision Tree (CART): 69.2%
         - ⚡ SVM Standalone: 92.3%
@@ -835,30 +878,30 @@ with tab2:
             body = st.number_input("Body Depth (mm)", 0.0, 150.0, 28.0, 0.1, key="body_real")
             eye = st.number_input("Eye Diameter (mm)", 0.0, 30.0, 6.0, 0.1, key="eye_real")
             snout = st.number_input("Snout Length (mm)", 0.0, 50.0, 12.0, 0.1, key="snout_real")
-            head_depth = st.number_input("Head Depth (mm)", 0.0, 50.0, 22.0, 0.1, key="head_depth_real")
+            head_width = st.number_input("Head Width (mm)", 0.0, 50.0, 20.0, 0.1, key="head_width_real")
         
         with col2:
             st.markdown("**🪢 Barbell**")
             maxillary = st.number_input("Maxillary Barbell (mm)", 0.0, 100.0, 35.0, 0.1, key="maxillary_real")
             mandibullary = st.number_input("Mandibullary Barbell (mm)", 0.0, 80.0, 25.0, 0.1, key="mandibullary_real")
             mental = st.number_input("Mental Barbell (mm)", 0.0, 50.0, 8.0, 0.1, key="mental_real")
-            body_width = st.number_input("Body Width (mm)", 0.0, 100.0, 20.0, 0.1, key="body_width_real")
-            predorsal = st.number_input("Predorsal Length (mm)", 0.0, 80.0, 30.0, 0.1, key="predorsal_real")
+            inter_orbital = st.number_input("Inter-orbital Space (mm)", 0.0, 20.0, 8.0, 0.1, key="inter_orbital_real")
+            total = st.number_input("Total Length (mm)", 0.0, 100.0, 45.0, 0.1, key="total_real")
         
         with col3:
             st.markdown("**🎯 Fins & Other**")
             dorsal = st.number_input("Dorsal Fin Ray", 0, 50, 18, 1, key="dorsal_real")
             anal = st.number_input("Anal Fin Ray", 0, 40, 14, 1, key="anal_real")
             pectoral = st.number_input("Pectoral Fin Ray", 0, 30, 16, 1, key="pectoral_real")
-            prepelvic = st.number_input("Prepelvic Length (mm)", 0.0, 80.0, 20.0, 0.1, key="prepelvic_real")
-            caudal = st.number_input("Caudal Peduncle Depth (mm)", 0.0, 20.0, 8.0, 0.1, key="caudal_real")
+            pre_dorsal = st.number_input("Pre-dorsal Length (mm)", 0.0, 80.0, 30.0, 0.1, key="pre_dorsal_real")
+            pre_pelvic = st.number_input("Pre-pelvic Length (mm)", 0.0, 80.0, 20.0, 0.1, key="pre_pelvic_real")
         
         if st.button("🔍 Identify Species", key="mode1_btn", use_container_width=True):
             try:
                 # Create input array with 15 features
                 input_data = np.array([[head, body, eye, snout, maxillary, mandibullary, mental, 
-                                        dorsal, anal, head_depth, body_width, predorsal, 
-                                        prepelvic, pectoral, caudal]])
+                                        dorsal, anal, pre_dorsal, pre_pelvic, pectoral, 
+                                        head_width, inter_orbital, total]])
                 
                 prediction_raw = predict_hybrid_real_15(input_data, models, models_loaded)
                 
@@ -981,30 +1024,30 @@ with tab2:
             body_sim = st.number_input("Body Depth (mm)", 0.0, 150.0, 28.0, 0.1, key="body_sim")
             eye_sim = st.number_input("Eye Diameter (mm)", 0.0, 30.0, 6.0, 0.1, key="eye_sim")
             snout_sim = st.number_input("Snout Length (mm)", 0.0, 50.0, 12.0, 0.1, key="snout_sim")
-            head_depth_sim = st.number_input("Head Depth (mm)", 0.0, 50.0, 22.0, 0.1, key="head_depth_sim")
+            head_width_sim = st.number_input("Head Width (mm)", 0.0, 50.0, 20.0, 0.1, key="head_width_sim")
         
         with col2:
             st.markdown("**🪢 Barbell**")
             maxillary_sim = st.number_input("Maxillary Barbell (mm)", 0.0, 100.0, 35.0, 0.1, key="maxillary_sim")
             mandibullary_sim = st.number_input("Mandibullary Barbell (mm)", 0.0, 80.0, 25.0, 0.1, key="mandibullary_sim")
             mental_sim = st.number_input("Mental Barbell (mm)", 0.0, 50.0, 8.0, 0.1, key="mental_sim")
-            body_width_sim = st.number_input("Body Width (mm)", 0.0, 100.0, 20.0, 0.1, key="body_width_sim")
-            predorsal_sim = st.number_input("Predorsal Length (mm)", 0.0, 80.0, 30.0, 0.1, key="predorsal_sim")
+            inter_orbital_sim = st.number_input("Inter-orbital Space (mm)", 0.0, 20.0, 8.0, 0.1, key="inter_orbital_sim")
+            total_sim = st.number_input("Total Length (mm)", 0.0, 100.0, 45.0, 0.1, key="total_sim")
         
         with col3:
             st.markdown("**🎯 Fins & Other**")
             dorsal_sim = st.number_input("Dorsal Fin Ray", 0, 50, 18, 1, key="dorsal_sim")
             anal_sim = st.number_input("Anal Fin Ray", 0, 40, 14, 1, key="anal_sim")
             pectoral_sim = st.number_input("Pectoral Fin Ray", 0, 30, 16, 1, key="pectoral_sim")
-            prepelvic_sim = st.number_input("Prepelvic Length (mm)", 0.0, 80.0, 20.0, 0.1, key="prepelvic_sim")
-            caudal_sim = st.number_input("Caudal Peduncle Depth (mm)", 0.0, 20.0, 8.0, 0.1, key="caudal_sim")
+            pre_dorsal_sim = st.number_input("Pre-dorsal Length (mm)", 0.0, 80.0, 30.0, 0.1, key="pre_dorsal_sim")
+            pre_pelvic_sim = st.number_input("Pre-pelvic Length (mm)", 0.0, 80.0, 20.0, 0.1, key="pre_pelvic_sim")
         
         if st.button("🔍 Identify Species (Simulated)", key="mode2_btn", use_container_width=True):
             try:
                 input_data_sim = np.array([[head_sim, body_sim, eye_sim, snout_sim, maxillary_sim, 
                                             mandibullary_sim, mental_sim, dorsal_sim, anal_sim,
-                                            head_depth_sim, body_width_sim, predorsal_sim,
-                                            prepelvic_sim, pectoral_sim, caudal_sim]])
+                                            pre_dorsal_sim, pre_pelvic_sim, pectoral_sim,
+                                            head_width_sim, inter_orbital_sim, total_sim]])
                 
                 prediction_raw = predict_hybrid_sim_15(input_data_sim, models, models_loaded)
                 
@@ -1227,7 +1270,7 @@ with tab4:
             • <strong>Head Length (0.145)</strong> and <strong>Maxillary Barbell (0.132)</strong> are also highly important<br>
             • Barbell measurements collectively contribute significant information<br>
             • Fin ray counts have moderate importance for species discrimination<br>
-            • Additional features (Head Depth, Body Width) provide supplementary information
+            • Additional features provide supplementary information
         </div>
         """, unsafe_allow_html=True)
     
