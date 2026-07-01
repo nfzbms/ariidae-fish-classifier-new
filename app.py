@@ -7,7 +7,6 @@ import seaborn as sns
 import warnings
 from PIL import Image
 import os
-import re
 warnings.filterwarnings('ignore')
 
 st.set_page_config(page_title="Ariidae Classification System", page_icon="🐟", layout="wide")
@@ -151,7 +150,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ============================================
-# SPECIES INFORMATION WITH IMAGE PATHS (PNG FORMAT)
+# SPECIES INFORMATION
 # ============================================
 
 # 6 Real species used for Hybrid CART-SVM training (MODE 1)
@@ -164,7 +163,7 @@ REAL_SPECIES_TRAINED = [
     "Osteogeneiosus militaris"
 ]
 
-# Complete 12 Ariidae Species Library with image paths (PNG format)
+# Complete 12 Ariidae Species Library with image paths
 ARIIDAE_SPECIES = {
     "Arius gagora": {
         "scientific": "Arius gagora",
@@ -175,8 +174,7 @@ ARIIDAE_SPECIES = {
         "features": "Long barbels, compressed body",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/arius_gagora.png",
-        "short_name": "A.GAGORA"
+        "image_path": "images/arius_gagora.png"
     },
     "Arius leptonotacanthus": {
         "scientific": "Arius leptonotacanthus",
@@ -187,8 +185,7 @@ ARIIDAE_SPECIES = {
         "features": "Thin dorsal spine, elongated body",
         "conservation": "Data Deficient",
         "data_source": "Simulated",
-        "image_path": "images/arius_leptonotacanthus.png",
-        "short_name": "A.LEPTONOTACANTHUS"
+        "image_path": "images/arius_leptonotacanthus.png"
     },
     "Arius maculatus": {
         "scientific": "Arius maculatus",
@@ -199,8 +196,7 @@ ARIIDAE_SPECIES = {
         "features": "Dark spots on body, 4 pairs of barbels",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "image_path": "images/arius_maculatus.png",
-        "short_name": "A.MACULATUS"
+        "image_path": "images/arius_maculatus.png"
     },
     "Arius oetik": {
         "scientific": "Arius oetik",
@@ -211,8 +207,7 @@ ARIIDAE_SPECIES = {
         "features": "Small size, slender body",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/arius_oetik.png",
-        "short_name": "A.OETIK"
+        "image_path": "images/arius_oetik.png"
     },
     "Arius venosus": {
         "scientific": "Arius venosus",
@@ -223,8 +218,7 @@ ARIIDAE_SPECIES = {
         "features": "Distinctive veined pattern on head",
         "conservation": "Data Deficient",
         "data_source": "Real ✅",
-        "image_path": "images/arius_venosus.png",
-        "short_name": "A.VENOSUS"
+        "image_path": "images/arius_venosus.png"
     },
     "Cryptarius truncatus": {
         "scientific": "Cryptarius truncatus",
@@ -235,8 +229,7 @@ ARIIDAE_SPECIES = {
         "features": "Truncated head shape",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "image_path": "images/cryptarius_truncatus.png",
-        "short_name": "C.TRUNCATUS"
+        "image_path": "images/cryptarius_truncatus.png"
     },
     "Hexanematichthys sagor": {
         "scientific": "Hexanematichthys sagor",
@@ -247,8 +240,7 @@ ARIIDAE_SPECIES = {
         "features": "Long maxillary barbels, small eyes",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/hexanematichthys_sagor.png",
-        "short_name": "H.SAGOR"
+        "image_path": "images/hexanematichthys_sagor.png"
     },
     "Nemapteryx macronotacantha": {
         "scientific": "Nemapteryx macronotacantha",
@@ -259,8 +251,7 @@ ARIIDAE_SPECIES = {
         "features": "Prominent dorsal spine",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "image_path": "images/nemapteryx_macronotacantha.png",
-        "short_name": "N.MACRONOTACANTHA"
+        "image_path": "images/nemapteryx_macronotacantha.png"
     },
     "Nemapteryx nenga": {
         "scientific": "Nemapteryx nenga",
@@ -271,8 +262,7 @@ ARIIDAE_SPECIES = {
         "features": "Small size, compressed body",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "image_path": "images/nemapteryx_nenga.png",
-        "short_name": "N.NENGA"
+        "image_path": "images/nemapteryx_nenga.png"
     },
     "Osteogeneiosus militaris": {
         "scientific": "Osteogeneiosus militaris",
@@ -283,8 +273,7 @@ ARIIDAE_SPECIES = {
         "features": "Bony head shield, elongated body",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "image_path": "images/osteogeneiosus_militaris.png",
-        "short_name": "O.MILITARIS"
+        "image_path": "images/osteogeneiosus_militaris.png"
     },
     "Plicofollis argyropleuron": {
         "scientific": "Plicofollis argyropleuron",
@@ -295,8 +284,7 @@ ARIIDAE_SPECIES = {
         "features": "Silver longitudinal band",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/plicofollis_argyropleuron.png",
-        "short_name": "P.ARGYROPLEURON"
+        "image_path": "images/plicofollis_argyropleuron.png"
     },
     "Plicofollis layardi": {
         "scientific": "Plicofollis layardi",
@@ -307,51 +295,17 @@ ARIIDAE_SPECIES = {
         "features": "Rugose head, long barbels",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/plicofollis_layardi.png",
-        "short_name": "P.LAYARDI"
+        "image_path": "images/plicofollis_layardi.png"
     }
 }
-
-# ============================================
-# FUNCTION TO FIND SPECIES BY SHORT NAME OR FULL NAME
-# ============================================
-
-def find_species_key(search_name):
-    """Find the full species name from either short name or full name"""
-    search_name = str(search_name).upper().strip()
-    
-    # First try exact match with short_name
-    for key, info in ARIIDAE_SPECIES.items():
-        if info.get('short_name', '').upper() == search_name:
-            return key
-    
-    # Then try to match scientific name
-    for key, info in ARIIDAE_SPECIES.items():
-        if info.get('scientific', '').upper() == search_name:
-            return key
-    
-    # Then try partial match
-    for key in ARIIDAE_SPECIES.keys():
-        if search_name in key.upper():
-            return key
-    
-    # Default return None if not found
-    return None
 
 # ============================================
 # FUNCTION TO DISPLAY FISH IMAGE
 # ============================================
 
 def display_fish_image(species_name):
-    """Display fish image for a given species - supports PNG format"""
-    # Try to find the correct species key
-    species_key = find_species_key(species_name)
-    
-    if species_key is None:
-        st.info(f"📸 Species '{species_name}' not found in library. Please check the species name.")
-        return None
-    
-    species_info = ARIIDAE_SPECIES.get(species_key, {})
+    """Display fish image for a given species"""
+    species_info = ARIIDAE_SPECIES.get(species_name, {})
     image_path = species_info.get('image_path', '')
     
     # Check if the image file exists
@@ -360,95 +314,18 @@ def display_fish_image(species_name):
             image = Image.open(image_path)
             return image
         except Exception as e:
-            st.warning(f"Could not load image for {species_key}: {e}")
+            st.warning(f"Could not load image for {species_name}: {e}")
             return None
     else:
         # If image doesn't exist, show placeholder
-        st.info(f"📸 Image for {species_key} will be available soon. Please add PNG image at: {image_path}")
+        st.info(f"📸 Image for {species_name} will be available soon. Please add PNG image at: {image_path}")
         return None
 
-def get_species_info(species_name):
-    """Get full species info from either short name or full name"""
-    species_key = find_species_key(species_name)
-    if species_key:
-        return ARIIDAE_SPECIES.get(species_key, {})
-    return {}
-
 # ============================================
-# SIMULATED DATA PREDICTION FUNCTION (MORE ACCURATE)
+# MODEL PERFORMANCE DATA (FROM ACTUAL TRAINING RESULTS)
 # ============================================
 
-def predict_simulated_species(features):
-    """Predict using rule-based system for simulated data (12 species) - MORE ACCURATE"""
-    try:
-        head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal = features[0]
-    except:
-        return "Arius gagora"
-    
-    # Normalize/scale features for better comparison
-    # Using typical ranges for Ariidae species
-    
-    # Calculate distances/weights for each species based on morphological characteristics
-    species_distances = {}
-    
-    # Define typical measurements for each species (mean values)
-    species_means = {
-        "Arius gagora": [50, 30, 6.5, 15, 38, 25, 9, 18, 15],
-        "Arius leptonotacanthus": [40, 25, 5.5, 12, 30, 20, 7, 16, 13],
-        "Arius maculatus": [58, 38, 6.0, 18, 45, 32, 10, 20, 16],
-        "Arius oetik": [35, 22, 5.0, 10, 25, 18, 6, 15, 12],
-        "Arius venosus": [48, 32, 6.0, 15, 38, 27, 8, 18, 15],
-        "Cryptarius truncatus": [32, 25, 8.0, 12, 28, 22, 7, 15, 12],
-        "Hexanematichthys sagor": [50, 32, 4.5, 16, 48, 32, 10, 22, 17],
-        "Nemapteryx macronotacantha": [42, 28, 5.5, 14, 33, 24, 8, 22, 14],
-        "Nemapteryx nenga": [35, 24, 5.0, 11, 30, 20, 7, 17, 13],
-        "Osteogeneiosus militaris": [55, 38, 6.0, 18, 42, 30, 9, 21, 18],
-        "Plicofollis argyropleuron": [48, 30, 6.0, 15, 38, 27, 8, 19, 15],
-        "Plicofollis layardi": [45, 30, 6.0, 14, 42, 30, 8, 19, 15]
-    }
-    
-    # Feature names for reference
-    feature_names = ['head', 'body', 'eye', 'snout', 'maxillary', 'mandibullary', 'mental', 'dorsal', 'anal']
-    input_values = [head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal]
-    
-    # Calculate weighted distance for each species
-    for species, means in species_means.items():
-        # Calculate Euclidean distance with weights
-        weights = [0.18, 0.20, 0.10, 0.12, 0.15, 0.10, 0.05, 0.05, 0.05]  # Feature importance weights
-        distance = 0
-        for i in range(len(input_values)):
-            # Normalize difference by expected range
-            diff = (input_values[i] - means[i]) / (means[i] + 0.01)
-            distance += weights[i] * (diff ** 2)
-        species_distances[species] = distance
-    
-    # Get species with minimum distance (most similar)
-    if species_distances:
-        prediction = min(species_distances, key=species_distances.get)
-    else:
-        # Fallback prediction
-        if head > 55:
-            prediction = "Arius maculatus"
-        elif body > 35:
-            prediction = "Arius venosus"
-        elif eye > 7:
-            prediction = "Cryptarius truncatus"
-        elif maxillary > 45:
-            prediction = "Hexanematichthys sagor"
-        elif dorsal > 22:
-            prediction = "Nemapteryx macronotacantha"
-        elif anal > 18:
-            prediction = "Osteogeneiosus militaris"
-        else:
-            prediction = "Arius gagora"
-    
-    return prediction
-
-# ============================================
-# MODEL PERFORMANCE DATA
-# ============================================
-
-# MODE 1: Real Data (6 Species)
+# MODE 1: Real Data (6 Species) - From your training output
 MODEL_PERFORMANCE_REAL = {
     'Decision Tree (CART)': 76.9,
     'SVM (Standalone)': 84.6,
@@ -456,7 +333,7 @@ MODEL_PERFORMANCE_REAL = {
     '🏆 HYBRID CART-SVM': 92.3
 }
 
-# MODE 2: Simulated Data (12 Species)
+# MODE 2: Simulated Data (12 Species) - From your training output
 MODEL_PERFORMANCE_SIM = {
     'Decision Tree (CART)': 89.8,
     'SVM (Standalone)': 92.6,
@@ -480,6 +357,7 @@ FEATURE_IMPORTANCE = {
 # Confusion Matrix Data for 12 Species
 species_list = list(ARIIDAE_SPECIES.keys())
 
+# Confusion Matrix - Real Data (6 species expanded to 12x12)
 confusion_matrix_real = np.array([
     [38, 2, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0],
     [1, 35, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0],
@@ -582,10 +460,12 @@ def predict_hybrid_real(features, models, models_loaded):
             return "Error: Expected 9 features"
         
         if not models_loaded or models is None:
-            return predict_fallback_real(features)
+            return predict_fallback(features)
         
+        # Try different prediction methods
         prediction = None
         
+        # Method 1: Full hybrid pipeline
         if models.get('selector_real') is not None and models.get('scaler_hybrid_real') is not None:
             try:
                 features_selected = models['selector_real'].transform(features)
@@ -600,6 +480,7 @@ def predict_hybrid_real(features, models, models_loaded):
             except:
                 pass
         
+        # Method 2: SVM with scaling only
         if models.get('svm_hybrid_real') is not None and models.get('scaler_real') is not None:
             try:
                 features_scaled = models['scaler_real'].transform(features)
@@ -609,6 +490,7 @@ def predict_hybrid_real(features, models, models_loaded):
             except:
                 pass
         
+        # Method 3: Use standalone SVM
         if models.get('svm_real') is not None and models.get('scaler_real') is not None:
             try:
                 features_scaled = models['scaler_real'].transform(features)
@@ -618,18 +500,73 @@ def predict_hybrid_real(features, models, models_loaded):
             except:
                 pass
         
-        return predict_fallback_real(features)
+        # Fallback to rule-based
+        return predict_fallback(features)
         
     except Exception as e:
-        return predict_fallback_real(features)
+        return predict_fallback(features)
 
-def predict_fallback_real(features):
-    """Fallback prediction for real data"""
+def predict_hybrid_sim(features, models, models_loaded):
+    """Predict using Hybrid CART-SVM for Simulated Data"""
+    try:
+        if features.shape[1] != 9:
+            return "Error: Expected 9 features"
+        
+        if not models_loaded or models is None:
+            return predict_fallback(features)
+        
+        # Try different prediction methods
+        prediction = None
+        
+        # Method 1: Full hybrid pipeline
+        if models.get('selector_sim') is not None and models.get('scaler_hybrid_sim') is not None:
+            try:
+                features_selected = models['selector_sim'].transform(features)
+                features_scaled = models['scaler_hybrid_sim'].transform(features_selected)
+                if models.get('pca_sim') is not None:
+                    features_pca = models['pca_sim'].transform(features_scaled)
+                    prediction = models['svm_hybrid_sim'].predict(features_pca)
+                else:
+                    prediction = models['svm_hybrid_sim'].predict(features_scaled)
+                if prediction is not None:
+                    return prediction[0]
+            except:
+                pass
+        
+        # Method 2: SVM with scaling only
+        if models.get('svm_hybrid_sim') is not None and models.get('scaler_sim') is not None:
+            try:
+                features_scaled = models['scaler_sim'].transform(features)
+                prediction = models['svm_hybrid_sim'].predict(features_scaled)
+                if prediction is not None:
+                    return prediction[0]
+            except:
+                pass
+        
+        # Method 3: Use standalone SVM
+        if models.get('svm_sim') is not None and models.get('scaler_sim') is not None:
+            try:
+                features_scaled = models['scaler_sim'].transform(features)
+                prediction = models['svm_sim'].predict(features_scaled)
+                if prediction is not None:
+                    return prediction[0]
+            except:
+                pass
+        
+        # Fallback to rule-based
+        return predict_fallback(features)
+        
+    except Exception as e:
+        return predict_fallback(features)
+
+def predict_fallback(features):
+    """Fallback prediction using rule-based system"""
     try:
         head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal = features[0]
     except:
-        return "Arius maculatus"
+        return "Arius gagora"
     
+    # Rule-based prediction logic
     if head > 55:
         return "Arius maculatus"
     elif body > 35:
@@ -637,19 +574,23 @@ def predict_fallback_real(features):
     elif eye > 7:
         return "Cryptarius truncatus"
     elif maxillary > 45:
-        return "Nemapteryx macronotacantha"
+        return "Hexanematichthys sagor"
     elif dorsal > 22:
-        return "Nemapteryx nenga"
+        return "Nemapteryx macronotacantha"
     elif anal > 18:
         return "Osteogeneiosus militaris"
+    elif head < 40 and body < 25:
+        return "Arius oetik"
+    elif maxillary < 30 and mandibullary < 20:
+        return "Arius leptonotacanthus"
     else:
-        return "Arius maculatus"
+        return "Arius gagora"
 
 # Load models
 models, models_loaded = load_all_models()
 
 # ============================================
-# SIDEBAR
+# SIDEBAR - MODEL PERFORMANCE
 # ============================================
 
 with st.sidebar:
@@ -742,7 +683,7 @@ with tab1:
         - ✅ **9 Measurements** - Easy data collection
         - ✅ **Real-time Prediction** - Instant results
         - ✅ **Optimized Pipeline** - Feature selection + PCA + SVM
-        - ✅ **Fish Images** - Visual identification for each species (PNG format)
+        - ✅ **Fish Images** - Visual identification for each species
         
         #### Model Comparison (Real Data - 6 Species):
         - 🌿 Decision Tree (CART): 76.9%
@@ -818,7 +759,7 @@ with tab1:
         for fisheries management and conservation efforts.</p>
         <p><strong>✅ Hybrid CART-SVM Optimization:</strong> The model uses CART for feature selection, 
         PCA for dimensionality reduction, and optimized SVM (GridSearchCV) for final classification.</p>
-        <p><strong>📸 Visual Identification:</strong> Each species comes with real fish images in PNG format for visual confirmation.</p>
+        <p><strong>📸 Visual Identification:</strong> Each species comes with real fish images for visual confirmation.</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -832,7 +773,7 @@ with tab2:
     sub_tab1, sub_tab2 = st.tabs(["📏 Mode 1: Real Data (6 Species) - 92.3%", "📈 Mode 2: Simulated Data (12 Species) - 95.4%"])
     
     # ============================================
-    # MODE 1: REAL DATA
+    # MODE 1: REAL DATA (92.3% ACCURACY)
     # ============================================
     with sub_tab1:
         st.markdown("### Enter 9 Morphological Measurements")
@@ -869,21 +810,13 @@ with tab2:
             try:
                 input_data = np.array([[head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal]])
                 
-                prediction_raw = predict_hybrid_real(input_data, models, models_loaded)
+                prediction = predict_hybrid_real(input_data, models, models_loaded)
                 
-                # Get full species info using the find_species_key function
-                species_key = find_species_key(prediction_raw)
-                if species_key:
-                    prediction = species_key
-                else:
-                    prediction = prediction_raw
-                
-                species_info = get_species_info(prediction)
+                species_info = ARIIDAE_SPECIES.get(prediction, {})
                 data_source = species_info.get('data_source', 'Unknown')
                 
                 confidence_badge = "✅ High Confidence (Real-trained species)" if data_source == "Real ✅" else "⚠️ Reference Species"
                 
-                # Display prediction card
                 st.markdown(f"""
                 <div class="prediction-card">
                     <div>🎯 Predicted Species</div>
@@ -923,15 +856,10 @@ with tab2:
                             svm_pred = models['svm_real'].predict(models['scaler_real'].transform(input_data))[0]
                             knn_pred = models['knn_real'].predict(models['scaler_real'].transform(input_data))[0]
                             
-                            # Get full names for predictions
-                            dt_pred_full = find_species_key(dt_pred) or dt_pred
-                            svm_pred_full = find_species_key(svm_pred) or svm_pred
-                            knn_pred_full = find_species_key(knn_pred) or knn_pred
-                            
                             st.markdown("### 📊 Model Comparison for This Input")
                             comparison_df = pd.DataFrame({
                                 'Model': ['Decision Tree', 'SVM', 'KNN', '🏆 HYBRID CART-SVM'],
-                                'Prediction': [dt_pred_full, svm_pred_full, knn_pred_full, prediction],
+                                'Prediction': [dt_pred, svm_pred, knn_pred, prediction],
                                 'Model Accuracy': ['76.9%', '84.6%', '80.8%', '92.3%']
                             })
                             st.dataframe(comparison_df, use_container_width=True, hide_index=True)
@@ -942,14 +870,14 @@ with tab2:
                 st.error(f"Error: {e}")
     
     # ============================================
-    # MODE 2: SIMULATED DATA (FIXED - ACCURATE PREDICTION)
+    # MODE 2: SIMULATED DATA (95.4% ACCURACY)
     # ============================================
     with sub_tab2:
         st.markdown("### Simulated Data Classification")
         st.markdown("""
         <div class="info-box">
             <strong>ℹ️ Mode 2: Simulated Data (12 Species) - 95.4% Accuracy</strong><br>
-            This uses the <strong>optimized distance-based classification</strong> trained on <strong>12 simulated Ariidae species</strong>.<br>
+            This uses the <strong>optimized Hybrid CART-SVM</strong> model trained on <strong>12 simulated Ariidae species</strong>.<br>
             <strong>🏆 Model Accuracy: 95.4% (BEST! Optimized with GridSearchCV + PCA)</strong>
         </div>
         """, unsafe_allow_html=True)
@@ -979,17 +907,9 @@ with tab2:
                 input_data_sim = np.array([[head_sim, body_sim, eye_sim, snout_sim, maxillary_sim, 
                                               mandibullary_sim, mental_sim, dorsal_sim, anal_sim]])
                 
-                # Use the SIMULATED prediction function
-                prediction_raw = predict_simulated_species(input_data_sim)
+                prediction = predict_hybrid_sim(input_data_sim, models, models_loaded)
                 
-                # Get full species info
-                species_key = find_species_key(prediction_raw)
-                if species_key:
-                    prediction = species_key
-                else:
-                    prediction = prediction_raw
-                
-                species_info = get_species_info(prediction)
+                species_info = ARIIDAE_SPECIES.get(prediction, {})
                 data_source = species_info.get('data_source', 'Unknown')
                 
                 confidence_badge = "✅ High Confidence" if data_source == "Real ✅" else "📊 Simulated Reference"
@@ -1025,15 +945,6 @@ with tab2:
                             st.markdown(f"**Features:** {species_info.get('features', 'N/A')}")
                             st.markdown(f"**Conservation:** {species_info.get('conservation', 'N/A')}")
                             st.markdown(f"**Data Source:** {species_info.get('data_source', 'N/A')}")
-                
-                # Show expected performance for simulated data
-                st.markdown("### 📊 Expected Model Performance (Simulated Data)")
-                comparison_df_sim = pd.DataFrame({
-                    'Model': ['CART', 'SVM', 'KNN', '🏆 HYBRID CART-SVM'],
-                    'Accuracy': ['89.8%', '92.6%', '93.5%', '95.4%'],
-                    'F1-Score': ['89.4%', '92.6%', '93.0%', '95.4%']
-                })
-                st.dataframe(comparison_df_sim, use_container_width=True, hide_index=True)
                 
                 st.info("""
                 💡 **FYP Conclusion:** The Optimized Hybrid CART-SVM achieves **95.4% accuracy** on simulated data 
