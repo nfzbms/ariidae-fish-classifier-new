@@ -7,7 +7,6 @@ import seaborn as sns
 import warnings
 from PIL import Image
 import os
-import re
 warnings.filterwarnings('ignore')
 
 st.set_page_config(page_title="Ariidae Classification System", page_icon="🐟", layout="wide")
@@ -134,7 +133,7 @@ st.markdown("""
     }
     .fish-image-container img {
         max-width: 100%;
-        max-height: 300px;
+        max-height: 350px;
         border-radius: 10px;
         object-fit: contain;
     }
@@ -151,7 +150,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ============================================
-# SPECIES INFORMATION
+# SPECIES INFORMATION WITH IMAGE PATHS
 # ============================================
 
 # 6 Real species used for Hybrid CART-SVM training (MODE 1)
@@ -164,7 +163,7 @@ REAL_SPECIES_TRAINED = [
     "Osteogeneiosus militaris"
 ]
 
-# Complete 12 Ariidae Species Library with image paths and short names
+# Complete 12 Ariidae Species Library with image paths
 ARIIDAE_SPECIES = {
     "Arius gagora": {
         "scientific": "Arius gagora",
@@ -175,8 +174,7 @@ ARIIDAE_SPECIES = {
         "features": "Long barbels, compressed body",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/arius_gagora.png",
-        "short_name": "A.GAGORA"
+        "image_path": "images/arius_gagora.png"
     },
     "Arius leptonotacanthus": {
         "scientific": "Arius leptonotacanthus",
@@ -187,8 +185,7 @@ ARIIDAE_SPECIES = {
         "features": "Thin dorsal spine, elongated body",
         "conservation": "Data Deficient",
         "data_source": "Simulated",
-        "image_path": "images/arius_leptonotacanthus.png",
-        "short_name": "A.LEPTONOTACANTHUS"
+        "image_path": "images/arius_leptonotacanthus.png"
     },
     "Arius maculatus": {
         "scientific": "Arius maculatus",
@@ -199,8 +196,7 @@ ARIIDAE_SPECIES = {
         "features": "Dark spots on body, 4 pairs of barbels",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "image_path": "images/arius_maculatus.png",
-        "short_name": "A.MACULATUS"
+        "image_path": "images/arius_maculatus.png"
     },
     "Arius oetik": {
         "scientific": "Arius oetik",
@@ -211,8 +207,7 @@ ARIIDAE_SPECIES = {
         "features": "Small size, slender body",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/arius_oetik.png",
-        "short_name": "A.OETIK"
+        "image_path": "images/arius_oetik.png"
     },
     "Arius venosus": {
         "scientific": "Arius venosus",
@@ -223,8 +218,7 @@ ARIIDAE_SPECIES = {
         "features": "Distinctive veined pattern on head",
         "conservation": "Data Deficient",
         "data_source": "Real ✅",
-        "image_path": "images/arius_venosus.png",
-        "short_name": "A.VENOSUS"
+        "image_path": "images/arius_venosus.png"
     },
     "Cryptarius truncatus": {
         "scientific": "Cryptarius truncatus",
@@ -235,8 +229,7 @@ ARIIDAE_SPECIES = {
         "features": "Truncated head shape",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "image_path": "images/cryptarius_truncatus.png",
-        "short_name": "C.TRUNCATUS"
+        "image_path": "images/cryptarius_truncatus.png"
     },
     "Hexanematichthys sagor": {
         "scientific": "Hexanematichthys sagor",
@@ -247,8 +240,7 @@ ARIIDAE_SPECIES = {
         "features": "Long maxillary barbels, small eyes",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/hexanematichthys_sagor.png",
-        "short_name": "H.SAGOR"
+        "image_path": "images/hexanematichthys_sagor.png"
     },
     "Nemapteryx macronotacantha": {
         "scientific": "Nemapteryx macronotacantha",
@@ -259,8 +251,7 @@ ARIIDAE_SPECIES = {
         "features": "Prominent dorsal spine",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "image_path": "images/nemapteryx_macronotacantha.png",
-        "short_name": "N.MACRONOTACANTHA"
+        "image_path": "images/nemapteryx_macronotacantha.png"
     },
     "Nemapteryx nenga": {
         "scientific": "Nemapteryx nenga",
@@ -271,8 +262,7 @@ ARIIDAE_SPECIES = {
         "features": "Small size, compressed body",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "image_path": "images/nemapteryx_nenga.png",
-        "short_name": "N.NENGA"
+        "image_path": "images/nemapteryx_nenga.png"
     },
     "Osteogeneiosus militaris": {
         "scientific": "Osteogeneiosus militaris",
@@ -283,8 +273,7 @@ ARIIDAE_SPECIES = {
         "features": "Bony head shield, elongated body",
         "conservation": "Least Concern",
         "data_source": "Real ✅",
-        "image_path": "images/osteogeneiosus_militaris.png",
-        "short_name": "O.MILITARIS"
+        "image_path": "images/osteogeneiosus_militaris.png"
     },
     "Plicofollis argyropleuron": {
         "scientific": "Plicofollis argyropleuron",
@@ -295,8 +284,7 @@ ARIIDAE_SPECIES = {
         "features": "Silver longitudinal band",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/plicofollis_argyropleuron.png",
-        "short_name": "P.ARGYROPLEURON"
+        "image_path": "images/plicofollis_argyropleuron.png"
     },
     "Plicofollis layardi": {
         "scientific": "Plicofollis layardi",
@@ -307,227 +295,31 @@ ARIIDAE_SPECIES = {
         "features": "Rugose head, long barbels",
         "conservation": "Least Concern",
         "data_source": "Simulated",
-        "image_path": "images/plicofollis_layardi.png",
-        "short_name": "P.LAYARDI"
+        "image_path": "images/plicofollis_layardi.png"
     }
 }
-
-# ============================================
-# FUNCTION TO FIND SPECIES BY SHORT NAME OR FULL NAME
-# ============================================
-
-def find_species_key(search_name):
-    """Find the full species name from either short name or full name"""
-    search_name = str(search_name).upper().strip()
-    
-    # First try exact match with short_name
-    for key, info in ARIIDAE_SPECIES.items():
-        if info.get('short_name', '').upper() == search_name:
-            return key
-    
-    # Then try to match scientific name
-    for key, info in ARIIDAE_SPECIES.items():
-        if info.get('scientific', '').upper() == search_name:
-            return key
-    
-    # Then try partial match (remove dots and spaces)
-    search_clean = search_name.replace('.', '').replace(' ', '')
-    for key, info in ARIIDAE_SPECIES.items():
-        short_clean = info.get('short_name', '').replace('.', '').replace(' ', '')
-        if short_clean == search_clean:
-            return key
-        sci_clean = info.get('scientific', '').replace(' ', '').upper()
-        if sci_clean == search_clean:
-            return key
-    
-    # Then try partial match
-    for key in ARIIDAE_SPECIES.keys():
-        if search_name in key.upper():
-            return key
-    
-    # Default return None if not found
-    return None
 
 # ============================================
 # FUNCTION TO DISPLAY FISH IMAGE
 # ============================================
 
 def display_fish_image(species_name):
-    """Display fish image for a given species - supports both full name and short name"""
-    # Try to find the correct species key
-    species_key = find_species_key(species_name)
-    
-    if species_key is None:
-        st.info(f"📸 Species '{species_name}' not found in library. Please check the species name.")
-        return None
-    
-    species_info = ARIIDAE_SPECIES.get(species_key, {})
+    """Display fish image for a given species"""
+    species_info = ARIIDAE_SPECIES.get(species_name, {})
     image_path = species_info.get('image_path', '')
     
-    # Check if the image file exists
+    # Try to load and display image
     if image_path and os.path.exists(image_path):
         try:
             image = Image.open(image_path)
             return image
         except Exception as e:
-            st.warning(f"Could not load image for {species_key}: {e}")
+            st.warning(f"Could not load image for {species_name}: {e}")
             return None
     else:
-        # If image doesn't exist, show placeholder with correct path
-        st.info(f"📸 Image for {species_key} will be available soon. Please add PNG image at: {image_path}")
+        # If image doesn't exist, show placeholder with species name
+        st.info(f"📸 Image for {species_name} will be available soon. Please add PNG image at: {image_path}")
         return None
-
-def get_species_info(species_name):
-    """Get full species info from either short name or full name"""
-    species_key = find_species_key(species_name)
-    if species_key:
-        return ARIIDAE_SPECIES.get(species_key, {})
-    return {}
-
-# ============================================
-# SIMULATED DATA PREDICTION FUNCTION (REALLY FIXED)
-# ============================================
-
-def predict_simulated_only(features):
-    """
-    PREDICTION KHUSUS UNTUK SIMULATED DATA - VERSION YANG BETUL
-    Menggunakan distance-based classification dengan weight yang tepat
-    """
-    try:
-        head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal = features[0]
-    except:
-        return "Arius gagora"
-    
-    # ========================================
-    # METHOD: WEIGHTED EUCLIDEAN DISTANCE
-    # ========================================
-    
-    # Feature weights (based on importance from your training)
-    weights = {
-        'head': 0.20,
-        'body': 0.25,
-        'eye': 0.05,
-        'snout': 0.05,
-        'maxillary': 0.18,
-        'mandibullary': 0.05,
-        'mental': 0.02,
-        'dorsal': 0.10,
-        'anal': 0.10
-    }
-    
-    # Mean values for each species (based on simulated data)
-    species_means = {
-        "Arius gagora": {
-            'head': 45, 'body': 28, 'eye': 6.5, 'snout': 12, 
-            'maxillary': 35, 'mandibullary': 25, 'mental': 8, 
-            'dorsal': 18, 'anal': 14
-        },
-        "Arius leptonotacanthus": {
-            'head': 38, 'body': 24, 'eye': 5.5, 'snout': 10, 
-            'maxillary': 28, 'mandibullary': 20, 'mental': 6, 
-            'dorsal': 16, 'anal': 13
-        },
-        "Arius maculatus": {
-            'head': 55, 'body': 38, 'eye': 6.0, 'snout': 16, 
-            'maxillary': 45, 'mandibullary': 32, 'mental': 10, 
-            'dorsal': 20, 'anal': 16
-        },
-        "Arius oetik": {
-            'head': 33, 'body': 22, 'eye': 5.0, 'snout': 9, 
-            'maxillary': 25, 'mandibullary': 18, 'mental': 5, 
-            'dorsal': 15, 'anal': 12
-        },
-        "Arius venosus": {
-            'head': 45, 'body': 30, 'eye': 6.0, 'snout': 12, 
-            'maxillary': 35, 'mandibullary': 26, 'mental': 8, 
-            'dorsal': 18, 'anal': 14
-        },
-        "Cryptarius truncatus": {
-            'head': 35, 'body': 25, 'eye': 8.0, 'snout': 10, 
-            'maxillary': 28, 'mandibullary': 22, 'mental': 7, 
-            'dorsal': 15, 'anal': 12
-        },
-        "Hexanematichthys sagor": {
-            'head': 48, 'body': 30, 'eye': 4.5, 'snout': 14, 
-            'maxillary': 48, 'mandibullary': 32, 'mental': 9, 
-            'dorsal': 20, 'anal': 16
-        },
-        "Nemapteryx macronotacantha": {
-            'head': 40, 'body': 26, 'eye': 5.5, 'snout': 11, 
-            'maxillary': 32, 'mandibullary': 24, 'mental': 7, 
-            'dorsal': 22, 'anal': 14
-        },
-        "Nemapteryx nenga": {
-            'head': 35, 'body': 24, 'eye': 5.5, 'snout': 10, 
-            'maxillary': 28, 'mandibullary': 20, 'mental': 6, 
-            'dorsal': 17, 'anal': 13
-        },
-        "Osteogeneiosus militaris": {
-            'head': 50, 'body': 35, 'eye': 6.0, 'snout': 14, 
-            'maxillary': 40, 'mandibullary': 30, 'mental': 9, 
-            'dorsal': 20, 'anal': 18
-        },
-        "Plicofollis argyropleuron": {
-            'head': 45, 'body': 28, 'eye': 6.0, 'snout': 12, 
-            'maxillary': 35, 'mandibullary': 27, 'mental': 8, 
-            'dorsal': 18, 'anal': 15
-        },
-        "Plicofollis layardi": {
-            'head': 45, 'body': 28, 'eye': 6.0, 'snout': 12, 
-            'maxillary': 40, 'mandibullary': 30, 'mental': 8, 
-            'dorsal': 18, 'anal': 15
-        }
-    }
-    
-    # Input values
-    input_values = {
-        'head': head, 'body': body, 'eye': eye, 'snout': snout,
-        'maxillary': maxillary, 'mandibullary': mandibullary,
-        'mental': mental, 'dorsal': dorsal, 'anal': anal
-    }
-    
-    # Calculate weighted distance for each species
-    distances = {}
-    for species, means in species_means.items():
-        distance = 0
-        for feature, weight in weights.items():
-            if feature in means and feature in input_values:
-                # Normalize difference by mean value
-                diff = (input_values[feature] - means[feature]) / (means[feature] + 0.01)
-                distance += weight * (diff ** 2)
-        distances[species] = distance
-    
-    # Get species with minimum distance (most similar)
-    if distances:
-        # Find the species with minimum distance
-        min_distance = min(distances.values())
-        best_species = min(distances, key=distances.get)
-        
-        # If the minimum distance is very large (no good match), use fallback
-        if min_distance > 0.15:
-            # Fallback: use simple rules
-            if head > 50 and body > 35:
-                return "Arius maculatus"
-            elif eye > 7:
-                return "Cryptarius truncatus"
-            elif maxillary > 42:
-                return "Hexanematichthys sagor"
-            elif dorsal > 20 and head < 45:
-                return "Nemapteryx macronotacantha"
-            elif anal > 17:
-                return "Osteogeneiosus militaris"
-            elif head < 35:
-                return "Arius oetik"
-            elif maxillary < 30:
-                return "Arius leptonotacanthus"
-            elif maxillary > 38:
-                return "Plicofollis layardi"
-            else:
-                return "Arius venosus"
-        
-        return best_species
-    
-    return "Arius gagora"
 
 # ============================================
 # MODEL PERFORMANCE DATA (FROM ACTUAL TRAINING RESULTS)
@@ -603,12 +395,12 @@ cv_results_sim = {
 }
 
 # ============================================
-# LOAD MODELS (ONLY FOR MODE 1 - REAL DATA)
+# LOAD MODELS
 # ============================================
 
 @st.cache_resource
-def load_real_models():
-    """Load only the real data models (MODE 1)"""
+def load_all_models():
+    """Load all trained models from both modes"""
     models = {}
     models_loaded = False
     
@@ -633,22 +425,42 @@ def load_real_models():
             models['pca_real'] = None
             models['svm_hybrid_real'] = joblib.load('svm_hybrid_real.pkl')
         
+        # MODE 2: Simulated Data Models
+        models['scaler_sim'] = joblib.load('scaler_sim.pkl')
+        models['cart_sim'] = joblib.load('cart_sim.pkl')
+        models['svm_sim'] = joblib.load('svm_sim.pkl')
+        models['knn_sim'] = joblib.load('knn_sim.pkl')
+        models['features_sim'] = joblib.load('features_sim.pkl')
+        models['classes_sim'] = joblib.load('classes_sim.pkl')
+        
+        # MODE 2: Hybrid components
+        try:
+            models['selector_sim'] = joblib.load('feature_selector_sim.pkl')
+            models['scaler_hybrid_sim'] = joblib.load('scaler_hybrid_sim.pkl')
+            models['pca_sim'] = joblib.load('pca_hybrid_sim.pkl')
+            models['svm_hybrid_sim'] = joblib.load('svm_hybrid_sim.pkl')
+        except:
+            models['selector_sim'] = None
+            models['scaler_hybrid_sim'] = None
+            models['pca_sim'] = None
+            models['svm_hybrid_sim'] = joblib.load('svm_hybrid_sim.pkl')
+        
         models_loaded = True
-        st.success("✅ Real Data models loaded successfully!")
+        st.success("✅ All models loaded successfully!")
         return models, models_loaded
     except Exception as e:
         st.warning(f"⚠️ Model loading issue: {e}")
-        st.info("📌 Using fallback prediction system for Real Data...")
+        st.info("📌 Using fallback prediction system...")
         return None, False
 
 def predict_hybrid_real(features, models, models_loaded):
-    """Predict using Hybrid CART-SVM for Real Data (MODE 1 ONLY)"""
+    """Predict using Hybrid CART-SVM for Real Data"""
     try:
         if features.shape[1] != 9:
             return "Error: Expected 9 features"
         
         if not models_loaded or models is None:
-            return predict_fallback_real(features)
+            return predict_fallback(features)
         
         # Try different prediction methods
         prediction = None
@@ -688,20 +500,73 @@ def predict_hybrid_real(features, models, models_loaded):
             except:
                 pass
         
-        # Fallback to rule-based for real data
-        return predict_fallback_real(features)
+        # Fallback to rule-based
+        return predict_fallback(features)
         
     except Exception as e:
-        return predict_fallback_real(features)
+        return predict_fallback(features)
 
-def predict_fallback_real(features):
-    """Fallback prediction for Real Data ONLY"""
+def predict_hybrid_sim(features, models, models_loaded):
+    """Predict using Hybrid CART-SVM for Simulated Data"""
+    try:
+        if features.shape[1] != 9:
+            return "Error: Expected 9 features"
+        
+        if not models_loaded or models is None:
+            return predict_fallback(features)
+        
+        # Try different prediction methods
+        prediction = None
+        
+        # Method 1: Full hybrid pipeline
+        if models.get('selector_sim') is not None and models.get('scaler_hybrid_sim') is not None:
+            try:
+                features_selected = models['selector_sim'].transform(features)
+                features_scaled = models['scaler_hybrid_sim'].transform(features_selected)
+                if models.get('pca_sim') is not None:
+                    features_pca = models['pca_sim'].transform(features_scaled)
+                    prediction = models['svm_hybrid_sim'].predict(features_pca)
+                else:
+                    prediction = models['svm_hybrid_sim'].predict(features_scaled)
+                if prediction is not None:
+                    return prediction[0]
+            except:
+                pass
+        
+        # Method 2: SVM with scaling only
+        if models.get('svm_hybrid_sim') is not None and models.get('scaler_sim') is not None:
+            try:
+                features_scaled = models['scaler_sim'].transform(features)
+                prediction = models['svm_hybrid_sim'].predict(features_scaled)
+                if prediction is not None:
+                    return prediction[0]
+            except:
+                pass
+        
+        # Method 3: Use standalone SVM
+        if models.get('svm_sim') is not None and models.get('scaler_sim') is not None:
+            try:
+                features_scaled = models['scaler_sim'].transform(features)
+                prediction = models['svm_sim'].predict(features_scaled)
+                if prediction is not None:
+                    return prediction[0]
+            except:
+                pass
+        
+        # Fallback to rule-based
+        return predict_fallback(features)
+        
+    except Exception as e:
+        return predict_fallback(features)
+
+def predict_fallback(features):
+    """Fallback prediction using rule-based system"""
     try:
         head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal = features[0]
     except:
-        return "Arius maculatus"
+        return "Arius gagora"
     
-    # Rule-based prediction logic for 6 real species
+    # Rule-based prediction logic
     if head > 55:
         return "Arius maculatus"
     elif body > 35:
@@ -709,16 +574,20 @@ def predict_fallback_real(features):
     elif eye > 7:
         return "Cryptarius truncatus"
     elif maxillary > 45:
-        return "Nemapteryx macronotacantha"
+        return "Hexanematichthys sagor"
     elif dorsal > 22:
-        return "Nemapteryx nenga"
+        return "Nemapteryx macronotacantha"
     elif anal > 18:
         return "Osteogeneiosus militaris"
+    elif head < 40 and body < 25:
+        return "Arius oetik"
+    elif maxillary < 30 and mandibullary < 20:
+        return "Arius leptonotacanthus"
     else:
-        return "Arius maculatus"
+        return "Arius gagora"
 
-# Load only real data models
-models, models_loaded = load_real_models()
+# Load models
+models, models_loaded = load_all_models()
 
 # ============================================
 # SIDEBAR - MODEL PERFORMANCE
@@ -904,7 +773,7 @@ with tab2:
     sub_tab1, sub_tab2 = st.tabs(["📏 Mode 1: Real Data (6 Species) - 92.3%", "📈 Mode 2: Simulated Data (12 Species) - 95.4%"])
     
     # ============================================
-    # MODE 1: REAL DATA (92.3% ACCURACY) - TIDAK DIUBAH
+    # MODE 1: REAL DATA (92.3% ACCURACY)
     # ============================================
     with sub_tab1:
         st.markdown("### Enter 9 Morphological Measurements")
@@ -941,16 +810,9 @@ with tab2:
             try:
                 input_data = np.array([[head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal]])
                 
-                prediction_raw = predict_hybrid_real(input_data, models, models_loaded)
+                prediction = predict_hybrid_real(input_data, models, models_loaded)
                 
-                # Get full species info using the find_species_key function
-                species_key = find_species_key(prediction_raw)
-                if species_key:
-                    prediction = species_key
-                else:
-                    prediction = prediction_raw
-                
-                species_info = get_species_info(prediction)
+                species_info = ARIIDAE_SPECIES.get(prediction, {})
                 data_source = species_info.get('data_source', 'Unknown')
                 
                 confidence_badge = "✅ High Confidence (Real-trained species)" if data_source == "Real ✅" else "⚠️ Reference Species"
@@ -994,15 +856,10 @@ with tab2:
                             svm_pred = models['svm_real'].predict(models['scaler_real'].transform(input_data))[0]
                             knn_pred = models['knn_real'].predict(models['scaler_real'].transform(input_data))[0]
                             
-                            # Get full names for predictions
-                            dt_pred_full = find_species_key(dt_pred) or dt_pred
-                            svm_pred_full = find_species_key(svm_pred) or svm_pred
-                            knn_pred_full = find_species_key(knn_pred) or knn_pred
-                            
                             st.markdown("### 📊 Model Comparison for This Input")
                             comparison_df = pd.DataFrame({
                                 'Model': ['Decision Tree', 'SVM', 'KNN', '🏆 HYBRID CART-SVM'],
-                                'Prediction': [dt_pred_full, svm_pred_full, knn_pred_full, prediction],
+                                'Prediction': [dt_pred, svm_pred, knn_pred, prediction],
                                 'Model Accuracy': ['76.9%', '84.6%', '80.8%', '92.3%']
                             })
                             st.dataframe(comparison_df, use_container_width=True, hide_index=True)
@@ -1013,14 +870,14 @@ with tab2:
                 st.error(f"Error: {e}")
     
     # ============================================
-    # MODE 2: SIMULATED DATA (95.4% ACCURACY) - FIXED
+    # MODE 2: SIMULATED DATA (95.4% ACCURACY)
     # ============================================
     with sub_tab2:
         st.markdown("### Simulated Data Classification")
         st.markdown("""
         <div class="info-box">
             <strong>ℹ️ Mode 2: Simulated Data (12 Species) - 95.4% Accuracy</strong><br>
-            This uses the <strong>optimized weighted distance classification</strong> trained on <strong>12 simulated Ariidae species</strong>.<br>
+            This uses the <strong>optimized Hybrid CART-SVM</strong> model trained on <strong>12 simulated Ariidae species</strong>.<br>
             <strong>🏆 Model Accuracy: 95.4% (BEST! Optimized with GridSearchCV + PCA)</strong>
         </div>
         """, unsafe_allow_html=True)
@@ -1050,17 +907,9 @@ with tab2:
                 input_data_sim = np.array([[head_sim, body_sim, eye_sim, snout_sim, maxillary_sim, 
                                               mandibullary_sim, mental_sim, dorsal_sim, anal_sim]])
                 
-                # GUNAKAN FUNGSI KHUSUS UNTUK SIMULATED DATA
-                prediction_raw = predict_simulated_only(input_data_sim)
+                prediction = predict_hybrid_sim(input_data_sim, models, models_loaded)
                 
-                # Get full species info using the find_species_key function
-                species_key = find_species_key(prediction_raw)
-                if species_key:
-                    prediction = species_key
-                else:
-                    prediction = prediction_raw
-                
-                species_info = get_species_info(prediction)
+                species_info = ARIIDAE_SPECIES.get(prediction, {})
                 data_source = species_info.get('data_source', 'Unknown')
                 
                 confidence_badge = "✅ High Confidence" if data_source == "Real ✅" else "📊 Simulated Reference"
@@ -1096,15 +945,6 @@ with tab2:
                             st.markdown(f"**Features:** {species_info.get('features', 'N/A')}")
                             st.markdown(f"**Conservation:** {species_info.get('conservation', 'N/A')}")
                             st.markdown(f"**Data Source:** {species_info.get('data_source', 'N/A')}")
-                
-                # Show expected performance for simulated data
-                st.markdown("### 📊 Expected Model Performance (Simulated Data)")
-                comparison_df_sim = pd.DataFrame({
-                    'Model': ['CART', 'SVM', 'KNN', '🏆 HYBRID CART-SVM'],
-                    'Accuracy': ['89.8%', '92.6%', '93.5%', '95.4%'],
-                    'F1-Score': ['89.4%', '92.6%', '93.0%', '95.4%']
-                })
-                st.dataframe(comparison_df_sim, use_container_width=True, hide_index=True)
                 
                 st.info("""
                 💡 **FYP Conclusion:** The Optimized Hybrid CART-SVM achieves **95.4% accuracy** on simulated data 
@@ -1374,11 +1214,11 @@ with tab4:
     <div class="info-box">
         <h4>🔬 Optimization Strategies Tested (5 Strategies)</h4>
         <ul>
-            <li><strong>Strategy 1:</strong> CART Feature Selection + PCA + SVM (multiple thresholds & C values)</li>
+            <li><strong>Strategy 1:</strong> CART  + PCA + SVM </li>
             <li><strong>Strategy 2:</strong> RFE (Recursive Feature Elimination) + SVM</li>
-            <li><strong>Strategy 3:</strong> SelectKBest (ANOVA F-test) + SVM</li>
-            <li><strong>Strategy 4:</strong> Stacking Ensemble (CART + SVM + KNN)</li>
-            <li><strong>Strategy 5:</strong> Voting Classifier (Soft voting)</li>
+            <li><strong>Strategy 3:</strong> SelectKBest  + SVM</li>
+            <li><strong>Strategy 4:</strong> Stacking Ensemble </li>
+            <li><strong>Strategy 5:</strong> Voting Classifier </li>
         </ul>
         <p><strong>✅ CONCLUSION:</strong> Hybrid CART-SVM achieves HIGHEST accuracy in BOTH modes!</p>
     </div>
@@ -1392,6 +1232,6 @@ st.markdown("""
     <p>📊 Optimization: Feature Selection + PCA + GridSearchCV | Hybrid CART-SVM BEST in BOTH modes!</p>
     <p>📈 5-Fold CV: Real (91.76% ± 0.65%) | Simulated (95.42% ± 0.62%)</p>
     <p>🔬 Top Features: Body Depth (0.185) > Head Length (0.162) > Maxillary Barbell (0.148)</p>
-    <p>📸 Visual identification with real fish images in PNG format!</p>
+    <p>📸 Visual identification with real fish images included!</p>
 </div>
 """, unsafe_allow_html=True)
