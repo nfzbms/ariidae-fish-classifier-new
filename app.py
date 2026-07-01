@@ -7,6 +7,7 @@ import seaborn as sns
 import warnings
 from PIL import Image
 import os
+import sys
 warnings.filterwarnings('ignore')
 
 st.set_page_config(page_title="Ariidae Classification System", page_icon="🐟", layout="wide")
@@ -121,6 +122,15 @@ st.markdown("""
         border-left: 4px solid #2196f3;
         margin: 1rem 0;
     }
+    .debug-box {
+        background: #fff3cd;
+        padding: 1rem;
+        border-radius: 10px;
+        border-left: 4px solid #ffc107;
+        margin: 1rem 0;
+        font-family: monospace;
+        font-size: 0.9rem;
+    }
     .confidence-high {
         color: #2ecc71;
         font-weight: bold;
@@ -146,20 +156,25 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ============================================
+# FEATURE NAMES - PASTIKAN SAMA DENGAN TRAINING
+# ============================================
+
+FEATURE_NAMES = [
+    'Head_length',
+    'Body_depth', 
+    'Eye_diameter',
+    'Snout_length',
+    'Maxillary_barbell_length',
+    'Mandibullary_barbell_length',
+    'Mental_barbell_length',
+    'Dorsal_fin_ray',
+    'Anal_fin_ray'
+]
+
+# ============================================
 # SPECIES INFORMATION
 # ============================================
 
-# 6 Real species used for Hybrid CART-SVM training (MODE 1)
-REAL_SPECIES_TRAINED = [
-    "Arius maculatus",
-    "Arius venosus", 
-    "Cryptarius truncatus",
-    "Nemapteryx macronotacantha",
-    "Nemapteryx nenga",
-    "Osteogeneiosus militaris"
-]
-
-# Complete 12 Ariidae Species Library
 ARIIDAE_SPECIES = {
     "Arius gagora": {
         "scientific": "Arius gagora",
@@ -299,7 +314,6 @@ ARIIDAE_SPECIES = {
 # MODEL PERFORMANCE DATA
 # ============================================
 
-# MODE 1: Real Data (6 Species)
 MODE1_PERFORMANCE = {
     'Decision Tree (CART)': 76.9,
     'SVM (Standalone)': 84.6,
@@ -307,7 +321,6 @@ MODE1_PERFORMANCE = {
     '🏆 HYBRID CART-SVM': 92.3
 }
 
-# MODE 2: Simulated Data (12 Species)
 MODE2_PERFORMANCE = {
     'Decision Tree (CART)': 89.8,
     'SVM (Standalone)': 92.6,
@@ -315,7 +328,6 @@ MODE2_PERFORMANCE = {
     '🏆 HYBRID CART-SVM': 95.4
 }
 
-# Feature Importance Data
 FEATURE_IMPORTANCE = {
     'Head_length': 0.162,
     'Body_depth': 0.185,
@@ -328,7 +340,6 @@ FEATURE_IMPORTANCE = {
     'Anal_fin_ray': 0.065
 }
 
-# Confusion Matrix Data for 12 Species
 species_list = list(ARIIDAE_SPECIES.keys())
 
 confusion_matrix_real = np.array([
@@ -346,7 +357,6 @@ confusion_matrix_real = np.array([
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 37]
 ])
 
-# Cross Validation Results
 cv_results_real = {
     'Fold 1': 0.915,
     'Fold 2': 0.922,
@@ -375,17 +385,12 @@ def find_species_key(search_name):
     """Find the full species name from short name or full name"""
     search_name = str(search_name).upper().strip()
     
-    # First try exact match with short_name
     for key, info in ARIIDAE_SPECIES.items():
         if info.get('short_name', '').upper() == search_name:
             return key
-    
-    # Then try to match scientific name
-    for key, info in ARIIDAE_SPECIES.items():
         if info.get('scientific', '').upper() == search_name:
             return key
     
-    # Then try partial match
     for key in ARIIDAE_SPECIES.keys():
         if search_name in key.upper():
             return key
@@ -393,20 +398,15 @@ def find_species_key(search_name):
     return None
 
 def get_species_image(species_name):
-    """Get image for species - handles various name formats"""
-    # Try to find the full species name
+    """Get image for species"""
     full_name = find_species_key(species_name)
     if full_name is None:
         full_name = species_name
     
-    # Get species info
     species_info = ARIIDAE_SPECIES.get(full_name, {})
-    
-    # Generate filename
     filename = full_name.lower().replace(' ', '_') + '.png'
     image_path = os.path.join('images', filename)
     
-    # Try to load image
     if os.path.exists(image_path):
         try:
             image = Image.open(image_path)
@@ -414,33 +414,34 @@ def get_species_image(species_name):
         except:
             pass
     
-    # Try alternative names
-    alt_names = [
-        species_name.lower().replace('.', '_') + '.png',
-        species_name.lower().replace(' ', '_') + '.png',
-        full_name.lower().replace(' ', '_') + '.jpg'
-    ]
-    
-    for alt in alt_names:
-        alt_path = os.path.join('images', alt)
-        if os.path.exists(alt_path):
-            try:
-                image = Image.open(alt_path)
-                return image, species_info
-            except:
-                pass
-    
     return None, species_info
 
 # ============================================
-# LOAD MODELS
+# LOAD MODELS WITH DEBUG
 # ============================================
 
 @st.cache_resource
 def load_all_models():
-    """Load all trained models from both modes"""
+    """Load all trained models from both modes with detailed debugging"""
     models = {}
     models_loaded = False
+    debug_info = []
+    
+    # Define required files for each mode
+    real_files = ['scaler_real.pkl', 'cart_real.pkl', 'svm_real.pkl', 'knn_real.pkl', 
+                  'svm_hybrid_real.pkl', 'features_real.pkl', 'classes_real.pkl']
+    
+    sim_files = ['scaler_sim.pkl', 'cart_sim.pkl', 'svm_sim.pkl', 'knn_sim.pkl',
+                 'svm_hybrid_sim.pkl', 'features_sim.pkl', 'classes_sim.pkl']
+    
+    # Check files exist
+    all_files = real_files + sim_files
+    missing_files = [f for f in all_files if not os.path.exists(f)]
+    
+    if missing_files:
+        debug_info.append(f"⚠️ Missing files: {missing_files}")
+        debug_info.append("📌 Using fallback prediction system...")
+        return None, False, debug_info
     
     try:
         # MODE 1: Real Data Models
@@ -451,17 +452,19 @@ def load_all_models():
         models['features_real'] = joblib.load('features_real.pkl')
         models['classes_real'] = joblib.load('classes_real.pkl')
         
-        # MODE 1: Hybrid components
+        # Try loading hybrid components
         try:
             models['selector_real'] = joblib.load('feature_selector_real.pkl')
             models['scaler_hybrid_real'] = joblib.load('scaler_hybrid_real.pkl')
             models['pca_real'] = joblib.load('pca_hybrid_real.pkl')
             models['svm_hybrid_real'] = joblib.load('svm_hybrid_real.pkl')
+            debug_info.append("✅ Real Hybrid components loaded (with selector + PCA)")
         except:
             models['selector_real'] = None
             models['scaler_hybrid_real'] = None
             models['pca_real'] = None
             models['svm_hybrid_real'] = joblib.load('svm_hybrid_real.pkl')
+            debug_info.append("✅ Real Hybrid loaded (SVM only, no selector/PCA)")
         
         # MODE 2: Simulated Data Models
         models['scaler_sim'] = joblib.load('scaler_sim.pkl')
@@ -471,25 +474,32 @@ def load_all_models():
         models['features_sim'] = joblib.load('features_sim.pkl')
         models['classes_sim'] = joblib.load('classes_sim.pkl')
         
-        # MODE 2: Hybrid components
         try:
             models['selector_sim'] = joblib.load('feature_selector_sim.pkl')
             models['scaler_hybrid_sim'] = joblib.load('scaler_hybrid_sim.pkl')
             models['pca_sim'] = joblib.load('pca_hybrid_sim.pkl')
             models['svm_hybrid_sim'] = joblib.load('svm_hybrid_sim.pkl')
+            debug_info.append("✅ Sim Hybrid components loaded (with selector + PCA)")
         except:
             models['selector_sim'] = None
             models['scaler_hybrid_sim'] = None
             models['pca_sim'] = None
             models['svm_hybrid_sim'] = joblib.load('svm_hybrid_sim.pkl')
+            debug_info.append("✅ Sim Hybrid loaded (SVM only, no selector/PCA)")
         
         models_loaded = True
-        st.success("✅ All models loaded successfully!")
-        return models, models_loaded
+        
+        # Debug info
+        debug_info.append(f"✅ Real features: {models['features_real']}")
+        debug_info.append(f"✅ Real classes: {models['classes_real']}")
+        debug_info.append(f"✅ Sim features: {models['features_sim']}")
+        debug_info.append(f"✅ Sim classes: {models['classes_sim']}")
+        
+        return models, models_loaded, debug_info
+        
     except Exception as e:
-        st.warning(f"⚠️ Model loading issue: {e}")
-        st.info("📌 Using fallback prediction system...")
-        return None, False
+        debug_info.append(f"❌ Error loading models: {str(e)}")
+        return None, False, debug_info
 
 def predict_hybrid_real(features, models, models_loaded):
     """Predict using Hybrid CART-SVM for Real Data"""
@@ -502,7 +512,7 @@ def predict_hybrid_real(features, models, models_loaded):
         
         prediction = None
         
-        # Try different prediction methods
+        # Method 1: Full hybrid pipeline (if available)
         if models.get('selector_real') is not None and models.get('scaler_hybrid_real') is not None:
             try:
                 features_selected = models['selector_real'].transform(features)
@@ -514,9 +524,10 @@ def predict_hybrid_real(features, models, models_loaded):
                     prediction = models['svm_hybrid_real'].predict(features_scaled)
                 if prediction is not None:
                     return prediction[0]
-            except:
-                pass
+            except Exception as e:
+                st.warning(f"Hybrid pipeline failed: {e}")
         
+        # Method 2: SVM with scaling only
         if models.get('svm_hybrid_real') is not None and models.get('scaler_real') is not None:
             try:
                 features_scaled = models['scaler_real'].transform(features)
@@ -526,6 +537,7 @@ def predict_hybrid_real(features, models, models_loaded):
             except:
                 pass
         
+        # Method 3: Use standalone SVM
         if models.get('svm_real') is not None and models.get('scaler_real') is not None:
             try:
                 features_scaled = models['scaler_real'].transform(features)
@@ -551,7 +563,7 @@ def predict_hybrid_sim(features, models, models_loaded):
         
         prediction = None
         
-        # Try different prediction methods
+        # Method 1: Full hybrid pipeline (if available)
         if models.get('selector_sim') is not None and models.get('scaler_hybrid_sim') is not None:
             try:
                 features_selected = models['selector_sim'].transform(features)
@@ -563,9 +575,10 @@ def predict_hybrid_sim(features, models, models_loaded):
                     prediction = models['svm_hybrid_sim'].predict(features_scaled)
                 if prediction is not None:
                     return prediction[0]
-            except:
-                pass
+            except Exception as e:
+                st.warning(f"Hybrid pipeline failed: {e}")
         
+        # Method 2: SVM with scaling only
         if models.get('svm_hybrid_sim') is not None and models.get('scaler_sim') is not None:
             try:
                 features_scaled = models['scaler_sim'].transform(features)
@@ -575,6 +588,7 @@ def predict_hybrid_sim(features, models, models_loaded):
             except:
                 pass
         
+        # Method 3: Use standalone SVM
         if models.get('svm_sim') is not None and models.get('scaler_sim') is not None:
             try:
                 features_scaled = models['scaler_sim'].transform(features)
@@ -590,36 +604,45 @@ def predict_hybrid_sim(features, models, models_loaded):
         return predict_fallback_sim(features)
 
 def predict_fallback_real(features):
-    """Fallback prediction for real data"""
+    """Fallback prediction for real data using distance-based method"""
     try:
         head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal = features[0]
     except:
         return "Arius maculatus"
     
-    if head > 55:
-        return "Arius maculatus"
-    elif body > 35:
-        return "Arius venosus"
-    elif eye > 7:
-        return "Cryptarius truncatus"
-    elif maxillary > 45:
-        return "Nemapteryx macronotacantha"
-    elif dorsal > 22:
-        return "Nemapteryx nenga"
-    elif anal > 18:
-        return "Osteogeneiosus militaris"
-    else:
-        return "Arius maculatus"
+    # Define typical measurements for real species
+    species_means_real = {
+        "Arius maculatus": [58, 38, 6.0, 18, 45, 32, 10, 20, 16],
+        "Arius venosus": [48, 32, 6.0, 15, 38, 27, 8, 18, 15],
+        "Cryptarius truncatus": [32, 25, 8.0, 12, 28, 22, 7, 15, 12],
+        "Nemapteryx macronotacantha": [42, 28, 5.5, 14, 33, 24, 8, 22, 14],
+        "Nemapteryx nenga": [35, 24, 5.0, 11, 30, 20, 7, 17, 13],
+        "Osteogeneiosus militaris": [55, 38, 6.0, 18, 42, 30, 9, 21, 18]
+    }
+    
+    input_values = [head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal]
+    weights = [0.18, 0.20, 0.10, 0.12, 0.15, 0.10, 0.05, 0.05, 0.05]
+    
+    distances = {}
+    for species, means in species_means_real.items():
+        distance = 0
+        for i in range(len(input_values)):
+            diff = (input_values[i] - means[i]) / (means[i] + 0.01)
+            distance += weights[i] * (diff ** 2)
+        distances[species] = distance
+    
+    if distances:
+        return min(distances, key=distances.get)
+    return "Arius maculatus"
 
 def predict_fallback_sim(features):
-    """Fallback prediction for simulated data - distance-based"""
+    """Fallback prediction for simulated data"""
     try:
         head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal = features[0]
     except:
         return "Arius gagora"
     
-    # Define typical measurements for each species
-    species_means = {
+    species_means_sim = {
         "Arius gagora": [50, 30, 6.5, 15, 38, 25, 9, 18, 15],
         "Arius leptonotacanthus": [40, 25, 5.5, 12, 30, 20, 7, 16, 13],
         "Arius maculatus": [58, 38, 6.0, 18, 45, 32, 10, 20, 16],
@@ -637,23 +660,20 @@ def predict_fallback_sim(features):
     input_values = [head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal]
     weights = [0.18, 0.20, 0.10, 0.12, 0.15, 0.10, 0.05, 0.05, 0.05]
     
-    # Calculate distance for each species
     distances = {}
-    for species, means in species_means.items():
+    for species, means in species_means_sim.items():
         distance = 0
         for i in range(len(input_values)):
             diff = (input_values[i] - means[i]) / (means[i] + 0.01)
             distance += weights[i] * (diff ** 2)
         distances[species] = distance
     
-    # Return species with minimum distance
     if distances:
         return min(distances, key=distances.get)
-    else:
-        return "Arius gagora"
+    return "Arius gagora"
 
 # Load models
-models, models_loaded = load_all_models()
+models, models_loaded, debug_info = load_all_models()
 
 # ============================================
 # SIDEBAR
@@ -828,6 +848,28 @@ with tab1:
         PCA for dimensionality reduction, and optimized SVM (GridSearchCV) for final classification.</p>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Debug section (hidden by default)
+    with st.expander("🔧 Debug Info (click to expand)"):
+        st.markdown("### System Debug Information")
+        st.markdown("**Model Loading Status:**")
+        st.write(f"Models loaded: {models_loaded}")
+        st.write(f"Debug info: {debug_info}")
+        
+        if models_loaded and models is not None:
+            st.markdown("**Loaded Model Components:**")
+            for key in models.keys():
+                if models[key] is not None:
+                    if 'scaler' in key or 'pca' in key:
+                        st.write(f"- {key}: {type(models[key])}")
+                    elif 'svm' in key or 'cart' in key or 'knn' in key:
+                        st.write(f"- {key}: {type(models[key])}")
+                    elif 'selector' in key:
+                        st.write(f"- {key}: {type(models[key])}")
+                    elif 'features' in key:
+                        st.write(f"- {key}: {models[key]}")
+                    elif 'classes' in key:
+                        st.write(f"- {key}: {models[key]}")
 
 # ============================================
 # TAB 2: CLASSIFICATION
@@ -839,7 +881,7 @@ with tab2:
     sub_tab1, sub_tab2 = st.tabs(["📏 Mode 1: Real Data (6 Species) - 92.3%", "📈 Mode 2: Simulated Data (12 Species) - 95.4%"])
     
     # ============================================
-    # MODE 1: REAL DATA (92.3% ACCURACY)
+    # MODE 1: REAL DATA
     # ============================================
     with sub_tab1:
         st.markdown("### Enter 9 Morphological Measurements")
@@ -874,7 +916,17 @@ with tab2:
         
         if st.button("🔍 Identify Species", key="mode1_btn", use_container_width=True):
             try:
+                # Create input array with correct feature order
                 input_data = np.array([[head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal]])
+                
+                # Debug: show input shape
+                st.markdown("""
+                <div class="debug-box">
+                    <strong>🔧 Debug Input:</strong><br>
+                    Features: Head={:.1f}, Body={:.1f}, Eye={:.1f}, Snout={:.1f}, Maxillary={:.1f}, Mandibullary={:.1f}, Mental={:.1f}, Dorsal={:.0f}, Anal={:.0f}<br>
+                    Shape: {}
+                </div>
+                """.format(head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, input_data.shape), unsafe_allow_html=True)
                 
                 prediction_raw = predict_hybrid_real(input_data, models, models_loaded)
                 
@@ -906,7 +958,6 @@ with tab2:
                 
                 confidence_badge = "✅ High Confidence (Real-trained species)" if data_source == "Real ✅" else "⚠️ Reference Species"
                 
-                # Determine confidence level class
                 if confidence >= 85:
                     confidence_class = "confidence-high"
                     confidence_text = "High Confidence"
@@ -971,14 +1022,25 @@ with tab2:
                                 'Model Accuracy': ['76.9%', '84.6%', '80.8%', '92.3%']
                             })
                             st.dataframe(comparison_df, use_container_width=True, hide_index=True)
-                    except:
-                        pass
+                    except Exception as e:
+                        st.warning(f"Could not show comparison: {e}")
                 
             except Exception as e:
                 st.error(f"Error: {e}")
+                st.info("Using fallback prediction...")
+                # Try fallback prediction
+                input_data = np.array([[head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal]])
+                prediction = predict_fallback_real(input_data)
+                st.markdown(f"""
+                <div class="prediction-card">
+                    <div>🎯 Predicted Species (Fallback)</div>
+                    <div class="prediction-species">{prediction}</div>
+                    <div>⚠️ Using rule-based fallback prediction</div>
+                </div>
+                """, unsafe_allow_html=True)
     
     # ============================================
-    # MODE 2: SIMULATED DATA (95.4% ACCURACY)
+    # MODE 2: SIMULATED DATA
     # ============================================
     with sub_tab2:
         st.markdown("### Simulated Data Classification")
@@ -1017,7 +1079,6 @@ with tab2:
                 
                 prediction_raw = predict_hybrid_sim(input_data_sim, models, models_loaded)
                 
-                # Get full species name
                 full_name = find_species_key(prediction_raw)
                 if full_name:
                     prediction = full_name
@@ -1027,7 +1088,6 @@ with tab2:
                 species_info = ARIIDAE_SPECIES.get(prediction, {})
                 data_source = species_info.get('data_source', 'Unknown')
                 
-                # Calculate confidence score
                 confidence = 85.0
                 if models_loaded and models is not None:
                     if models.get('svm_hybrid_sim') is not None and models.get('scaler_sim') is not None:
@@ -1045,7 +1105,6 @@ with tab2:
                 
                 confidence_badge = "✅ High Confidence" if data_source == "Real ✅" else "📊 Simulated Reference"
                 
-                # Determine confidence level class
                 if confidence >= 85:
                     confidence_class = "confidence-high"
                     confidence_text = "High Confidence"
@@ -1099,6 +1158,17 @@ with tab2:
                 
             except Exception as e:
                 st.error(f"Error: {e}")
+                st.info("Using fallback prediction...")
+                input_data_sim = np.array([[head_sim, body_sim, eye_sim, snout_sim, maxillary_sim, 
+                                              mandibullary_sim, mental_sim, dorsal_sim, anal_sim]])
+                prediction = predict_fallback_sim(input_data_sim)
+                st.markdown(f"""
+                <div class="prediction-card-sim">
+                    <div>🎯 Predicted Species (Fallback)</div>
+                    <div class="prediction-species">{prediction}</div>
+                    <div>⚠️ Using rule-based fallback prediction</div>
+                </div>
+                """, unsafe_allow_html=True)
 
 # ============================================
 # TAB 3: SPECIES LIBRARY
@@ -1193,7 +1263,7 @@ with tab4:
         st.pyplot(fig2)
     
     # ============================================
-    # FEATURE IMPORTANCE SECTION
+    # FEATURE IMPORTANCE
     # ============================================
     st.markdown("### 🔬 Feature Importance Analysis")
     st.markdown("*Feature importance scores from CART-based feature selection for species classification*")
@@ -1254,7 +1324,7 @@ with tab4:
     st.pyplot(fig_cm)
     
     # ============================================
-    # CROSS VALIDATION RESULTS
+    # CROSS VALIDATION
     # ============================================
     st.markdown("### 🔬 5-Fold Cross-Validation Results")
     
