@@ -7,6 +7,7 @@ import seaborn as sns
 import warnings
 from PIL import Image
 import os
+import glob
 warnings.filterwarnings('ignore')
 
 st.set_page_config(page_title="Ariidae Classification System", page_icon="🐟", layout="wide")
@@ -185,8 +186,7 @@ ARIIDAE_SPECIES = {
         "diet": "Carnivorous - small fish, crustaceans",
         "features": "Long barbels, compressed body",
         "conservation": "Least Concern",
-        "data_source": "Simulated",
-        "image_path": "images/arius_gagora.png"
+        "data_source": "Simulated"
     },
     "Arius leptonotacanthus": {
         "scientific": "Arius leptonotacanthus",
@@ -196,8 +196,7 @@ ARIIDAE_SPECIES = {
         "diet": "Omnivorous - insects, plants",
         "features": "Thin dorsal spine, elongated body",
         "conservation": "Data Deficient",
-        "data_source": "Simulated",
-        "image_path": "images/arius_leptonotacanthus.png"
+        "data_source": "Simulated"
     },
     "Arius maculatus": {
         "scientific": "Arius maculatus",
@@ -207,8 +206,7 @@ ARIIDAE_SPECIES = {
         "diet": "Carnivorous - small fish, crustaceans",
         "features": "Dark spots on body, 4 pairs of barbels",
         "conservation": "Least Concern",
-        "data_source": "Real ✅",
-        "image_path": "images/arius_maculatus.png"
+        "data_source": "Real ✅"
     },
     "Arius oetik": {
         "scientific": "Arius oetik",
@@ -218,8 +216,7 @@ ARIIDAE_SPECIES = {
         "diet": "Carnivorous - small fish",
         "features": "Small size, slender body",
         "conservation": "Least Concern",
-        "data_source": "Simulated",
-        "image_path": "images/arius_oetik.png"
+        "data_source": "Simulated"
     },
     "Arius venosus": {
         "scientific": "Arius venosus",
@@ -229,8 +226,7 @@ ARIIDAE_SPECIES = {
         "diet": "Omnivorous - small fish, algae",
         "features": "Distinctive veined pattern on head",
         "conservation": "Data Deficient",
-        "data_source": "Real ✅",
-        "image_path": "images/arius_venosus.png"
+        "data_source": "Real ✅"
     },
     "Cryptarius truncatus": {
         "scientific": "Cryptarius truncatus",
@@ -240,8 +236,7 @@ ARIIDAE_SPECIES = {
         "diet": "Carnivorous - insects, worms",
         "features": "Truncated head shape",
         "conservation": "Least Concern",
-        "data_source": "Real ✅",
-        "image_path": "images/cryptarius_truncatus.png"
+        "data_source": "Real ✅"
     },
     "Hexanematichthys sagor": {
         "scientific": "Hexanematichthys sagor",
@@ -251,8 +246,7 @@ ARIIDAE_SPECIES = {
         "diet": "Omnivorous - fish, plants, insects",
         "features": "Long maxillary barbels, small eyes",
         "conservation": "Least Concern",
-        "data_source": "Simulated",
-        "image_path": "images/hexanematichthys_sagor.png"
+        "data_source": "Simulated"
     },
     "Nemapteryx macronotacantha": {
         "scientific": "Nemapteryx macronotacantha",
@@ -262,8 +256,7 @@ ARIIDAE_SPECIES = {
         "diet": "Carnivorous - small crustaceans",
         "features": "Prominent dorsal spine",
         "conservation": "Least Concern",
-        "data_source": "Real ✅",
-        "image_path": "images/nemapteryx_macronotacantha.png"
+        "data_source": "Real ✅"
     },
     "Nemapteryx nenga": {
         "scientific": "Nemapteryx nenga",
@@ -273,8 +266,7 @@ ARIIDAE_SPECIES = {
         "diet": "Omnivorous - small fish, plants",
         "features": "Small size, compressed body",
         "conservation": "Least Concern",
-        "data_source": "Real ✅",
-        "image_path": "images/nemapteryx_nenga.png"
+        "data_source": "Real ✅"
     },
     "Osteogeneiosus militaris": {
         "scientific": "Osteogeneiosus militaris",
@@ -284,8 +276,7 @@ ARIIDAE_SPECIES = {
         "diet": "Carnivorous - fish, shrimp",
         "features": "Bony head shield, elongated body",
         "conservation": "Least Concern",
-        "data_source": "Real ✅",
-        "image_path": "images/osteogeneiosus_militaris.png"
+        "data_source": "Real ✅"
     },
     "Plicofollis argyropleuron": {
         "scientific": "Plicofollis argyropleuron",
@@ -295,8 +286,7 @@ ARIIDAE_SPECIES = {
         "diet": "Carnivorous - crustaceans",
         "features": "Silver longitudinal band",
         "conservation": "Least Concern",
-        "data_source": "Simulated",
-        "image_path": "images/plicofollis_argyropleuron.png"
+        "data_source": "Simulated"
     },
     "Plicofollis layardi": {
         "scientific": "Plicofollis layardi",
@@ -306,10 +296,44 @@ ARIIDAE_SPECIES = {
         "diet": "Carnivorous - small fish",
         "features": "Rugose head, long barbels",
         "conservation": "Least Concern",
-        "data_source": "Simulated",
-        "image_path": "images/plicofollis_layardi.png"
+        "data_source": "Simulated"
     }
 }
+
+# ============================================
+# FUNCTION TO GET IMAGE PATH FOR SPECIES
+# ============================================
+
+def get_image_path(species_name):
+    """Get image path for a species - tries multiple naming conventions"""
+    # Convert species name to filename format
+    # Example: "Arius maculatus" -> "arius_maculatus"
+    filename = species_name.lower().replace(' ', '_')
+    
+    # Try different extensions and paths
+    possible_paths = [
+        f"images/{filename}.png",
+        f"images/{filename}.jpg",
+        f"images/{filename}.jpeg",
+        f"images/{species_name.lower().replace(' ', '_')}.png",
+        f"images/{species_name.lower().replace(' ', '_')}.jpg",
+    ]
+    
+    # Also try without "arius_" prefix for some species
+    if "arius" in filename:
+        alt_name = filename.replace("arius_", "")
+        possible_paths.extend([
+            f"images/{alt_name}.png",
+            f"images/{alt_name}.jpg",
+        ])
+    
+    # Check all possible paths
+    for path in possible_paths:
+        if os.path.exists(path):
+            return path
+    
+    # If no image found, return None
+    return None
 
 # ============================================
 # FUNCTION TO DISPLAY FISH IMAGE
@@ -317,16 +341,21 @@ ARIIDAE_SPECIES = {
 
 def display_fish_image(species_name):
     """Display fish image for a given species"""
-    species_info = ARIIDAE_SPECIES.get(species_name, {})
-    image_path = species_info.get('image_path', '')
+    image_path = get_image_path(species_name)
     
-    if image_path and os.path.exists(image_path):
+    if image_path:
         try:
             image = Image.open(image_path)
             return image
         except Exception as e:
+            st.warning(f"Could not load image: {e}")
             return None
-    return None
+    else:
+        # Show debug info
+        st.info(f"📸 Image not found for: {species_name}")
+        st.info(f"Expected filename: images/{species_name.lower().replace(' ', '_')}.png")
+        st.info("Please add the image file to the 'images' folder.")
+        return None
 
 # ============================================
 # FUNCTION TO CALCULATE CONFIDENCE SCORE
@@ -348,11 +377,10 @@ def calculate_confidence(features, model, scaler):
                 confidence = np.abs(decision_values[0])
             
             # Normalize to 0-100%
-            # Using sigmoid-like transformation
             confidence_score = 100 * (1 / (1 + np.exp(-confidence / 2)))
-            return min(100, max(50, confidence_score))
+            return min(98, max(60, confidence_score))
         else:
-            return 85.0  # Default confidence for non-SVM models
+            return 85.0
     except:
         return 85.0
 
@@ -844,7 +872,6 @@ with tab2:
                 if models_loaded and models is not None:
                     if models.get('svm_hybrid_real') is not None and models.get('scaler_real') is not None:
                         try:
-                            # Use decision function for confidence
                             features_scaled = models['scaler_real'].transform(input_data)
                             if hasattr(models['svm_hybrid_real'], 'decision_function'):
                                 decision_values = models['svm_hybrid_real'].decision_function(features_scaled)
@@ -888,7 +915,8 @@ with tab2:
                 if fish_image:
                     st.image(fish_image, caption=f"{prediction} - {species_info.get('common', '')}", use_container_width=True)
                 else:
-                    st.info(f"📸 Image for {prediction} will be available soon. Please add PNG image to: images/ folder")
+                    st.warning(f"⚠️ Image not found for {prediction}")
+                    st.info(f"Please add image file: images/{prediction.lower().replace(' ', '_')}.png")
                 
                 if species_info:
                     with st.expander("📖 View Species Information"):
@@ -1015,7 +1043,8 @@ with tab2:
                 if fish_image:
                     st.image(fish_image, caption=f"{prediction} - {species_info.get('common', '')}", use_container_width=True)
                 else:
-                    st.info(f"📸 Image for {prediction} will be available soon. Please add PNG image to: images/ folder")
+                    st.warning(f"⚠️ Image not found for {prediction}")
+                    st.info(f"Please add image file: images/{prediction.lower().replace(' ', '_')}.png")
                 
                 if species_info:
                     with st.expander("📖 View Species Information"):
