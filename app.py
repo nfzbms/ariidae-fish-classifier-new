@@ -238,6 +238,7 @@ def load_all_models_15():
     models = {}
     models_loaded = False
     try:
+        # MODE 1: Real Data Models
         models['scaler_real'] = joblib.load('scaler_real_15.pkl')
         models['cart_real'] = joblib.load('cart_real_15.pkl')
         models['svm_real'] = joblib.load('svm_real_15.pkl')
@@ -256,6 +257,7 @@ def load_all_models_15():
             models['pca_real'] = None
             models['svm_hybrid_real'] = joblib.load('svm_hybrid_real_15.pkl')
         
+        # MODE 2: Simulated Data Models
         models['scaler_sim'] = joblib.load('scaler_sim_15.pkl')
         models['cart_sim'] = joblib.load('cart_sim_15.pkl')
         models['svm_sim'] = joblib.load('svm_sim_15.pkl')
@@ -505,107 +507,229 @@ with tab2:
     st.markdown("## 🔍 Classify Ariidae Fish")
     st.markdown('<div class="mode-selector">', unsafe_allow_html=True)
     
+    # Create two tabs for Mode 1 and Mode 2
+    mode_tab1, mode_tab2 = st.tabs(["📏 Mode 1: Real Data (6 Species) - 92.3%", "📈 Mode 2: Simulated Data (12 Species) - 98.1%"])
+    
+    # ============================================
     # MODE 1: REAL DATA
-    st.markdown("### 📏 Mode 1: Real Data (6 Species) - 92.3%")
-    st.markdown("""
-    <div class="info-box">
-        Species: Arius maculatus, Arius venosus, Cryptarius truncatus, 
-        Nemapteryx macronotacantha, Nemapteryx nenga, Osteogeneiosus militaris
-    </div>
-    """, unsafe_allow_html=True)
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown("**📏 Head & Body**")
-        head = st.number_input("Head Length (mm)", 0.0, 200.0, 45.0, 0.1, key="head_real")
-        body = st.number_input("Body Depth (mm)", 0.0, 100.0, 28.0, 0.1, key="body_real")
-        eye = st.number_input("Eye Diameter (mm)", 0.0, 30.0, 6.0, 0.1, key="eye_real")
-        snout = st.number_input("Snout Length (mm)", 0.0, 50.0, 12.0, 0.1, key="snout_real")
-        head_width = st.number_input("Head Width (mm)", 0.0, 100.0, 20.0, 0.1, key="head_width_real")
-    
-    with col2:
-        st.markdown("**🪢 Barbell**")
-        maxillary = st.number_input("Maxillary Barbell (mm)", 0.0, 150.0, 35.0, 0.1, key="maxillary_real")
-        mandibullary = st.number_input("Mandibullary Barbell (mm)", 0.0, 100.0, 25.0, 0.1, key="mandibullary_real")
-        mental = st.number_input("Mental Barbell (mm)", 0.0, 80.0, 8.0, 0.1, key="mental_real")
-        inter_orbital = st.number_input("Inter-orbital Space (mm)", 0.0, 50.0, 8.0, 0.1, key="inter_orbital_real")
-        total = st.number_input("Total Length (mm)", 0.0, 500.0, 45.0, 0.1, key="total_real")
-    
-    with col3:
-        st.markdown("**🎯 Fins**")
-        dorsal = st.number_input("Dorsal Fin Ray", 0, 30, 18, 1, key="dorsal_real")
-        anal = st.number_input("Anal Fin Ray", 0, 30, 14, 1, key="anal_real")
-        pectoral = st.number_input("Pectoral Fin Ray", 0, 30, 16, 1, key="pectoral_real")
-        pre_dorsal = st.number_input("Pre-dorsal Length (mm)", 0.0, 200.0, 30.0, 0.1, key="pre_dorsal_real")
-        pre_pelvic = st.number_input("Pre-pelvic Length (mm)", 0.0, 250.0, 20.0, 0.1, key="pre_pelvic_real")
-    
-    if st.button("🔍 Identify Species", key="mode1_btn", use_container_width=True):
-        try:
-            input_data = np.array([[head, body, eye, snout, maxillary, mandibullary, mental, 
-                                    dorsal, anal, pre_dorsal, pre_pelvic, pectoral, 
-                                    head_width, inter_orbital, total]])
-            
-            prediction_raw = predict_hybrid_real_15(input_data, models, models_loaded)
-            full_name = find_species_key(prediction_raw)
-            prediction = full_name if full_name else prediction_raw
-            
-            species_info = ARIIDAE_SPECIES.get(prediction, {})
-            
-            # Confidence
-            confidence = 85.0
-            if models_loaded and models is not None:
-                if models.get('svm_hybrid_real') is not None and models.get('scaler_real') is not None:
-                    try:
-                        features_scaled = models['scaler_real'].transform(input_data)
-                        if hasattr(models['svm_hybrid_real'], 'decision_function'):
-                            decision_values = models['svm_hybrid_real'].decision_function(features_scaled)
-                            if len(decision_values.shape) > 1:
-                                confidence_val = np.max(decision_values, axis=1)[0]
-                            else:
-                                confidence_val = np.abs(decision_values[0])
-                            confidence = min(98, max(60, 100 * (1 / (1 + np.exp(-confidence_val / 2)))))
-                    except:
-                        confidence = 85.0
-            
-            confidence_class = "confidence-high" if confidence >= 85 else "confidence-medium" if confidence >= 70 else "confidence-low"
-            confidence_text = "High Confidence" if confidence >= 85 else "Medium Confidence" if confidence >= 70 else "Low Confidence"
-            
-            st.markdown(f"""
-            <div class="prediction-card">
-                <div>🎯 Predicted Species</div>
-                <div class="prediction-species">{prediction}</div>
-                <div>🏆 Optimized Hybrid CART-SVM | 92.3% Accuracy</div>
-                <div style="font-size: 1rem; margin-top: 10px;">
-                    <span class="{confidence_class}">📊 Confidence Score: {confidence:.1f}% ({confidence_text})</span>
+    # ============================================
+    with mode_tab1:
+        st.markdown("### Enter 15 Morphological Measurements")
+        st.markdown("""
+        <div class="info-box">
+            <strong>ℹ️ Mode 1: Real Data (6 Species) - 92.3% Accuracy</strong><br>
+            Species: Arius maculatus, Arius venosus, Cryptarius truncatus, 
+            Nemapteryx macronotacantha, Nemapteryx nenga, Osteogeneiosus militaris
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.markdown("**📏 Head & Body**")
+            head = st.number_input("Head Length (mm)", 0.0, 200.0, 45.0, 0.1, key="head_real")
+            body = st.number_input("Body Depth (mm)", 0.0, 100.0, 28.0, 0.1, key="body_real")
+            eye = st.number_input("Eye Diameter (mm)", 0.0, 30.0, 6.0, 0.1, key="eye_real")
+            snout = st.number_input("Snout Length (mm)", 0.0, 50.0, 12.0, 0.1, key="snout_real")
+            head_width = st.number_input("Head Width (mm)", 0.0, 100.0, 20.0, 0.1, key="head_width_real")
+        
+        with col2:
+            st.markdown("**🪢 Barbell**")
+            maxillary = st.number_input("Maxillary Barbell (mm)", 0.0, 150.0, 35.0, 0.1, key="maxillary_real")
+            mandibullary = st.number_input("Mandibullary Barbell (mm)", 0.0, 100.0, 25.0, 0.1, key="mandibullary_real")
+            mental = st.number_input("Mental Barbell (mm)", 0.0, 80.0, 8.0, 0.1, key="mental_real")
+            inter_orbital = st.number_input("Inter-orbital Space (mm)", 0.0, 50.0, 8.0, 0.1, key="inter_orbital_real")
+            total = st.number_input("Total Length (mm)", 0.0, 500.0, 45.0, 0.1, key="total_real")
+        
+        with col3:
+            st.markdown("**🎯 Fins**")
+            dorsal = st.number_input("Dorsal Fin Ray", 0, 30, 18, 1, key="dorsal_real")
+            anal = st.number_input("Anal Fin Ray", 0, 30, 14, 1, key="anal_real")
+            pectoral = st.number_input("Pectoral Fin Ray", 0, 30, 16, 1, key="pectoral_real")
+            pre_dorsal = st.number_input("Pre-dorsal Length (mm)", 0.0, 200.0, 30.0, 0.1, key="pre_dorsal_real")
+            pre_pelvic = st.number_input("Pre-pelvic Length (mm)", 0.0, 250.0, 20.0, 0.1, key="pre_pelvic_real")
+        
+        if st.button("🔍 Identify Species", key="mode1_btn", use_container_width=True):
+            try:
+                input_data = np.array([[head, body, eye, snout, maxillary, mandibullary, mental, 
+                                        dorsal, anal, pre_dorsal, pre_pelvic, pectoral, 
+                                        head_width, inter_orbital, total]])
+                
+                prediction_raw = predict_hybrid_real_15(input_data, models, models_loaded)
+                full_name = find_species_key(prediction_raw)
+                prediction = full_name if full_name else prediction_raw
+                
+                species_info = ARIIDAE_SPECIES.get(prediction, {})
+                
+                # Confidence
+                confidence = 85.0
+                if models_loaded and models is not None:
+                    if models.get('svm_hybrid_real') is not None and models.get('scaler_real') is not None:
+                        try:
+                            features_scaled = models['scaler_real'].transform(input_data)
+                            if hasattr(models['svm_hybrid_real'], 'decision_function'):
+                                decision_values = models['svm_hybrid_real'].decision_function(features_scaled)
+                                if len(decision_values.shape) > 1:
+                                    confidence_val = np.max(decision_values, axis=1)[0]
+                                else:
+                                    confidence_val = np.abs(decision_values[0])
+                                confidence = min(98, max(60, 100 * (1 / (1 + np.exp(-confidence_val / 2)))))
+                        except:
+                            confidence = 85.0
+                
+                confidence_class = "confidence-high" if confidence >= 85 else "confidence-medium" if confidence >= 70 else "confidence-low"
+                confidence_text = "High Confidence" if confidence >= 85 else "Medium Confidence" if confidence >= 70 else "Low Confidence"
+                
+                st.markdown(f"""
+                <div class="prediction-card">
+                    <div>🎯 Predicted Species</div>
+                    <div class="prediction-species">{prediction}</div>
+                    <div>🏆 Optimized Hybrid CART-SVM | 92.3% Accuracy</div>
+                    <div style="font-size: 1rem; margin-top: 10px;">
+                        <span class="{confidence_class}">📊 Confidence Score: {confidence:.1f}% ({confidence_text})</span>
+                    </div>
+                    <div style="font-size: 0.8rem; margin-top: 5px;">✅ 15 Features + PCA + GridSearchCV</div>
                 </div>
-                <div style="font-size: 0.8rem; margin-top: 5px;">✅ 15 Features + PCA + GridSearchCV</div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # Fish Image - FIXED: use_column_width instead of use_container_width
-            st.markdown("### 📸 Fish Image")
-            image, species_info = get_species_image(prediction)
-            if image:
-                st.image(image, caption=f"{prediction} - {species_info.get('common', '')}", use_column_width=True)
-            else:
-                st.warning(f"⚠️ Image not found for {prediction}")
-                st.info(f"Please add image: images/{prediction.lower().replace(' ', '_')}.png")
-            
-            if species_info:
-                with st.expander("📖 View Species Information"):
-                    col_a, col_b = st.columns(2)
-                    with col_a:
-                        st.markdown(f"**Scientific Name:** {species_info.get('scientific', 'N/A')}")
-                        st.markdown(f"**Common Name:** {species_info.get('common', 'N/A')}")
-                        st.markdown(f"**Size:** {species_info.get('size', 'N/A')}")
-                    with col_b:
-                        st.markdown(f"**Habitat:** {species_info.get('habitat', 'N/A')}")
-                        st.markdown(f"**Diet:** {species_info.get('diet', 'N/A')}")
-                        st.markdown(f"**Conservation:** {species_info.get('conservation', 'N/A')}")
-            
-        except Exception as e:
-            st.error(f"Error: {e}")
+                """, unsafe_allow_html=True)
+                
+                # Fish Image
+                st.markdown("### 📸 Fish Image")
+                image, species_info = get_species_image(prediction)
+                if image:
+                    st.image(image, caption=f"{prediction} - {species_info.get('common', '')}", use_column_width=True)
+                else:
+                    st.warning(f"⚠️ Image not found for {prediction}")
+                    st.info(f"Please add image: images/{prediction.lower().replace(' ', '_')}.png")
+                
+                if species_info:
+                    with st.expander("📖 View Species Information"):
+                        col_a, col_b = st.columns(2)
+                        with col_a:
+                            st.markdown(f"**Scientific Name:** {species_info.get('scientific', 'N/A')}")
+                            st.markdown(f"**Common Name:** {species_info.get('common', 'N/A')}")
+                            st.markdown(f"**Size:** {species_info.get('size', 'N/A')}")
+                        with col_b:
+                            st.markdown(f"**Habitat:** {species_info.get('habitat', 'N/A')}")
+                            st.markdown(f"**Diet:** {species_info.get('diet', 'N/A')}")
+                            st.markdown(f"**Conservation:** {species_info.get('conservation', 'N/A')}")
+                
+            except Exception as e:
+                st.error(f"Error: {e}")
+    
+    # ============================================
+    # MODE 2: SIMULATED DATA
+    # ============================================
+    with mode_tab2:
+        st.markdown("### Enter 15 Morphological Measurements")
+        st.markdown("""
+        <div class="info-box">
+            <strong>ℹ️ Mode 2: Simulated Data (12 Species) - 98.1% Accuracy (BEST!)</strong><br>
+            This uses the <strong>optimized Hybrid CART-SVM</strong> model trained on <strong>12 simulated Ariidae species</strong>.<br>
+            🏆 <strong>Model Accuracy: 98.1% (BEST! Optimized with GridSearchCV + PCA)</strong>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.markdown("**📏 Head & Body**")
+            head_sim = st.number_input("Head Length (mm)", 0.0, 200.0, 45.0, 0.1, key="head_sim")
+            body_sim = st.number_input("Body Depth (mm)", 0.0, 100.0, 28.0, 0.1, key="body_sim")
+            eye_sim = st.number_input("Eye Diameter (mm)", 0.0, 30.0, 6.0, 0.1, key="eye_sim")
+            snout_sim = st.number_input("Snout Length (mm)", 0.0, 50.0, 12.0, 0.1, key="snout_sim")
+            head_width_sim = st.number_input("Head Width (mm)", 0.0, 100.0, 20.0, 0.1, key="head_width_sim")
+        
+        with col2:
+            st.markdown("**🪢 Barbell**")
+            maxillary_sim = st.number_input("Maxillary Barbell (mm)", 0.0, 150.0, 35.0, 0.1, key="maxillary_sim")
+            mandibullary_sim = st.number_input("Mandibullary Barbell (mm)", 0.0, 100.0, 25.0, 0.1, key="mandibullary_sim")
+            mental_sim = st.number_input("Mental Barbell (mm)", 0.0, 80.0, 8.0, 0.1, key="mental_sim")
+            inter_orbital_sim = st.number_input("Inter-orbital Space (mm)", 0.0, 50.0, 8.0, 0.1, key="inter_orbital_sim")
+            total_sim = st.number_input("Total Length (mm)", 0.0, 500.0, 45.0, 0.1, key="total_sim")
+        
+        with col3:
+            st.markdown("**🎯 Fins**")
+            dorsal_sim = st.number_input("Dorsal Fin Ray", 0, 30, 18, 1, key="dorsal_sim")
+            anal_sim = st.number_input("Anal Fin Ray", 0, 30, 14, 1, key="anal_sim")
+            pectoral_sim = st.number_input("Pectoral Fin Ray", 0, 30, 16, 1, key="pectoral_sim")
+            pre_dorsal_sim = st.number_input("Pre-dorsal Length (mm)", 0.0, 200.0, 30.0, 0.1, key="pre_dorsal_sim")
+            pre_pelvic_sim = st.number_input("Pre-pelvic Length (mm)", 0.0, 250.0, 20.0, 0.1, key="pre_pelvic_sim")
+        
+        if st.button("🔍 Identify Species (Simulated)", key="mode2_btn", use_container_width=True):
+            try:
+                input_data_sim = np.array([[head_sim, body_sim, eye_sim, snout_sim, maxillary_sim, 
+                                            mandibullary_sim, mental_sim, dorsal_sim, anal_sim,
+                                            pre_dorsal_sim, pre_pelvic_sim, pectoral_sim,
+                                            head_width_sim, inter_orbital_sim, total_sim]])
+                
+                prediction_raw = predict_hybrid_sim_15(input_data_sim, models, models_loaded)
+                full_name = find_species_key(prediction_raw)
+                prediction = full_name if full_name else prediction_raw
+                
+                species_info = ARIIDAE_SPECIES.get(prediction, {})
+                data_source = species_info.get('data_source', 'Unknown')
+                
+                # Confidence
+                confidence = 85.0
+                if models_loaded and models is not None:
+                    if models.get('svm_hybrid_sim') is not None and models.get('scaler_sim') is not None:
+                        try:
+                            features_scaled = models['scaler_sim'].transform(input_data_sim)
+                            if hasattr(models['svm_hybrid_sim'], 'decision_function'):
+                                decision_values = models['svm_hybrid_sim'].decision_function(features_scaled)
+                                if len(decision_values.shape) > 1:
+                                    confidence_val = np.max(decision_values, axis=1)[0]
+                                else:
+                                    confidence_val = np.abs(decision_values[0])
+                                confidence = min(98, max(60, 100 * (1 / (1 + np.exp(-confidence_val / 2)))))
+                        except:
+                            confidence = 85.0
+                
+                confidence_badge = "✅ High Confidence" if data_source == "Real ✅" else "📊 Simulated Reference"
+                confidence_class = "confidence-high" if confidence >= 85 else "confidence-medium" if confidence >= 70 else "confidence-low"
+                confidence_text = "High Confidence" if confidence >= 85 else "Medium Confidence" if confidence >= 70 else "Low Confidence"
+                
+                st.markdown(f"""
+                <div class="prediction-card-sim">
+                    <div>🎯 Predicted Species (Simulated Data)</div>
+                    <div class="prediction-species">{prediction}</div>
+                    <div>🏆 Optimized Hybrid CART-SVM | 98.1% Accuracy (BEST!)</div>
+                    <div style="font-size: 1rem; margin-top: 10px;">
+                        <span class="{confidence_class}">📊 Confidence Score: {confidence:.1f}% ({confidence_text})</span>
+                    </div>
+                    <div style="font-size: 0.9rem; margin-top: 5px;">{confidence_badge}</div>
+                    <div style="font-size: 0.8rem; margin-top: 5px;">✅ 15 Features + PCA + GridSearchCV</div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Fish Image
+                st.markdown("### 📸 Fish Image")
+                image, species_info = get_species_image(prediction)
+                if image:
+                    st.image(image, caption=f"{prediction} - {species_info.get('common', '')}", use_column_width=True)
+                else:
+                    st.warning(f"⚠️ Image not found for {prediction}")
+                    st.info(f"Please add image: images/{prediction.lower().replace(' ', '_')}.png")
+                
+                if species_info:
+                    with st.expander("📖 View Species Information"):
+                        col_a, col_b = st.columns(2)
+                        with col_a:
+                            st.markdown(f"**Scientific Name:** {species_info.get('scientific', 'N/A')}")
+                            st.markdown(f"**Common Name:** {species_info.get('common', 'N/A')}")
+                            st.markdown(f"**Size:** {species_info.get('size', 'N/A')}")
+                        with col_b:
+                            st.markdown(f"**Habitat:** {species_info.get('habitat', 'N/A')}")
+                            st.markdown(f"**Diet:** {species_info.get('diet', 'N/A')}")
+                            st.markdown(f"**Conservation:** {species_info.get('conservation', 'N/A')}")
+                
+                st.info("""
+                💡 **FYP Conclusion:** The Optimized Hybrid CART-SVM achieves **98.1% accuracy** on simulated data 
+                and **92.3% accuracy** on real data with 15 features, outperforming all standalone models!
+                """)
+                
+            except Exception as e:
+                st.error(f"Error: {e}")
 
 # ============================================
 # TAB 3: SPECIES LIBRARY
@@ -665,6 +789,21 @@ with tab4:
     plt.xticks(rotation=15, ha='right')
     plt.tight_layout()
     st.pyplot(fig1)
+    
+    # Mode 2
+    fig2, ax2 = plt.subplots(figsize=(8, 5))
+    models_list2 = list(MODE2_PERFORMANCE.keys())
+    accuracies2 = list(MODE2_PERFORMANCE.values())
+    colors2 = ['#e74c3c', '#3498db', '#f39c12', '#2ecc71']
+    bars2 = ax2.bar(models_list2, accuracies2, color=colors2, edgecolor='black', linewidth=1)
+    ax2.set_ylabel('Accuracy (%)', fontsize=12)
+    ax2.set_title('Mode 2: Simulated Data (12 Species)', fontsize=14)
+    ax2.set_ylim(88, 100)
+    for bar, acc in zip(bars2, accuracies2):
+        ax2.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.5, f'{acc:.1f}%', ha='center', va='bottom', fontweight='bold')
+    plt.xticks(rotation=15, ha='right')
+    plt.tight_layout()
+    st.pyplot(fig2)
 
 # ============================================
 # DEBUG: IMAGE STATUS
