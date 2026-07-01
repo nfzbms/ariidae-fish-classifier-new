@@ -385,117 +385,184 @@ def get_species_info(species_name):
     return {}
 
 # ============================================
-# SIMULATED DATA PREDICTION FUNCTION (STANDALONE - DOES NOT USE REAL DATA MODEL)
+# SIMULATED DATA PREDICTION FUNCTION (FIXED - MORE ACCURATE)
 # ============================================
 
 def predict_simulated_only(features):
     """
-    PREDICTION KHUSUS UNTUK SIMULATED DATA
-    Fungsi ini TIDAK menggunakan model real data.
-    Menggunakan rule-based system yang direka khas untuk 12 species simulated.
+    PREDICTION KHUSUS UNTUK SIMULATED DATA - LEBIH TEPAT
+    Menggunakan kombinasi rule-based dan distance-based classification
     """
     try:
         head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal = features[0]
     except:
         return "Arius gagora"
     
-    # Define typical measurement ranges for each species
-    # Format: [head_min, head_max, body_min, body_max, eye_min, eye_max, 
-    #           maxillary_min, maxillary_max, dorsal_min, dorsal_max]
+    # ========================================
+    # RULE 1: Check for extreme values first
+    # ========================================
     
+    # VERY LARGE SPECIES
+    if head > 60 and body > 35:
+        return "Arius maculatus"
+    if head > 55 and body > 38:
+        return "Osteogeneiosus militaris"
+    
+    # VERY SMALL SPECIES
+    if head < 35 and body < 25:
+        return "Arius oetik"
+    if head < 40 and body < 28 and maxillary < 32:
+        return "Arius leptonotacanthus"
+    
+    # ========================================
+    # RULE 2: Check by eye diameter
+    # ========================================
+    if eye > 7.5:
+        return "Cryptarius truncatus"
+    
+    # ========================================
+    # RULE 3: Check by maxillary barbell
+    # ========================================
+    if maxillary > 50:
+        return "Hexanematichthys sagor"
+    if maxillary > 45 and head > 50:
+        return "Plicofollis layardi"
+    
+    # ========================================
+    # RULE 4: Check by dorsal fin ray
+    # ========================================
+    if dorsal > 24:
+        return "Nemapteryx macronotacantha"
+    
+    # ========================================
+    # RULE 5: Check by anal fin ray
+    # ========================================
+    if anal > 20:
+        return "Osteogeneiosus militaris"
+    
+    # ========================================
+    # RULE 6: Default classification based on combination
+    # ========================================
+    
+    # Calculate scores for each species
+    scores = {}
+    
+    # Define typical value ranges for each species
     species_ranges = {
         "Arius gagora": {
-            "head": (38, 62), "body": (23, 37), "eye": (4, 9),
-            "maxillary": (28, 47), "dorsal": (14, 24), "anal": (11, 19)
+            "head": (42, 55), "body": (26, 33), "eye": (5, 7.5),
+            "maxillary": (32, 42), "dorsal": (16, 21), "anal": (13, 17)
         },
         "Arius leptonotacanthus": {
-            "head": (30, 52), "body": (20, 32), "eye": (4, 7),
-            "maxillary": (25, 38), "dorsal": (14, 22), "anal": (11, 17)
+            "head": (35, 45), "body": (22, 28), "eye": (4.5, 6.5),
+            "maxillary": (28, 35), "dorsal": (15, 19), "anal": (12, 15)
         },
         "Arius maculatus": {
-            "head": (43, 72), "body": (28, 52), "eye": (4, 8),
-            "maxillary": (33, 57), "dorsal": (15, 27), "anal": (12, 22)
+            "head": (50, 65), "body": (32, 45), "eye": (5, 7),
+            "maxillary": (38, 50), "dorsal": (18, 24), "anal": (15, 20)
         },
         "Arius oetik": {
-            "head": (28, 48), "body": (18, 28), "eye": (3, 7),
-            "maxillary": (22, 33), "dorsal": (13, 20), "anal": (10, 16)
+            "head": (30, 40), "body": (20, 26), "eye": (4, 6),
+            "maxillary": (24, 30), "dorsal": (14, 17), "anal": (11, 14)
         },
         "Arius venosus": {
-            "head": (38, 58), "body": (26, 42), "eye": (4, 8),
-            "maxillary": (28, 47), "dorsal": (14, 24), "anal": (11, 19)
+            "head": (42, 52), "body": (28, 35), "eye": (5, 7),
+            "maxillary": (32, 42), "dorsal": (16, 21), "anal": (13, 17)
         },
         "Cryptarius truncatus": {
-            "head": (28, 45), "body": (20, 33), "eye": (6, 10),
-            "maxillary": (25, 35), "dorsal": (13, 20), "anal": (10, 16)
+            "head": (30, 42), "body": (22, 30), "eye": (7, 9),
+            "maxillary": (26, 33), "dorsal": (14, 18), "anal": (11, 15)
         },
         "Hexanematichthys sagor": {
-            "head": (38, 62), "body": (23, 40), "eye": (3, 6),
-            "maxillary": (38, 52), "dorsal": (16, 27), "anal": (13, 22)
+            "head": (45, 55), "body": (26, 35), "eye": (4, 5.5),
+            "maxillary": (42, 52), "dorsal": (18, 24), "anal": (15, 19)
         },
         "Nemapteryx macronotacantha": {
-            "head": (35, 50), "body": (22, 33), "eye": (4, 7),
-            "maxillary": (28, 38), "dorsal": (18, 26), "anal": (12, 18)
+            "head": (38, 48), "body": (24, 30), "eye": (4.5, 6.5),
+            "maxillary": (30, 38), "dorsal": (20, 25), "anal": (13, 17)
         },
         "Nemapteryx nenga": {
-            "head": (30, 45), "body": (20, 30), "eye": (4, 7),
-            "maxillary": (25, 35), "dorsal": (15, 22), "anal": (11, 17)
+            "head": (32, 42), "body": (22, 28), "eye": (4.5, 6.5),
+            "maxillary": (26, 34), "dorsal": (16, 20), "anal": (12, 16)
         },
         "Osteogeneiosus militaris": {
-            "head": (43, 68), "body": (28, 47), "eye": (4, 8),
-            "maxillary": (33, 52), "dorsal": (16, 27), "anal": (14, 24)
+            "head": (48, 60), "body": (32, 42), "eye": (5, 7),
+            "maxillary": (36, 48), "dorsal": (18, 24), "anal": (16, 22)
         },
         "Plicofollis argyropleuron": {
-            "head": (38, 58), "body": (23, 37), "eye": (4, 8),
-            "maxillary": (28, 47), "dorsal": (15, 24), "anal": (12, 20)
+            "head": (42, 52), "body": (26, 33), "eye": (5, 7),
+            "maxillary": (32, 42), "dorsal": (16, 21), "anal": (14, 18)
         },
         "Plicofollis layardi": {
-            "head": (38, 58), "body": (23, 37), "eye": (4, 8),
-            "maxillary": (36, 48), "dorsal": (15, 24), "anal": (12, 20)
+            "head": (42, 52), "body": (26, 33), "eye": (5, 7),
+            "maxillary": (38, 48), "dorsal": (16, 21), "anal": (14, 18)
         }
     }
     
-    # Calculate score for each species based on how well input matches ranges
-    scores = {}
+    # Calculate match score for each species
     for species, ranges in species_ranges.items():
         score = 0
         
-        # Check each feature
+        # Head length
         if ranges["head"][0] <= head <= ranges["head"][1]:
             score += 3
+        elif abs(head - (ranges["head"][0] + ranges["head"][1])/2) < 10:
+            score += 1
+        
+        # Body depth
         if ranges["body"][0] <= body <= ranges["body"][1]:
             score += 3
+        elif abs(body - (ranges["body"][0] + ranges["body"][1])/2) < 8:
+            score += 1
+        
+        # Eye diameter
         if ranges["eye"][0] <= eye <= ranges["eye"][1]:
             score += 2
+        elif abs(eye - (ranges["eye"][0] + ranges["eye"][1])/2) < 2:
+            score += 1
+        
+        # Maxillary barbell
         if ranges["maxillary"][0] <= maxillary <= ranges["maxillary"][1]:
             score += 3
+        elif abs(maxillary - (ranges["maxillary"][0] + ranges["maxillary"][1])/2) < 8:
+            score += 1
+        
+        # Dorsal fin ray
         if ranges["dorsal"][0] <= dorsal <= ranges["dorsal"][1]:
             score += 2
+        elif abs(dorsal - (ranges["dorsal"][0] + ranges["dorsal"][1])/2) < 3:
+            score += 1
+        
+        # Anal fin ray
         if ranges["anal"][0] <= anal <= ranges["anal"][1]:
             score += 2
+        elif abs(anal - (ranges["anal"][0] + ranges["anal"][1])/2) < 3:
+            score += 1
         
         scores[species] = score
     
     # Get species with highest score
     max_score = max(scores.values())
     
-    if max_score > 0:
+    if max_score >= 6:  # Only return if score is high enough
         # Get all species with max score
         best_species = [s for s, sc in scores.items() if sc == max_score]
-        # If multiple, choose based on additional criteria
-        if len(best_species) > 1:
-            # Use head length as tiebreaker
-            if head > 55:
-                return "Arius maculatus" if "Arius maculatus" in best_species else best_species[0]
-            elif head > 45:
-                return "Osteogeneiosus militaris" if "Osteogeneiosus militaris" in best_species else best_species[0]
-            else:
-                return best_species[0]
-        return best_species[0]
+        if len(best_species) == 1:
+            return best_species[0]
+        else:
+            # If multiple species have same score, use tiebreaker
+            # Check if any of the best species match the short_name pattern
+            for species in best_species:
+                # Check if this species is in the short_name list
+                for key, info in ARIIDAE_SPECIES.items():
+                    if info.get('short_name', '').upper() in species.upper():
+                        return species
+            return best_species[0]
     else:
-        # Fallback prediction based on primary features
-        if head > 55:
+        # If no good match, use simple rule-based
+        if head > 50:
             return "Arius maculatus"
-        elif body > 38:
+        elif body > 32:
             return "Osteogeneiosus militaris"
         elif eye > 7:
             return "Cryptarius truncatus"
@@ -503,9 +570,7 @@ def predict_simulated_only(features):
             return "Hexanematichthys sagor"
         elif dorsal > 22:
             return "Nemapteryx macronotacantha"
-        elif anal > 18:
-            return "Osteogeneiosus militaris"
-        elif head < 40 and body < 25:
+        elif head < 38:
             return "Arius oetik"
         else:
             return "Arius gagora"
@@ -994,7 +1059,7 @@ with tab2:
                 st.error(f"Error: {e}")
     
     # ============================================
-    # MODE 2: SIMULATED DATA (95.4% ACCURACY) - DIPERBAIKI
+    # MODE 2: SIMULATED DATA (95.4% ACCURACY) - FIXED
     # ============================================
     with sub_tab2:
         st.markdown("### Simulated Data Classification")
@@ -1031,7 +1096,7 @@ with tab2:
                 input_data_sim = np.array([[head_sim, body_sim, eye_sim, snout_sim, maxillary_sim, 
                                               mandibullary_sim, mental_sim, dorsal_sim, anal_sim]])
                 
-                # GUNAKAN FUNGSI KHUSUS UNTUK SIMULATED DATA - TIDAK GUNA MODEL REAL
+                # GUNAKAN FUNGSI KHUSUS UNTUK SIMULATED DATA
                 prediction_raw = predict_simulated_only(input_data_sim)
                 
                 # Get full species info using the find_species_key function
