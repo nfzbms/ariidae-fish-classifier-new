@@ -1,4 +1,0 @@
-Model,CV Accuracy Mean (%),CV Accuracy Std (%),CV F1 Mean (%),CV F1 Std (%)
-CART,65.61,8.80,nan,nan
-SVM,79.09,15.95,nan,nan
-KNN,82.73,10.81,nan,nan
