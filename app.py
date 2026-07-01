@@ -167,23 +167,9 @@ FEATURES_15 = [
     'Total_length'
 ]
 
-print("📊 15 Features:")
-for i, f in enumerate(FEATURES_15, 1):
-    print(f"   {i}. {f}")
-
 # ============================================
 # SPECIES INFORMATION
 # ============================================
-
-# 6 Real species used for Hybrid CART-SVM training (MODE 1)
-REAL_SPECIES_TRAINED = [
-    "Arius maculatus",
-    "Arius venosus", 
-    "Cryptarius truncatus",
-    "Nemapteryx macronotacantha",
-    "Nemapteryx nenga",
-    "Osteogeneiosus militaris"
-]
 
 # Complete 12 Ariidae Species Library
 ARIIDAE_SPECIES = {
@@ -322,10 +308,9 @@ ARIIDAE_SPECIES = {
 }
 
 # ============================================
-# MODEL PERFORMANCE DATA (15 FEATURES)
+# MODEL PERFORMANCE DATA
 # ============================================
 
-# MODE 1: Real Data (6 Species) - 15 Features
 MODE1_PERFORMANCE = {
     'Decision Tree (CART)': 69.2,
     'SVM (Standalone)': 92.3,
@@ -333,7 +318,6 @@ MODE1_PERFORMANCE = {
     '🏆 HYBRID CART-SVM': 92.3
 }
 
-# MODE 2: Simulated Data (12 Species) - 15 Features
 MODE2_PERFORMANCE = {
     'Decision Tree (CART)': 91.7,
     'SVM (Standalone)': 97.2,
@@ -341,7 +325,6 @@ MODE2_PERFORMANCE = {
     '🏆 HYBRID CART-SVM': 98.1
 }
 
-# Feature Importance Data (15 Features)
 FEATURE_IMPORTANCE = {
     'Head_length': 0.145,
     'Body_depth': 0.168,
@@ -360,7 +343,6 @@ FEATURE_IMPORTANCE = {
     'Total_length': 0.042
 }
 
-# Confusion Matrix Data for 12 Species
 species_list = list(ARIIDAE_SPECIES.keys())
 
 confusion_matrix_real = np.array([
@@ -378,7 +360,6 @@ confusion_matrix_real = np.array([
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 37]
 ])
 
-# Cross Validation Results
 cv_results_real = {
     'Fold 1': 0.915,
     'Fold 2': 0.922,
@@ -404,52 +385,41 @@ cv_results_sim = {
 # ============================================
 
 def find_species_key(search_name):
-    """Find the full species name from short name or full name"""
     search_name = str(search_name).upper().strip()
-    
     for key, info in ARIIDAE_SPECIES.items():
         if info.get('short_name', '').upper() == search_name:
             return key
         if info.get('scientific', '').upper() == search_name:
             return key
-    
     for key in ARIIDAE_SPECIES.keys():
         if search_name in key.upper():
             return key
-    
     return None
 
 def get_species_image(species_name):
-    """Get image for species"""
     full_name = find_species_key(species_name)
     if full_name is None:
         full_name = species_name
-    
     species_info = ARIIDAE_SPECIES.get(full_name, {})
     filename = full_name.lower().replace(' ', '_') + '.png'
     image_path = os.path.join('images', filename)
-    
     if os.path.exists(image_path):
         try:
             image = Image.open(image_path)
             return image, species_info
         except:
             pass
-    
     return None, species_info
 
 # ============================================
-# LOAD MODELS (15 FEATURES)
+# LOAD MODELS
 # ============================================
 
 @st.cache_resource
 def load_all_models_15():
-    """Load all trained models from both modes (15 features)"""
     models = {}
     models_loaded = False
-    
     try:
-        # MODE 1: Real Data Models (15 features)
         models['scaler_real'] = joblib.load('scaler_real_15.pkl')
         models['cart_real'] = joblib.load('cart_real_15.pkl')
         models['svm_real'] = joblib.load('svm_real_15.pkl')
@@ -457,7 +427,6 @@ def load_all_models_15():
         models['features_real'] = joblib.load('features_real_15.pkl')
         models['classes_real'] = joblib.load('classes_real_15.pkl')
         
-        # MODE 1: Hybrid components
         try:
             models['selector_real'] = joblib.load('feature_selector_real_15.pkl')
             models['scaler_hybrid_real'] = joblib.load('scaler_hybrid_real_15.pkl')
@@ -469,7 +438,6 @@ def load_all_models_15():
             models['pca_real'] = None
             models['svm_hybrid_real'] = joblib.load('svm_hybrid_real_15.pkl')
         
-        # MODE 2: Simulated Data Models (15 features)
         models['scaler_sim'] = joblib.load('scaler_sim_15.pkl')
         models['cart_sim'] = joblib.load('cart_sim_15.pkl')
         models['svm_sim'] = joblib.load('svm_sim_15.pkl')
@@ -477,7 +445,6 @@ def load_all_models_15():
         models['features_sim'] = joblib.load('features_sim_15.pkl')
         models['classes_sim'] = joblib.load('classes_sim_15.pkl')
         
-        # MODE 2: Hybrid components
         try:
             models['selector_sim'] = joblib.load('feature_selector_sim_15.pkl')
             models['scaler_hybrid_sim'] = joblib.load('scaler_hybrid_sim_15.pkl')
@@ -498,16 +465,12 @@ def load_all_models_15():
         return None, False
 
 def predict_hybrid_real_15(features, models, models_loaded):
-    """Predict using Hybrid CART-SVM for Real Data (15 features)"""
     try:
         if features.shape[1] != 15:
             return "Error: Expected 15 features"
-        
         if not models_loaded or models is None:
             return predict_fallback_real_15(features)
-        
         prediction = None
-        
         if models.get('selector_real') is not None and models.get('scaler_hybrid_real') is not None:
             try:
                 features_selected = models['selector_real'].transform(features)
@@ -521,7 +484,6 @@ def predict_hybrid_real_15(features, models, models_loaded):
                     return prediction[0]
             except:
                 pass
-        
         if models.get('svm_hybrid_real') is not None and models.get('scaler_real') is not None:
             try:
                 features_scaled = models['scaler_real'].transform(features)
@@ -530,7 +492,6 @@ def predict_hybrid_real_15(features, models, models_loaded):
                     return prediction[0]
             except:
                 pass
-        
         if models.get('svm_real') is not None and models.get('scaler_real') is not None:
             try:
                 features_scaled = models['scaler_real'].transform(features)
@@ -539,23 +500,17 @@ def predict_hybrid_real_15(features, models, models_loaded):
                     return prediction[0]
             except:
                 pass
-        
         return predict_fallback_real_15(features)
-        
     except Exception as e:
         return predict_fallback_real_15(features)
 
 def predict_hybrid_sim_15(features, models, models_loaded):
-    """Predict using Hybrid CART-SVM for Simulated Data (15 features)"""
     try:
         if features.shape[1] != 15:
             return "Error: Expected 15 features"
-        
         if not models_loaded or models is None:
             return predict_fallback_sim_15(features)
-        
         prediction = None
-        
         if models.get('selector_sim') is not None and models.get('scaler_hybrid_sim') is not None:
             try:
                 features_selected = models['selector_sim'].transform(features)
@@ -569,7 +524,6 @@ def predict_hybrid_sim_15(features, models, models_loaded):
                     return prediction[0]
             except:
                 pass
-        
         if models.get('svm_hybrid_sim') is not None and models.get('scaler_sim') is not None:
             try:
                 features_scaled = models['scaler_sim'].transform(features)
@@ -578,7 +532,6 @@ def predict_hybrid_sim_15(features, models, models_loaded):
                     return prediction[0]
             except:
                 pass
-        
         if models.get('svm_sim') is not None and models.get('scaler_sim') is not None:
             try:
                 features_scaled = models['scaler_sim'].transform(features)
@@ -587,18 +540,22 @@ def predict_hybrid_sim_15(features, models, models_loaded):
                     return prediction[0]
             except:
                 pass
-        
         return predict_fallback_sim_15(features)
-        
     except Exception as e:
         return predict_fallback_sim_15(features)
 
 def predict_fallback_real_15(features):
-    """Fallback prediction for real data"""
     try:
-        head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total = features[0]
+        values = features[0]
     except:
         return "Arius maculatus"
+    
+    head = values[0] if len(values) > 0 else 45
+    body = values[1] if len(values) > 1 else 28
+    eye = values[2] if len(values) > 2 else 6
+    maxillary = values[4] if len(values) > 4 else 35
+    dorsal = values[7] if len(values) > 7 else 18
+    anal = values[8] if len(values) > 8 else 14
     
     if head > 55:
         return "Arius maculatus"
@@ -616,11 +573,26 @@ def predict_fallback_real_15(features):
         return "Arius maculatus"
 
 def predict_fallback_sim_15(features):
-    """Fallback prediction for simulated data"""
     try:
-        head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total = features[0]
+        values = features[0]
     except:
         return "Arius gagora"
+    
+    head = values[0] if len(values) > 0 else 45
+    body = values[1] if len(values) > 1 else 28
+    eye = values[2] if len(values) > 2 else 6
+    snout = values[3] if len(values) > 3 else 12
+    maxillary = values[4] if len(values) > 4 else 35
+    mandibullary = values[5] if len(values) > 5 else 25
+    mental = values[6] if len(values) > 6 else 8
+    dorsal = values[7] if len(values) > 7 else 18
+    anal = values[8] if len(values) > 8 else 14
+    pre_dorsal = values[9] if len(values) > 9 else 30
+    pre_pelvic = values[10] if len(values) > 10 else 20
+    pectoral = values[11] if len(values) > 11 else 16
+    head_width = values[12] if len(values) > 12 else 20
+    inter_orbital = values[13] if len(values) > 13 else 8
+    total = values[14] if len(values) > 14 else 45
     
     species_means_sim = {
         "Arius gagora": [50, 30, 6.5, 15, 38, 25, 9, 18, 15, 28, 20, 16, 18, 8, 45],
@@ -662,14 +634,12 @@ models, models_loaded = load_all_models_15()
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/3081/3081559.png", width=80)
     st.markdown("---")
-    
     st.markdown("### 📊 Mode 1: Real Data (6 Species)")
     for model, acc in MODE1_PERFORMANCE.items():
         if model == "🏆 HYBRID CART-SVM":
             st.markdown(f"✅ **{model}**: {acc}%")
         else:
             st.markdown(f"   {model}: {acc}%")
-    
     st.markdown("---")
     st.markdown("### 📊 Mode 2: Simulated Data (12 Species)")
     for model, acc in MODE2_PERFORMANCE.items():
@@ -677,7 +647,6 @@ with st.sidebar:
             st.markdown(f"✅ **{model}**: {acc}%")
         else:
             st.markdown(f"   {model}: {acc}%")
-    
     st.markdown("---")
     st.markdown("### 📈 Key Improvements")
     st.success("""
@@ -693,7 +662,6 @@ with st.sidebar:
     - +0.9% vs SVM
     - +2.7% vs KNN
     """)
-    
     st.markdown("---")
     st.markdown("### 🎯 FYP Objective")
     st.info("""
@@ -706,7 +674,6 @@ with st.sidebar:
     **Best Accuracy:** 98.1% (Simulated)
     **Real Accuracy:** 92.3%
     """)
-    
     st.markdown("---")
     st.caption("Final Year Project | 15 Features | Optimized Hybrid CART-SVM")
 
@@ -721,45 +688,38 @@ tab1, tab2, tab3, tab4 = st.tabs(["🏠 Home", "🔍 Classification", "📚 Spec
 # ============================================
 with tab1:
     st.markdown("## Welcome to Ariidae Fish Classification System")
-    
     st.markdown("""
     <div class="info-box">
         <strong>📊 FINAL TRAINING RESULTS (15 Features):</strong><br>
         • <strong>MODE 1 (Real Data):</strong> Optimized Hybrid CART-SVM achieved <strong>92.3% accuracy</strong> on 6 real Ariidae species<br>
         • <strong>MODE 2 (Simulated Data):</strong> Optimized Hybrid CART-SVM achieved <strong>98.1% accuracy</strong> on 12 simulated species<br>
-        • <strong>BEST MODEL:</strong> Hybrid CART-SVM outperforms CART, SVM, and KNN in both modes!<br>
-        • <strong>Features:</strong> 15 morphological measurements for comprehensive classification
+        • <strong>BEST MODEL:</strong> Hybrid CART-SVM outperforms CART, SVM, and KNN in both modes!
     </div>
     """, unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
-    
     with col1:
         st.markdown("""
         ### 🎯 System Overview
-        
-        This system uses **Optimized Hybrid CART-SVM** machine learning approach 
-        to automatically classify **Ariidae fish species** based on 
-        **15 morphological measurements**.
+        This system uses **Optimized Hybrid CART-SVM** to classify **Ariidae fish species** based on **15 morphological measurements**.
         
         #### Key Features:
         - ✅ **98.1% Max Accuracy** - Simulated Data Mode
         - ✅ **92.3% Accuracy** - Real Data Mode
         - ✅ **6 Real Species** - Trained on actual specimen data
-        - ✅ **12 Species Library** - Comprehensive Ariidae coverage
+        - ✅ **12 Species Library** - Comprehensive coverage
         - ✅ **15 Measurements** - More features = better accuracy
         - ✅ **Real-time Prediction** - Instant results
-        - ✅ **Optimized Pipeline** - Feature selection + PCA + SVM
-        - ✅ **Fish Images** - Visual identification for each species
+        - ✅ **Fish Images** - Visual identification
         
-        #### 15 Features Used:
+        #### 15 Features:
         1. Head Length
         2. Body Depth
         3. Eye Diameter
         4. Snout Length
-        5. Maxillary Barbell Length
-        6. Mandibullary Barbell Length
-        7. Mental Barbell Length
+        5. Maxillary Barbell
+        6. Mandibullary Barbell
+        7. Mental Barbell
         8. Dorsal Fin Ray
         9. Anal Fin Ray
         10. Pre-dorsal Length
@@ -768,18 +728,11 @@ with tab1:
         13. Head Width
         14. Inter-orbital Space
         15. Total Length
-        
-        #### Model Comparison (Real Data - 6 Species):
-        - 🌿 Decision Tree (CART): 69.2%
-        - ⚡ SVM Standalone: 92.3%
-        - 📊 KNN: 88.5%
-        - 🏆 **Hybrid CART-SVM: 92.3%**
         """)
     
     with col2:
         st.markdown("""
         ### 🐟 Species Training Status
-        
         | No | Species | Data Source | Mode | Accuracy |
         |----|---------|-------------|------|----------|
         | 1 | Arius gagora | 📊 Simulated | Mode 2 | 98.1% |
@@ -797,11 +750,8 @@ with tab1:
         """)
     
     st.markdown("---")
-    
     st.markdown("### 🔬 Research Value")
-    
     col1, col2, col3, col4 = st.columns(4)
-    
     with col1:
         st.markdown("""
         <div class="performance-card">
@@ -809,7 +759,6 @@ with tab1:
             <div>Simulated Accuracy</div>
         </div>
         """, unsafe_allow_html=True)
-    
     with col2:
         st.markdown("""
         <div class="performance-card">
@@ -817,7 +766,6 @@ with tab1:
             <div>Real Accuracy</div>
         </div>
         """, unsafe_allow_html=True)
-    
     with col3:
         st.markdown("""
         <div class="performance-card">
@@ -825,7 +773,6 @@ with tab1:
             <div>Features</div>
         </div>
         """, unsafe_allow_html=True)
-    
     with col4:
         st.markdown("""
         <div class="performance-card">
@@ -833,40 +780,24 @@ with tab1:
             <div>Species Library</div>
         </div>
         """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="info-box">
-        <h4>📝 About Ariidae Fish</h4>
-        <p>Ariidae, commonly known as sea catfishes, are found in coastal waters, 
-        estuaries, and freshwater systems. They play important roles in local 
-        fisheries and ecosystem health. Accurate species identification is crucial 
-        for fisheries management and conservation efforts.</p>
-        <p><strong>✅ Hybrid CART-SVM Optimization:</strong> The model uses CART for feature selection, 
-        PCA for dimensionality reduction, and optimized SVM (GridSearchCV) for final classification.</p>
-        <p><strong>📊 15 Features:</strong> More morphological measurements lead to higher classification accuracy!</p>
-    </div>
-    """, unsafe_allow_html=True)
 
 # ============================================
 # TAB 2: CLASSIFICATION
 # ============================================
 with tab2:
     st.markdown("## 🔍 Classify Ariidae Fish")
-    
     st.markdown('<div class="mode-selector">', unsafe_allow_html=True)
     sub_tab1, sub_tab2 = st.tabs(["📏 Mode 1: Real Data (6 Species) - 92.3%", "📈 Mode 2: Simulated Data (12 Species) - 98.1%"])
     
     # ============================================
-    # MODE 1: REAL DATA (15 FEATURES)
+    # MODE 1: REAL DATA - DENGAN HAD NILAI YANG BETUL
     # ============================================
     with sub_tab1:
         st.markdown("### Enter 15 Morphological Measurements")
         st.markdown("""
         <div class="info-box">
             <strong>ℹ️ Mode 1: Real Data (6 Species) - 92.3% Accuracy</strong><br>
-            This uses the <strong>optimized Hybrid CART-SVM</strong> model trained on <strong>6 real Ariidae species</strong> with <strong>15 features</strong>:<br>
-            Arius maculatus, Arius venosus, Cryptarius truncatus, Nemapteryx macronotacantha, Nemapteryx nenga, Osteogeneiosus militaris<br>
-            <strong>🏆 Model Accuracy: 92.3% (Optimized with GridSearchCV + PCA)</strong>
+            Species: Arius maculatus, Arius venosus, Cryptarius truncatus, Nemapteryx macronotacantha, Nemapteryx nenga, Osteogeneiosus militaris
         </div>
         """, unsafe_allow_html=True)
         
@@ -875,47 +806,41 @@ with tab2:
         with col1:
             st.markdown("**📏 Head & Body**")
             head = st.number_input("Head Length (mm)", 0.0, 200.0, 45.0, 0.1, key="head_real")
-            body = st.number_input("Body Depth (mm)", 0.0, 150.0, 28.0, 0.1, key="body_real")
+            body = st.number_input("Body Depth (mm)", 0.0, 100.0, 28.0, 0.1, key="body_real")
             eye = st.number_input("Eye Diameter (mm)", 0.0, 30.0, 6.0, 0.1, key="eye_real")
             snout = st.number_input("Snout Length (mm)", 0.0, 50.0, 12.0, 0.1, key="snout_real")
-            head_width = st.number_input("Head Width (mm)", 0.0, 50.0, 20.0, 0.1, key="head_width_real")
+            head_width = st.number_input("Head Width (mm)", 0.0, 100.0, 20.0, 0.1, key="head_width_real")
         
         with col2:
             st.markdown("**🪢 Barbell**")
-            maxillary = st.number_input("Maxillary Barbell (mm)", 0.0, 100.0, 35.0, 0.1, key="maxillary_real")
-            mandibullary = st.number_input("Mandibullary Barbell (mm)", 0.0, 80.0, 25.0, 0.1, key="mandibullary_real")
-            mental = st.number_input("Mental Barbell (mm)", 0.0, 50.0, 8.0, 0.1, key="mental_real")
-            inter_orbital = st.number_input("Inter-orbital Space (mm)", 0.0, 20.0, 8.0, 0.1, key="inter_orbital_real")
-            total = st.number_input("Total Length (mm)", 0.0, 100.0, 45.0, 0.1, key="total_real")
+            maxillary = st.number_input("Maxillary Barbell (mm)", 0.0, 150.0, 35.0, 0.1, key="maxillary_real")
+            mandibullary = st.number_input("Mandibullary Barbell (mm)", 0.0, 100.0, 25.0, 0.1, key="mandibullary_real")
+            mental = st.number_input("Mental Barbell (mm)", 0.0, 80.0, 8.0, 0.1, key="mental_real")
+            inter_orbital = st.number_input("Inter-orbital Space (mm)", 0.0, 50.0, 8.0, 0.1, key="inter_orbital_real")
+            total = st.number_input("Total Length (mm)", 0.0, 500.0, 45.0, 0.1, key="total_real")
         
         with col3:
-            st.markdown("**🎯 Fins & Other**")
-            dorsal = st.number_input("Dorsal Fin Ray", 0, 50, 18, 1, key="dorsal_real")
-            anal = st.number_input("Anal Fin Ray", 0, 40, 14, 1, key="anal_real")
+            st.markdown("**🎯 Fins**")
+            dorsal = st.number_input("Dorsal Fin Ray", 0, 30, 18, 1, key="dorsal_real")
+            anal = st.number_input("Anal Fin Ray", 0, 30, 14, 1, key="anal_real")
             pectoral = st.number_input("Pectoral Fin Ray", 0, 30, 16, 1, key="pectoral_real")
-            pre_dorsal = st.number_input("Pre-dorsal Length (mm)", 0.0, 80.0, 30.0, 0.1, key="pre_dorsal_real")
-            pre_pelvic = st.number_input("Pre-pelvic Length (mm)", 0.0, 80.0, 20.0, 0.1, key="pre_pelvic_real")
+            pre_dorsal = st.number_input("Pre-dorsal Length (mm)", 0.0, 200.0, 30.0, 0.1, key="pre_dorsal_real")
+            pre_pelvic = st.number_input("Pre-pelvic Length (mm)", 0.0, 250.0, 20.0, 0.1, key="pre_pelvic_real")
         
         if st.button("🔍 Identify Species", key="mode1_btn", use_container_width=True):
             try:
-                # Create input array with 15 features
                 input_data = np.array([[head, body, eye, snout, maxillary, mandibullary, mental, 
                                         dorsal, anal, pre_dorsal, pre_pelvic, pectoral, 
                                         head_width, inter_orbital, total]])
                 
                 prediction_raw = predict_hybrid_real_15(input_data, models, models_loaded)
-                
-                # Get full species name
                 full_name = find_species_key(prediction_raw)
-                if full_name:
-                    prediction = full_name
-                else:
-                    prediction = prediction_raw
+                prediction = full_name if full_name else prediction_raw
                 
                 species_info = ARIIDAE_SPECIES.get(prediction, {})
                 data_source = species_info.get('data_source', 'Unknown')
                 
-                # Calculate confidence score
+                # Confidence
                 confidence = 85.0
                 if models_loaded and models is not None:
                     if models.get('svm_hybrid_real') is not None and models.get('scaler_real') is not None:
@@ -932,16 +857,8 @@ with tab2:
                             confidence = 85.0
                 
                 confidence_badge = "✅ High Confidence (Real-trained species)" if data_source == "Real ✅" else "⚠️ Reference Species"
-                
-                if confidence >= 85:
-                    confidence_class = "confidence-high"
-                    confidence_text = "High Confidence"
-                elif confidence >= 70:
-                    confidence_class = "confidence-medium"
-                    confidence_text = "Medium Confidence"
-                else:
-                    confidence_class = "confidence-low"
-                    confidence_text = "Low Confidence"
+                confidence_class = "confidence-high" if confidence >= 85 else "confidence-medium" if confidence >= 70 else "confidence-low"
+                confidence_text = "High Confidence" if confidence >= 85 else "Medium Confidence" if confidence >= 70 else "Low Confidence"
                 
                 st.markdown(f"""
                 <div class="prediction-card">
@@ -956,7 +873,7 @@ with tab2:
                 </div>
                 """, unsafe_allow_html=True)
                 
-                # Display fish image
+                # Fish Image
                 st.markdown("### 📸 Fish Image")
                 image, species_info = get_species_image(prediction)
                 if image:
@@ -1004,15 +921,14 @@ with tab2:
                 st.error(f"Error: {e}")
     
     # ============================================
-    # MODE 2: SIMULATED DATA (15 FEATURES)
+    # MODE 2: SIMULATED DATA - DENGAN HAD NILAI YANG BETUL
     # ============================================
     with sub_tab2:
         st.markdown("### Simulated Data Classification")
         st.markdown("""
         <div class="info-box">
             <strong>ℹ️ Mode 2: Simulated Data (12 Species) - 98.1% Accuracy</strong><br>
-            This uses the <strong>optimized Hybrid CART-SVM</strong> model trained on <strong>12 simulated Ariidae species</strong> with <strong>15 features</strong>.<br>
-            <strong>🏆 Model Accuracy: 98.1% (BEST! Optimized with GridSearchCV + PCA)</strong>
+            All 12 Ariidae species with optimized Hybrid CART-SVM.
         </div>
         """, unsafe_allow_html=True)
         
@@ -1021,26 +937,26 @@ with tab2:
         with col1:
             st.markdown("**📏 Head & Body**")
             head_sim = st.number_input("Head Length (mm)", 0.0, 200.0, 45.0, 0.1, key="head_sim")
-            body_sim = st.number_input("Body Depth (mm)", 0.0, 150.0, 28.0, 0.1, key="body_sim")
+            body_sim = st.number_input("Body Depth (mm)", 0.0, 100.0, 28.0, 0.1, key="body_sim")
             eye_sim = st.number_input("Eye Diameter (mm)", 0.0, 30.0, 6.0, 0.1, key="eye_sim")
             snout_sim = st.number_input("Snout Length (mm)", 0.0, 50.0, 12.0, 0.1, key="snout_sim")
-            head_width_sim = st.number_input("Head Width (mm)", 0.0, 50.0, 20.0, 0.1, key="head_width_sim")
+            head_width_sim = st.number_input("Head Width (mm)", 0.0, 100.0, 20.0, 0.1, key="head_width_sim")
         
         with col2:
             st.markdown("**🪢 Barbell**")
-            maxillary_sim = st.number_input("Maxillary Barbell (mm)", 0.0, 100.0, 35.0, 0.1, key="maxillary_sim")
-            mandibullary_sim = st.number_input("Mandibullary Barbell (mm)", 0.0, 80.0, 25.0, 0.1, key="mandibullary_sim")
-            mental_sim = st.number_input("Mental Barbell (mm)", 0.0, 50.0, 8.0, 0.1, key="mental_sim")
-            inter_orbital_sim = st.number_input("Inter-orbital Space (mm)", 0.0, 20.0, 8.0, 0.1, key="inter_orbital_sim")
-            total_sim = st.number_input("Total Length (mm)", 0.0, 100.0, 45.0, 0.1, key="total_sim")
+            maxillary_sim = st.number_input("Maxillary Barbell (mm)", 0.0, 150.0, 35.0, 0.1, key="maxillary_sim")
+            mandibullary_sim = st.number_input("Mandibullary Barbell (mm)", 0.0, 100.0, 25.0, 0.1, key="mandibullary_sim")
+            mental_sim = st.number_input("Mental Barbell (mm)", 0.0, 80.0, 8.0, 0.1, key="mental_sim")
+            inter_orbital_sim = st.number_input("Inter-orbital Space (mm)", 0.0, 50.0, 8.0, 0.1, key="inter_orbital_sim")
+            total_sim = st.number_input("Total Length (mm)", 0.0, 500.0, 45.0, 0.1, key="total_sim")
         
         with col3:
-            st.markdown("**🎯 Fins & Other**")
-            dorsal_sim = st.number_input("Dorsal Fin Ray", 0, 50, 18, 1, key="dorsal_sim")
-            anal_sim = st.number_input("Anal Fin Ray", 0, 40, 14, 1, key="anal_sim")
+            st.markdown("**🎯 Fins**")
+            dorsal_sim = st.number_input("Dorsal Fin Ray", 0, 30, 18, 1, key="dorsal_sim")
+            anal_sim = st.number_input("Anal Fin Ray", 0, 30, 14, 1, key="anal_sim")
             pectoral_sim = st.number_input("Pectoral Fin Ray", 0, 30, 16, 1, key="pectoral_sim")
-            pre_dorsal_sim = st.number_input("Pre-dorsal Length (mm)", 0.0, 80.0, 30.0, 0.1, key="pre_dorsal_sim")
-            pre_pelvic_sim = st.number_input("Pre-pelvic Length (mm)", 0.0, 80.0, 20.0, 0.1, key="pre_pelvic_sim")
+            pre_dorsal_sim = st.number_input("Pre-dorsal Length (mm)", 0.0, 200.0, 30.0, 0.1, key="pre_dorsal_sim")
+            pre_pelvic_sim = st.number_input("Pre-pelvic Length (mm)", 0.0, 250.0, 20.0, 0.1, key="pre_pelvic_sim")
         
         if st.button("🔍 Identify Species (Simulated)", key="mode2_btn", use_container_width=True):
             try:
@@ -1050,12 +966,8 @@ with tab2:
                                             head_width_sim, inter_orbital_sim, total_sim]])
                 
                 prediction_raw = predict_hybrid_sim_15(input_data_sim, models, models_loaded)
-                
                 full_name = find_species_key(prediction_raw)
-                if full_name:
-                    prediction = full_name
-                else:
-                    prediction = prediction_raw
+                prediction = full_name if full_name else prediction_raw
                 
                 species_info = ARIIDAE_SPECIES.get(prediction, {})
                 data_source = species_info.get('data_source', 'Unknown')
@@ -1076,16 +988,8 @@ with tab2:
                             confidence = 85.0
                 
                 confidence_badge = "✅ High Confidence" if data_source == "Real ✅" else "📊 Simulated Reference"
-                
-                if confidence >= 85:
-                    confidence_class = "confidence-high"
-                    confidence_text = "High Confidence"
-                elif confidence >= 70:
-                    confidence_class = "confidence-medium"
-                    confidence_text = "Medium Confidence"
-                else:
-                    confidence_class = "confidence-low"
-                    confidence_text = "Low Confidence"
+                confidence_class = "confidence-high" if confidence >= 85 else "confidence-medium" if confidence >= 70 else "confidence-low"
+                confidence_text = "High Confidence" if confidence >= 85 else "Medium Confidence" if confidence >= 70 else "Low Confidence"
                 
                 st.markdown(f"""
                 <div class="prediction-card-sim">
@@ -1100,7 +1004,7 @@ with tab2:
                 </div>
                 """, unsafe_allow_html=True)
                 
-                # Display fish image
+                # Fish Image
                 st.markdown("### 📸 Fish Image")
                 image, species_info = get_species_image(prediction)
                 if image:
@@ -1125,7 +1029,7 @@ with tab2:
                 
                 st.info("""
                 💡 **FYP Conclusion:** The Optimized Hybrid CART-SVM achieves **98.1% accuracy** on simulated data 
-                and **92.3% accuracy** on real data with 15 features, outperforming all standalone models!
+                and **92.3% accuracy** on real data with 15 features!
                 """)
                 
             except Exception as e:
@@ -1139,11 +1043,9 @@ with tab3:
     st.markdown(f"Total species available: **{len(ARIIDAE_SPECIES)}** (6 Real-trained ✓ | 6 Simulated reference)")
     
     search = st.text_input("🔍 Search species:", "")
-    
     source_filter = st.radio("Filter by data source:", ["All", "Real-trained ✅", "Simulated reference"])
     
     cols = st.columns(2)
-    
     filtered_species = []
     for species_name, info in ARIIDAE_SPECIES.items():
         if search.lower() in species_name.lower() or search.lower() in info.get('common', '').lower():
@@ -1157,7 +1059,6 @@ with tab3:
     for i, (species_name, info) in enumerate(filtered_species):
         data_source_badge = "✅ Real-trained" if info.get('data_source') == "Real ✅" else "📊 Simulated reference"
         data_source_color = "#11998e" if info.get('data_source') == "Real ✅" else "#f39c12"
-        
         with cols[i % 2]:
             st.markdown(f"""
             <div class="species-card">
@@ -1178,20 +1079,17 @@ with tab3:
 # ============================================
 with tab4:
     st.markdown("## 📊 Model Performance Analysis")
-    
     st.markdown("""
     <div class="info-box">
         <strong>📊 FINAL TRAINING RESULTS (15 Features):</strong><br>
         • <strong>Hybrid CART-SVM (Real Data):</strong> 92.3% Accuracy | 91.5% F1-Score<br>
         • <strong>Hybrid CART-SVM (Simulated Data):</strong> 98.1% Accuracy | 98.1% F1-Score<br>
         • <strong>Optimization:</strong> GridSearchCV (5-fold) + Feature Selection + PCA<br>
-        • <strong>Best Strategy:</strong> Automatically selected from 5 hybrid strategies<br>
-        • <strong>Features:</strong> 15 morphological measurements
+        • <strong>Best Strategy:</strong> Automatically selected from 5 hybrid strategies
     </div>
     """, unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
-    
     with col1:
         st.markdown("### Mode 1: Real Data (6 Species)")
         fig1, ax1 = plt.subplots(figsize=(8, 5))
@@ -1224,62 +1122,43 @@ with tab4:
         plt.tight_layout()
         st.pyplot(fig2)
     
-    # ============================================
-    # FEATURE IMPORTANCE
-    # ============================================
+    # Feature Importance
     st.markdown("### 🔬 Feature Importance Analysis")
-    st.markdown("*Feature importance scores from CART-based feature selection for species classification (15 features)*")
-    
     col_fi1, col_fi2 = st.columns([2, 1])
-    
     with col_fi1:
         fig_fi, ax_fi = plt.subplots(figsize=(10, 7))
         features = list(FEATURE_IMPORTANCE.keys())
         importance = list(FEATURE_IMPORTANCE.values())
-        
-        # Sort by importance
         sorted_idx = np.argsort(importance)
         features_sorted = [features[i] for i in sorted_idx]
         importance_sorted = [importance[i] for i in sorted_idx]
-        
         colors_fi = plt.cm.RdYlGn_r(np.linspace(0.2, 0.8, len(features)))
         bars_fi = ax_fi.barh(features_sorted, importance_sorted, color=colors_fi, edgecolor='black', linewidth=1)
         ax_fi.set_xlabel('Importance Score', fontsize=12)
         ax_fi.set_title('Morphological Feature Importance (15 Features)', fontsize=14)
         ax_fi.set_xlim(0, max(importance) + 0.02)
-        
         for bar, imp in zip(bars_fi, importance_sorted):
             ax_fi.text(bar.get_width() + 0.002, bar.get_y() + bar.get_height()/2, 
                       f'{imp:.3f}', va='center', fontweight='bold', fontsize=9)
-        
         plt.tight_layout()
         st.pyplot(fig_fi)
     
     with col_fi2:
-        st.markdown("#### Feature Importance Ranking")
         importance_df = pd.DataFrame([
             {'Rank': i+1, 'Feature': f.replace('_', ' ').title(), 'Importance': imp}
             for i, (f, imp) in enumerate(sorted(FEATURE_IMPORTANCE.items(), key=lambda x: x[1], reverse=True))
         ])
         st.dataframe(importance_df, use_container_width=True, hide_index=True)
-        
         st.markdown("""
         <div class="info-box" style="margin-top: 1rem;">
             <strong>💡 Key Insights:</strong><br>
             • <strong>Body Depth (0.168)</strong> is the most important feature<br>
-            • <strong>Head Length (0.145)</strong> and <strong>Maxillary Barbell (0.132)</strong> are also highly important<br>
-            • Barbell measurements collectively contribute significant information<br>
-            • Fin ray counts have moderate importance for species discrimination<br>
-            • Additional features provide supplementary information
+            • <strong>Head Length (0.145)</strong> and <strong>Maxillary Barbell (0.132)</strong> are also highly important
         </div>
         """, unsafe_allow_html=True)
     
-    # ============================================
-    # CONFUSION MATRIX
-    # ============================================
+    # Confusion Matrix
     st.markdown("### 🔍 Confusion Matrix - Hybrid CART-SVM (12 Species)")
-    st.markdown("*Confusion matrix showing classification performance across all 12 Ariidae species*")
-    
     fig_cm, ax_cm = plt.subplots(figsize=(14, 12))
     sns.heatmap(confusion_matrix_real, annot=True, fmt='d', cmap='Blues',
                 xticklabels=species_list, yticklabels=species_list, ax=ax_cm)
@@ -1291,13 +1170,9 @@ with tab4:
     plt.tight_layout()
     st.pyplot(fig_cm)
     
-    # ============================================
-    # CROSS VALIDATION
-    # ============================================
+    # Cross Validation
     st.markdown("### 🔬 5-Fold Cross-Validation Results")
-    
     col_cv1, col_cv2 = st.columns(2)
-    
     with col_cv1:
         st.markdown("#### Mode 1: Real Data (6 Species)")
         cv_df_real = pd.DataFrame({
@@ -1305,7 +1180,6 @@ with tab4:
             'F1-Score': [0.915, 0.922, 0.908, 0.925, 0.918, 0.9176, 0.0065]
         })
         st.dataframe(cv_df_real, use_container_width=True, hide_index=True)
-        
         fig_cv1, ax_cv1 = plt.subplots(figsize=(8, 4))
         folds = [1, 2, 3, 4, 5]
         scores = [0.915, 0.922, 0.908, 0.925, 0.918]
@@ -1328,7 +1202,6 @@ with tab4:
             'F1-Score': [0.951, 0.958, 0.945, 0.962, 0.955, 0.9542, 0.0062]
         })
         st.dataframe(cv_df_sim, use_container_width=True, hide_index=True)
-        
         fig_cv2, ax_cv2 = plt.subplots(figsize=(8, 4))
         folds = [1, 2, 3, 4, 5]
         scores = [0.951, 0.958, 0.945, 0.962, 0.955]
@@ -1344,46 +1217,32 @@ with tab4:
         plt.tight_layout()
         st.pyplot(fig_cv2)
     
-    # ============================================
-    # KEY FINDINGS
-    # ============================================
+    # Key Findings
     st.markdown("### 📈 Key Findings from Training")
-    
     col_k1, col_k2 = st.columns(2)
-    
     with col_k1:
         st.markdown("""
         <div class="performance-card best-model">
             <h4>🏆 Mode 1: Real Data (6 Species)</h4>
             <p>• <strong>Best Model:</strong> Hybrid CART-SVM (92.3%)</p>
             <p>• Improvement over DT: +23.1%</p>
-            <p>• Improvement over SVM: Equal (92.3%)</p>
-            <p>• Improvement over KNN: +3.8%</p>
             <p>• <strong>F1-Score:</strong> 91.5%</p>
             <p>• <strong>CV Mean F1:</strong> 91.76% ± 0.65%</p>
-            <p>• <strong>Features:</strong> 15 morphological measurements</p>
         </div>
         """, unsafe_allow_html=True)
-    
     with col_k2:
         st.markdown("""
         <div class="performance-card best-model">
             <h4>🏆 Mode 2: Simulated Data (12 Species)</h4>
             <p>• <strong>Best Model:</strong> Hybrid CART-SVM (98.1%)</p>
             <p>• Improvement over DT: +6.4%</p>
-            <p>• Improvement over SVM: +0.9%</p>
-            <p>• Improvement over KNN: +2.7%</p>
             <p>• <strong>F1-Score:</strong> 98.1%</p>
             <p>• <strong>CV Mean F1:</strong> 95.42% ± 0.62%</p>
-            <p>• <strong>Features:</strong> 15 morphological measurements</p>
         </div>
         """, unsafe_allow_html=True)
     
-    # ============================================
-    # COMPLETE TRAINING RESULTS SUMMARY
-    # ============================================
+    # Complete Training Results Summary
     st.markdown("### 📋 Complete Training Results Summary (15 Features)")
-    
     training_summary = pd.DataFrame({
         'Model': ['CART', 'SVM', 'KNN', '🏆 HYBRID CART-SVM'],
         'Mode 1 - Real (6 species) - Acc': ['69.2%', '92.3%', '88.5%', '92.3%'],
@@ -1393,21 +1252,18 @@ with tab4:
     })
     st.dataframe(training_summary, use_container_width=True, hide_index=True)
     
-    # ============================================
-    # OPTIMIZATION STRATEGIES
-    # ============================================
     st.markdown("""
     <div class="info-box">
         <h4>🔬 Optimization Strategies Tested (5 Strategies)</h4>
         <ul>
             <li><strong>Strategy 1:</strong> CART + PCA + SVM</li>
-            <li><strong>Strategy 2:</strong> RFE (Recursive Feature Elimination) + SVM</li>
+            <li><strong>Strategy 2:</strong> RFE + SVM</li>
             <li><strong>Strategy 3:</strong> SelectKBest + SVM</li>
             <li><strong>Strategy 4:</strong> Stacking Ensemble</li>
             <li><strong>Strategy 5:</strong> Voting Classifier</li>
         </ul>
-        <p><strong>✅ CONCLUSION:</strong> Hybrid CART-SVM with 15 features achieves HIGHEST accuracy in BOTH modes!</p>
-        <p><strong>🏆 BEST PERFORMANCE:</strong> 98.1% accuracy on Simulated Data with 15 features!</p>
+        <p><strong>✅ CONCLUSION:</strong> Hybrid CART-SVM with 15 features achieves HIGHEST accuracy!</p>
+        <p><strong>🏆 BEST PERFORMANCE:</strong> 98.1% accuracy on Simulated Data!</p>
     </div>
     """, unsafe_allow_html=True)
 
