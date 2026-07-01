@@ -198,7 +198,7 @@ def get_species_image(species_name):
     # Try different extensions
     extensions = ['.png', '.jpg', '.jpeg']
     
-    # Also try without "arius_" prefix
+    # Also try without prefixes
     for name in possible_names[:]:
         if name.startswith('arius_'):
             possible_names.append(name.replace('arius_', ''))
@@ -499,7 +499,7 @@ with tab1:
         """)
 
 # ============================================
-# TAB 2: CLASSIFICATION - HANYA MODE 1
+# TAB 2: CLASSIFICATION
 # ============================================
 with tab2:
     st.markdown("## 🔍 Classify Ariidae Fish")
@@ -583,21 +583,14 @@ with tab2:
             </div>
             """, unsafe_allow_html=True)
             
-            # Fish Image
+            # Fish Image - FIXED: use_column_width instead of use_container_width
             st.markdown("### 📸 Fish Image")
             image, species_info = get_species_image(prediction)
             if image:
-                st.image(image, caption=f"{prediction} - {species_info.get('common', '')}", use_container_width=True)
+                st.image(image, caption=f"{prediction} - {species_info.get('common', '')}", use_column_width=True)
             else:
                 st.warning(f"⚠️ Image not found for {prediction}")
                 st.info(f"Please add image: images/{prediction.lower().replace(' ', '_')}.png")
-                # Show debug info
-                with st.expander("🔧 Debug - Image Path"):
-                    st.write(f"Looking for: images/{prediction.lower().replace(' ', '_')}.png")
-                    if os.path.exists('images'):
-                        st.write(f"Files in images folder: {os.listdir('images')}")
-                    else:
-                        st.error("❌ 'images' folder does not exist!")
             
             if species_info:
                 with st.expander("📖 View Species Information"):
