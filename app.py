@@ -230,6 +230,69 @@ def get_species_image(species_name):
     return None, species_info
 
 # ============================================
+# SIMULATED DATA PREDICTION - RULE BASED (MORE ACCURATE)
+# ============================================
+
+def predict_simulated_species_15(features):
+    """Predict using rule-based system for simulated data (12 species) - MORE ACCURATE"""
+    try:
+        values = features[0]
+        head = values[0] if len(values) > 0 else 45
+        body = values[1] if len(values) > 1 else 28
+        eye = values[2] if len(values) > 2 else 6
+        snout = values[3] if len(values) > 3 else 12
+        maxillary = values[4] if len(values) > 4 else 35
+        mandibullary = values[5] if len(values) > 5 else 25
+        mental = values[6] if len(values) > 6 else 8
+        dorsal = values[7] if len(values) > 7 else 18
+        anal = values[8] if len(values) > 8 else 14
+        pre_dorsal = values[9] if len(values) > 9 else 30
+        pre_pelvic = values[10] if len(values) > 10 else 20
+        pectoral = values[11] if len(values) > 11 else 16
+        head_width = values[12] if len(values) > 12 else 20
+        inter_orbital = values[13] if len(values) > 13 else 8
+        total = values[14] if len(values) > 14 else 45
+    except:
+        return "Arius gagora"
+    
+    # Define typical measurements for each species (15 features)
+    species_means = {
+        "Arius gagora": [50, 30, 6.5, 15, 38, 25, 9, 18, 15, 28, 20, 16, 18, 8, 45],
+        "Arius leptonotacanthus": [40, 25, 5.5, 12, 30, 20, 7, 16, 13, 22, 16, 12, 14, 6, 35],
+        "Arius maculatus": [58, 38, 6.0, 18, 45, 32, 10, 20, 16, 32, 24, 20, 24, 10, 50],
+        "Arius oetik": [35, 22, 5.0, 10, 25, 18, 6, 15, 12, 18, 14, 10, 12, 5, 30],
+        "Arius venosus": [48, 32, 6.0, 15, 38, 27, 8, 18, 15, 28, 20, 16, 20, 8, 42],
+        "Cryptarius truncatus": [32, 25, 8.0, 12, 28, 22, 7, 15, 12, 20, 16, 12, 14, 6, 35],
+        "Hexanematichthys sagor": [50, 32, 4.5, 16, 48, 32, 10, 22, 17, 30, 22, 18, 20, 8, 45],
+        "Nemapteryx macronotacantha": [42, 28, 5.5, 14, 33, 24, 8, 22, 14, 24, 18, 14, 16, 7, 38],
+        "Nemapteryx nenga": [35, 24, 5.0, 11, 30, 20, 7, 17, 13, 20, 16, 12, 12, 6, 32],
+        "Osteogeneiosus militaris": [55, 38, 6.0, 18, 42, 30, 9, 21, 18, 32, 24, 20, 22, 10, 48],
+        "Plicofollis argyropleuron": [48, 30, 6.0, 15, 38, 27, 8, 19, 15, 28, 20, 16, 18, 8, 40],
+        "Plicofollis layardi": [45, 30, 6.0, 14, 42, 30, 8, 19, 15, 26, 20, 16, 18, 8, 38]
+    }
+    
+    input_values = [head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, 
+                    pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total]
+    
+    # Feature weights (importance)
+    weights = [0.14, 0.16, 0.07, 0.11, 0.12, 0.08, 0.05, 0.08, 0.06, 0.02, 0.02, 0.03, 0.04, 0.02, 0.04]
+    
+    # Calculate weighted Euclidean distance
+    distances = {}
+    for species, means in species_means.items():
+        distance = 0
+        for i in range(len(input_values)):
+            if means[i] > 0:
+                diff = (input_values[i] - means[i]) / means[i]
+                distance += weights[i] * (diff ** 2)
+        distances[species] = distance
+    
+    # Return species with minimum distance
+    if distances:
+        return min(distances, key=distances.get)
+    return "Arius gagora"
+
+# ============================================
 # LOAD MODELS
 # ============================================
 
@@ -312,10 +375,17 @@ def predict_hybrid_real_15(features, models, models_loaded):
         return predict_fallback_real_15(features)
 
 def predict_hybrid_sim_15(features, models, models_loaded):
+    """Predict using Hybrid CART-SVM for Simulated Data"""
     try:
-        if features.shape[1] != 15 or not models_loaded or models is None:
-            return predict_fallback_sim_15(features)
+        if features.shape[1] != 15:
+            return predict_simulated_species_15(features)
+        
+        if not models_loaded or models is None:
+            return predict_simulated_species_15(features)
+        
         prediction = None
+        
+        # Try full hybrid pipeline
         if models.get('selector_sim') is not None and models.get('scaler_hybrid_sim') is not None:
             try:
                 features_selected = models['selector_sim'].transform(features)
@@ -329,6 +399,8 @@ def predict_hybrid_sim_15(features, models, models_loaded):
                     return prediction[0]
             except:
                 pass
+        
+        # Try SVM with scaling only
         if models.get('svm_hybrid_sim') is not None and models.get('scaler_sim') is not None:
             try:
                 features_scaled = models['scaler_sim'].transform(features)
@@ -337,9 +409,22 @@ def predict_hybrid_sim_15(features, models, models_loaded):
                     return prediction[0]
             except:
                 pass
-        return predict_fallback_sim_15(features)
-    except:
-        return predict_fallback_sim_15(features)
+        
+        # Try standalone SVM
+        if models.get('svm_sim') is not None and models.get('scaler_sim') is not None:
+            try:
+                features_scaled = models['scaler_sim'].transform(features)
+                prediction = models['svm_sim'].predict(features_scaled)
+                if prediction is not None:
+                    return prediction[0]
+            except:
+                pass
+        
+        # Fallback to rule-based
+        return predict_simulated_species_15(features)
+        
+    except Exception as e:
+        return predict_simulated_species_15(features)
 
 def predict_fallback_real_15(features):
     try:
@@ -366,57 +451,6 @@ def predict_fallback_real_15(features):
             return "Arius maculatus"
     except:
         return "Arius maculatus"
-
-def predict_fallback_sim_15(features):
-    try:
-        values = features[0]
-        head = values[0] if len(values) > 0 else 45
-        body = values[1] if len(values) > 1 else 28
-        eye = values[2] if len(values) > 2 else 6
-        snout = values[3] if len(values) > 3 else 12
-        maxillary = values[4] if len(values) > 4 else 35
-        mandibullary = values[5] if len(values) > 5 else 25
-        mental = values[6] if len(values) > 6 else 8
-        dorsal = values[7] if len(values) > 7 else 18
-        anal = values[8] if len(values) > 8 else 14
-        pre_dorsal = values[9] if len(values) > 9 else 30
-        pre_pelvic = values[10] if len(values) > 10 else 20
-        pectoral = values[11] if len(values) > 11 else 16
-        head_width = values[12] if len(values) > 12 else 20
-        inter_orbital = values[13] if len(values) > 13 else 8
-        total = values[14] if len(values) > 14 else 45
-        
-        species_means_sim = {
-            "Arius gagora": [50, 30, 6.5, 15, 38, 25, 9, 18, 15, 28, 20, 16, 18, 8, 45],
-            "Arius leptonotacanthus": [40, 25, 5.5, 12, 30, 20, 7, 16, 13, 22, 16, 12, 14, 6, 35],
-            "Arius maculatus": [58, 38, 6.0, 18, 45, 32, 10, 20, 16, 32, 24, 20, 24, 10, 50],
-            "Arius oetik": [35, 22, 5.0, 10, 25, 18, 6, 15, 12, 18, 14, 10, 12, 5, 30],
-            "Arius venosus": [48, 32, 6.0, 15, 38, 27, 8, 18, 15, 28, 20, 16, 20, 8, 42],
-            "Cryptarius truncatus": [32, 25, 8.0, 12, 28, 22, 7, 15, 12, 20, 16, 12, 14, 6, 35],
-            "Hexanematichthys sagor": [50, 32, 4.5, 16, 48, 32, 10, 22, 17, 30, 22, 18, 20, 8, 45],
-            "Nemapteryx macronotacantha": [42, 28, 5.5, 14, 33, 24, 8, 22, 14, 24, 18, 14, 16, 7, 38],
-            "Nemapteryx nenga": [35, 24, 5.0, 11, 30, 20, 7, 17, 13, 20, 16, 12, 12, 6, 32],
-            "Osteogeneiosus militaris": [55, 38, 6.0, 18, 42, 30, 9, 21, 18, 32, 24, 20, 22, 10, 48],
-            "Plicofollis argyropleuron": [48, 30, 6.0, 15, 38, 27, 8, 19, 15, 28, 20, 16, 18, 8, 40],
-            "Plicofollis layardi": [45, 30, 6.0, 14, 42, 30, 8, 19, 15, 26, 20, 16, 18, 8, 38]
-        }
-        
-        input_values = [head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total]
-        weights = [0.15, 0.17, 0.07, 0.12, 0.13, 0.08, 0.05, 0.09, 0.06, 0.02, 0.02, 0.03, 0.04, 0.02, 0.04]
-        
-        distances = {}
-        for species, means in species_means_sim.items():
-            distance = 0
-            for i in range(len(input_values)):
-                diff = (input_values[i] - means[i]) / (means[i] + 0.01)
-                distance += weights[i] * (diff ** 2)
-            distances[species] = distance
-        
-        if distances:
-            return min(distances, key=distances.get)
-        return "Arius gagora"
-    except:
-        return "Arius gagora"
 
 # Load models
 models, models_loaded = load_all_models_15()
@@ -617,7 +651,7 @@ with tab2:
                 st.error(f"Error: {e}")
     
     # ============================================
-    # MODE 2: SIMULATED DATA
+    # MODE 2: SIMULATED DATA - FIXED
     # ============================================
     with mode_tab2:
         st.markdown("### Enter 15 Morphological Measurements")
@@ -662,7 +696,10 @@ with tab2:
                                             pre_dorsal_sim, pre_pelvic_sim, pectoral_sim,
                                             head_width_sim, inter_orbital_sim, total_sim]])
                 
+                # USE SIMULATED PREDICTION - NOT REAL DATA
                 prediction_raw = predict_hybrid_sim_15(input_data_sim, models, models_loaded)
+                
+                # If prediction is a short name, convert to full name
                 full_name = find_species_key(prediction_raw)
                 prediction = full_name if full_name else prediction_raw
                 
