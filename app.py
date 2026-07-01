@@ -272,43 +272,65 @@ ARIIDAE_SPECIES = {
 }
 
 # ============================================
-# FUNCTION TO DISPLAY FISH IMAGE
+# FUNCTION TO FIND SPECIES AND DISPLAY IMAGE
 # ============================================
 
-def display_fish_image(species_name):
-    """Display fish image for a given species"""
-    # Convert species name to filename
-    # Example: "Arius maculatus" -> "arius_maculatus"
-    filename = species_name.lower().replace(' ', '_')
+def get_species_image(species_name):
+    """Get image for species - handles various name formats"""
+    # Map short names to full names
+    name_mapping = {
+        'A.GAGORA': 'Arius gagora',
+        'A.LEPTONOTACANTHUS': 'Arius leptonotacanthus',
+        'A.MACULATUS': 'Arius maculatus',
+        'A.OETIK': 'Arius oetik',
+        'A.VENOSUS': 'Arius venosus',
+        'C.TRUNCATUS': 'Cryptarius truncatus',
+        'H.SAGOR': 'Hexanematichthys sagor',
+        'N.MACRONOTACANTHA': 'Nemapteryx macronotacantha',
+        'N.NENGA': 'Nemapteryx nenga',
+        'O.MILITARIS': 'Osteogeneiosus militaris',
+        'P.ARGYROPLEURON': 'Plicofollis argyropleuron',
+        'P.LAYARDI': 'Plicofollis layardi'
+    }
     
-    # Try different extensions
-    extensions = ['.png', '.jpg', '.jpeg']
+    # Get full name
+    full_name = name_mapping.get(species_name.upper(), species_name)
     
-    for ext in extensions:
-        image_path = f"images/{filename}{ext}"
-        if os.path.exists(image_path):
+    # Get species info
+    species_info = ARIIDAE_SPECIES.get(full_name, {})
+    
+    # Generate filename
+    filename = full_name.lower().replace(' ', '_') + '.png'
+    image_path = os.path.join('images', filename)
+    
+    # Try to load image
+    if os.path.exists(image_path):
+        try:
+            image = Image.open(image_path)
+            return image, species_info
+        except:
+            pass
+    
+    # Try alternative names
+    alt_names = [
+        species_name.lower().replace('.', '_') + '.png',
+        species_name.lower().replace(' ', '_') + '.png',
+        full_name.lower().replace(' ', '_') + '.jpg'
+    ]
+    
+    for alt in alt_names:
+        alt_path = os.path.join('images', alt)
+        if os.path.exists(alt_path):
             try:
-                image = Image.open(image_path)
-                return image
+                image = Image.open(alt_path)
+                return image, species_info
             except:
-                continue
+                pass
     
-    # Try without "arius_" prefix
-    if filename.startswith('arius_'):
-        alt_name = filename.replace('arius_', '')
-        for ext in extensions:
-            image_path = f"images/{alt_name}{ext}"
-            if os.path.exists(image_path):
-                try:
-                    image = Image.open(image_path)
-                    return image
-                except:
-                    continue
-    
-    return None
+    return None, species_info
 
 # ============================================
-# MODEL PERFORMANCE DATA (FROM ACTUAL TRAINING RESULTS)
+# MODEL PERFORMANCE DATA
 # ============================================
 
 # MODE 1: Real Data (6 Species)
@@ -449,7 +471,6 @@ def predict_hybrid_real(features, models, models_loaded):
         
         prediction = None
         
-        # Method 1: Full hybrid pipeline
         if models.get('selector_real') is not None and models.get('scaler_hybrid_real') is not None:
             try:
                 features_selected = models['selector_real'].transform(features)
@@ -464,7 +485,6 @@ def predict_hybrid_real(features, models, models_loaded):
             except:
                 pass
         
-        # Method 2: SVM with scaling only
         if models.get('svm_hybrid_real') is not None and models.get('scaler_real') is not None:
             try:
                 features_scaled = models['scaler_real'].transform(features)
@@ -474,7 +494,6 @@ def predict_hybrid_real(features, models, models_loaded):
             except:
                 pass
         
-        # Method 3: Use standalone SVM
         if models.get('svm_real') is not None and models.get('scaler_real') is not None:
             try:
                 features_scaled = models['scaler_real'].transform(features)
@@ -484,7 +503,6 @@ def predict_hybrid_real(features, models, models_loaded):
             except:
                 pass
         
-        # Fallback to rule-based
         return predict_fallback(features)
         
     except Exception as e:
@@ -501,7 +519,6 @@ def predict_hybrid_sim(features, models, models_loaded):
         
         prediction = None
         
-        # Method 1: Full hybrid pipeline
         if models.get('selector_sim') is not None and models.get('scaler_hybrid_sim') is not None:
             try:
                 features_selected = models['selector_sim'].transform(features)
@@ -516,7 +533,6 @@ def predict_hybrid_sim(features, models, models_loaded):
             except:
                 pass
         
-        # Method 2: SVM with scaling only
         if models.get('svm_hybrid_sim') is not None and models.get('scaler_sim') is not None:
             try:
                 features_scaled = models['scaler_sim'].transform(features)
@@ -526,7 +542,6 @@ def predict_hybrid_sim(features, models, models_loaded):
             except:
                 pass
         
-        # Method 3: Use standalone SVM
         if models.get('svm_sim') is not None and models.get('scaler_sim') is not None:
             try:
                 features_scaled = models['scaler_sim'].transform(features)
@@ -536,7 +551,6 @@ def predict_hybrid_sim(features, models, models_loaded):
             except:
                 pass
         
-        # Fallback to rule-based
         return predict_fallback(features)
         
     except Exception as e:
@@ -792,9 +806,11 @@ with tab2:
                 
                 prediction = predict_hybrid_real(input_data, models, models_loaded)
                 
-                species_info = ARIIDAE_SPECIES.get(prediction, {})
-                data_source = species_info.get('data_source', 'Unknown')
+                # Get species info and image
+                image, species_info = get_species_image(prediction)
                 
+                # Get data source
+                data_source = species_info.get('data_source', 'Unknown')
                 confidence_badge = "✅ High Confidence (Real-trained species)" if data_source == "Real ✅" else "⚠️ Reference Species"
                 
                 st.markdown(f"""
@@ -807,13 +823,13 @@ with tab2:
                 </div>
                 """, unsafe_allow_html=True)
                 
-                # Display fish image
+                # Display image
                 st.markdown("### 📸 Fish Image")
-                fish_image = display_fish_image(prediction)
-                if fish_image:
-                    st.image(fish_image, caption=f"{prediction} - {species_info.get('common', '')}", use_container_width=True)
+                if image:
+                    st.image(image, caption=f"{prediction} - {species_info.get('common', '')}", use_container_width=True)
                 else:
-                    st.info(f"📸 Image for {prediction} will be available soon. Please add PNG image to: images/ folder")
+                    st.warning(f"⚠️ Image not found for {prediction}")
+                    st.info(f"Please add image: images/{prediction.lower().replace(' ', '_')}.png")
                 
                 if species_info:
                     with st.expander("📖 View Species Information"):
@@ -889,9 +905,10 @@ with tab2:
                 
                 prediction = predict_hybrid_sim(input_data_sim, models, models_loaded)
                 
-                species_info = ARIIDAE_SPECIES.get(prediction, {})
-                data_source = species_info.get('data_source', 'Unknown')
+                # Get species info and image
+                image, species_info = get_species_image(prediction)
                 
+                data_source = species_info.get('data_source', 'Unknown')
                 confidence_badge = "✅ High Confidence" if data_source == "Real ✅" else "📊 Simulated Reference"
                 
                 st.markdown(f"""
@@ -904,13 +921,13 @@ with tab2:
                 </div>
                 """, unsafe_allow_html=True)
                 
-                # Display fish image
+                # Display image
                 st.markdown("### 📸 Fish Image")
-                fish_image = display_fish_image(prediction)
-                if fish_image:
-                    st.image(fish_image, caption=f"{prediction} - {species_info.get('common', '')}", use_container_width=True)
+                if image:
+                    st.image(image, caption=f"{prediction} - {species_info.get('common', '')}", use_container_width=True)
                 else:
-                    st.info(f"📸 Image for {prediction} will be available soon. Please add PNG image to: images/ folder")
+                    st.warning(f"⚠️ Image not found for {prediction}")
+                    st.info(f"Please add image: images/{prediction.lower().replace(' ', '_')}.png")
                 
                 if species_info:
                     with st.expander("📖 View Species Information"):
@@ -1194,11 +1211,11 @@ with tab4:
     <div class="info-box">
         <h4>🔬 Optimization Strategies Tested (5 Strategies)</h4>
         <ul>
-            <li><strong>Strategy 1:</strong> CART Feature Selection + PCA + SVM (multiple thresholds & C values)</li>
+            <li><strong>Strategy 1:</strong> CART + PCA + SVM</li>
             <li><strong>Strategy 2:</strong> RFE (Recursive Feature Elimination) + SVM</li>
-            <li><strong>Strategy 3:</strong> SelectKBest (ANOVA F-test) + SVM</li>
-            <li><strong>Strategy 4:</strong> Stacking Ensemble (CART + SVM + KNN)</li>
-            <li><strong>Strategy 5:</strong> Voting Classifier (Soft voting)</li>
+            <li><strong>Strategy 3:</strong> SelectKBest + SVM</li>
+            <li><strong>Strategy 4:</strong> Stacking Ensemble</li>
+            <li><strong>Strategy 5:</strong> Voting Classifier</li>
         </ul>
         <p><strong>✅ CONCLUSION:</strong> Hybrid CART-SVM achieves HIGHEST accuracy in BOTH modes!</p>
     </div>
