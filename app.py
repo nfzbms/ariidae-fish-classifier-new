@@ -108,14 +108,11 @@ COMMON_NAMES = {
 # ============================================
 
 def get_image(species_name):
-    """Get image for species"""
     clean_name = species_name.strip()
-    
     possible_names = [
         clean_name.lower().replace(' ', '_'),
         clean_name.upper().replace(' ', '_'),
     ]
-    
     if clean_name in SHORT_TO_FULL:
         full = SHORT_TO_FULL[clean_name]
         possible_names.append(full.lower().replace(' ', '_'))
@@ -123,9 +120,7 @@ def get_image(species_name):
         for short, full in SHORT_TO_FULL.items():
             if full == clean_name:
                 possible_names.append(short.lower().replace('.', '_'))
-    
     extensions = ['.png', '.jpg', '.jpeg']
-    
     for name in possible_names:
         for ext in extensions:
             path = os.path.join('images', f"{name}{ext}")
@@ -146,14 +141,12 @@ def load_real_model():
         scaler = joblib.load('scaler_real_15.pkl')
         scaler_hybrid = joblib.load('scaler_hybrid_real_15.pkl')
         svm_hybrid = joblib.load('svm_hybrid_real_15.pkl')
-        
         try:
             selector = joblib.load('feature_selector_real_15.pkl')
             pca = joblib.load('pca_hybrid_real_15.pkl')
         except:
             selector = None
             pca = None
-        
         return scaler, scaler_hybrid, svm_hybrid, selector, pca, True
     except:
         return None, None, None, None, None, False
@@ -165,12 +158,9 @@ scaler_real, scaler_hybrid_real, svm_hybrid_real, selector_real, pca_real, real_
 # ============================================
 
 def predict_real(features):
-    """Predict using Real Data model"""
     if not real_loaded:
         return "Arius maculatus"
-    
     try:
-        # Try hybrid pipeline
         if selector_real is not None:
             try:
                 feat = selector_real.transform(features)
@@ -182,8 +172,6 @@ def predict_real(features):
                     return pred[0]
             except:
                 pass
-        
-        # Try SVM with scaling
         if svm_hybrid_real is not None:
             try:
                 feat = scaler_real.transform(features)
@@ -192,8 +180,6 @@ def predict_real(features):
                     return pred[0]
             except:
                 pass
-        
-        # Fallback
         vals = features[0]
         if vals[0] > 55:
             return "Arius maculatus"
@@ -211,19 +197,21 @@ def predict_real(features):
     except:
         return "Arius maculatus"
 
+# ============================================
+# SIMULATED PREDICTION - RULE BASED (DIPERBAIKI)
+# ============================================
+
 def predict_sim_rule_based(vals):
     """
-    RULE-BASED PREDICTION for Simulated Data
-    Menggunakan mean values dari data simulated anda
-    - 100% ACCURATE berdasarkan data anda
+    RULE-BASED PREDICTION untuk Simulated Data
+    Menggunakan mean values yang lebih tepat dari data simulated anda
     """
     try:
         head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total = vals
     except:
         return "A.GAGORA"
     
-    # Mean values untuk setiap species (dari data simulated anda)
-    # SHORT NAMES
+    # MEAN VALUES DARI DATA SIMULATED ANDA - DIPERBAIKI
     species_means = {
         "A.GAGORA": [63.5, 46.5, 10.6, 18.5, 48.0, 34.0, 20.0, 8.0, 17.0, 82.0, 120.0, 8.5, 45.0, 32.0, 290.0],
         "A.LEPTONOTACANTHUS": [70.5, 44.5, 10.2, 21.0, 46.0, 19.5, 28.5, 8.0, 18.0, 93.0, 111.0, 9.5, 44.0, 36.5, 265.0],
@@ -242,7 +230,7 @@ def predict_sim_rule_based(vals):
     input_vals = [head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, 
                   pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total]
     
-    # Weights - feature importance
+    # Feature weights
     weights = [0.12, 0.14, 0.06, 0.10, 0.10, 0.07, 0.05, 0.07, 0.05, 0.02, 0.02, 0.03, 0.04, 0.02, 0.11]
     
     distances = {}
@@ -347,7 +335,7 @@ with tab1:
             st.info(f"📸 Image for {prediction} will be available soon")
 
 # ============================================
-# MODE 2: SIMULATED DATA - RULE BASED (100% ACCURATE)
+# MODE 2: SIMULATED DATA - FIXED PREDICTION
 # ============================================
 with tab2:
     st.markdown("""
@@ -361,33 +349,33 @@ with tab2:
     
     with col1:
         st.markdown("**📏 Head & Body**")
-        head = st.number_input("Head Length (mm)", 0.0, 200.0, 45.0, 0.1, key="h_s")
-        body = st.number_input("Body Depth (mm)", 0.0, 100.0, 28.0, 0.1, key="b_s")
-        eye = st.number_input("Eye Diameter (mm)", 0.0, 30.0, 6.0, 0.1, key="e_s")
-        snout = st.number_input("Snout Length (mm)", 0.0, 50.0, 12.0, 0.1, key="s_s")
-        head_width = st.number_input("Head Width (mm)", 0.0, 100.0, 20.0, 0.1, key="hw_s")
+        head = st.number_input("Head Length (mm)", 0.0, 200.0, 66.7, 0.1, key="h_s")
+        body = st.number_input("Body Depth (mm)", 0.0, 100.0, 44.1, 0.1, key="b_s")
+        eye = st.number_input("Eye Diameter (mm)", 0.0, 30.0, 10.5, 0.1, key="e_s")
+        snout = st.number_input("Snout Length (mm)", 0.0, 50.0, 22.6, 0.1, key="s_s")
+        head_width = st.number_input("Head Width (mm)", 0.0, 100.0, 44.5, 0.1, key="hw_s")
     
     with col2:
         st.markdown("**🪢 Barbell**")
-        maxillary = st.number_input("Maxillary Barbell (mm)", 0.0, 150.0, 35.0, 0.1, key="m_s")
-        mandibullary = st.number_input("Mandibullary Barbell (mm)", 0.0, 100.0, 25.0, 0.1, key="md_s")
-        mental = st.number_input("Mental Barbell (mm)", 0.0, 80.0, 8.0, 0.1, key="mt_s")
-        inter_orbital = st.number_input("Inter-orbital Space (mm)", 0.0, 50.0, 8.0, 0.1, key="io_s")
-        total = st.number_input("Total Length (mm)", 0.0, 500.0, 45.0, 0.1, key="t_s")
+        maxillary = st.number_input("Maxillary Barbell (mm)", 0.0, 150.0, 47.3, 0.1, key="m_s")
+        mandibullary = st.number_input("Mandibullary Barbell (mm)", 0.0, 100.0, 33.3, 0.1, key="md_s")
+        mental = st.number_input("Mental Barbell (mm)", 0.0, 80.0, 24.9, 0.1, key="mt_s")
+        inter_orbital = st.number_input("Inter-orbital Space (mm)", 0.0, 50.0, 32.3, 0.1, key="io_s")
+        total = st.number_input("Total Length (mm)", 0.0, 500.0, 310.1, 0.1, key="t_s")
     
     with col3:
         st.markdown("**🎯 Fins**")
-        dorsal = st.number_input("Dorsal Fin Ray", 0, 30, 18, 1, key="d_s")
-        anal = st.number_input("Anal Fin Ray", 0, 30, 14, 1, key="a_s")
-        pectoral = st.number_input("Pectoral Fin Ray", 0, 30, 16, 1, key="p_s")
-        pre_dorsal = st.number_input("Pre-dorsal Length (mm)", 0.0, 200.0, 30.0, 0.1, key="pd_s")
-        pre_pelvic = st.number_input("Pre-pelvic Length (mm)", 0.0, 250.0, 20.0, 0.1, key="pp_s")
+        dorsal = st.number_input("Dorsal Fin Ray", 0, 30, 8, 1, key="d_s")
+        anal = st.number_input("Anal Fin Ray", 0, 30, 17, 1, key="a_s")
+        pectoral = st.number_input("Pectoral Fin Ray", 0, 30, 9, 1, key="p_s")
+        pre_dorsal = st.number_input("Pre-dorsal Length (mm)", 0.0, 200.0, 88.9, 0.1, key="pd_s")
+        pre_pelvic = st.number_input("Pre-pelvic Length (mm)", 0.0, 250.0, 122.3, 0.1, key="pp_s")
     
     if st.button("🔍 Identify Species (Simulated)", key="btn_sim", use_container_width=True):
         vals = [head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, 
                 pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total]
         
-        # RULE-BASED PREDICTION - returns SHORT NAME
+        # PREDICT using rule-based
         pred_short = predict_sim_rule_based(vals)
         
         # Convert to full name
@@ -403,6 +391,15 @@ with tab2:
             <div style="margin-top: 10px;">🏆 Optimized Hybrid CART-SVM | 98.1% Accuracy (BEST!)</div>
         </div>
         """, unsafe_allow_html=True)
+        
+        # TUNJUKKAN NILAI YANG DIMASUKKAN UNTUK DEBUG
+        with st.expander("🔧 Debug - Input Values"):
+            st.write(f"Head: {head}, Body: {body}, Eye: {eye}, Snout: {snout}")
+            st.write(f"Maxillary: {maxillary}, Mandibullary: {mandibullary}, Mental: {mental}")
+            st.write(f"Dorsal: {dorsal}, Anal: {anal}, Pectoral: {pectoral}")
+            st.write(f"Pre-dorsal: {pre_dorsal}, Pre-pelvic: {pre_pelvic}")
+            st.write(f"Head Width: {head_width}, Inter-orbital: {inter_orbital}, Total: {total}")
+            st.write(f"Predicted: {pred_short} -> {pred_full}")
         
         # Image
         img = get_image(pred_short)
