@@ -70,28 +70,46 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ============================================
-# SPECIES INFORMATION
+# SPECIES INFORMATION - FOR REAL DATA (FULL NAMES)
 # ============================================
 
-SPECIES_LIST = {
-    "Arius gagora": {"short": "A.GAGORA", "common": "Gagora Catfish"},
-    "Arius leptonotacanthus": {"short": "A.LEPTONOTACANTHUS", "common": "Thin-spined Catfish"},
+REAL_SPECIES = {
     "Arius maculatus": {"short": "A.MACULATUS", "common": "Spotted Catfish"},
-    "Arius oetik": {"short": "A.OETIK", "common": "Oetik Catfish"},
     "Arius venosus": {"short": "A.VENOSUS", "common": "Veined Catfish"},
     "Cryptarius truncatus": {"short": "C.TRUNCATUS", "common": "Truncate Catfish"},
-    "Hexanematichthys sagor": {"short": "H.SAGOR", "common": "Sagor Catfish"},
     "Nemapteryx macronotacantha": {"short": "N.MACRONOTACANTHA", "common": "Large-spined Catfish"},
     "Nemapteryx nenga": {"short": "N.NENGA", "common": "Nenga Catfish"},
-    "Osteogeneiosus militaris": {"short": "O.MILITARIS", "common": "Soldier Catfish"},
-    "Plicofollis argyropleuron": {"short": "P.ARGYROPLEURON", "common": "Silver-lined Catfish"},
-    "Plicofollis layardi": {"short": "P.LAYARDI", "common": "Layard's Catfish"}
+    "Osteogeneiosus militaris": {"short": "O.MILITARIS", "common": "Soldier Catfish"}
 }
 
-def find_full_name(short_name):
-    for full, info in SPECIES_LIST.items():
+# ============================================
+# SPECIES INFORMATION - FOR SIMULATED DATA (SHORT NAMES)
+# ============================================
+
+SIM_SPECIES = {
+    "A.GAGORA": {"full": "Arius gagora", "common": "Gagora Catfish"},
+    "A.LEPTONOTACANTHUS": {"full": "Arius leptonotacanthus", "common": "Thin-spined Catfish"},
+    "A.MACULATUS": {"full": "Arius maculatus", "common": "Spotted Catfish"},
+    "A.OETIK": {"full": "Arius oetik", "common": "Oetik Catfish"},
+    "A.VENOSUS": {"full": "Arius venosus", "common": "Veined Catfish"},
+    "C.TRUNCATUS": {"full": "Cryptarius truncatus", "common": "Truncate Catfish"},
+    "H.SAGOR": {"full": "Hexanematichthys sagor", "common": "Sagor Catfish"},
+    "N.MACRONOTACANTHA": {"full": "Nemapteryx macronotacantha", "common": "Large-spined Catfish"},
+    "N.NENGA": {"full": "Nemapteryx nenga", "common": "Nenga Catfish"},
+    "O.MILITARIS": {"full": "Osteogeneiosus militaris", "common": "Soldier Catfish"},
+    "P.ARGYROPLEURON": {"full": "Plicofollis argyropleuron", "common": "Silver-lined Catfish"},
+    "P.LAYARDI": {"full": "Plicofollis layardi", "common": "Layard's Catfish"}
+}
+
+def get_real_full_name(short_name):
+    for full, info in REAL_SPECIES.items():
         if info["short"] == short_name:
             return full
+    return short_name
+
+def get_sim_full_name(short_name):
+    if short_name in SIM_SPECIES:
+        return SIM_SPECIES[short_name]["full"]
     return short_name
 
 # ============================================
@@ -99,57 +117,28 @@ def find_full_name(short_name):
 # ============================================
 
 def get_image(species_name):
+    # Try full name format
     filename = species_name.lower().replace(' ', '_') + '.png'
     path = os.path.join('images', filename)
     if os.path.exists(path):
         try:
             return Image.open(path)
         except:
-            return None
+            pass
+    
+    # Try short name format
+    short_name = species_name.upper().replace(' ', '_')
+    if '.' in short_name:
+        short_name = short_name.replace('.', '_')
+    filename2 = short_name.lower() + '.png'
+    path2 = os.path.join('images', filename2)
+    if os.path.exists(path2):
+        try:
+            return Image.open(path2)
+        except:
+            pass
+    
     return None
-
-# ============================================
-# SIMULATED PREDICTION (RULE-BASED)
-# ============================================
-
-def predict_simulated(values):
-    """Predict using distance-based method for 12 species"""
-    try:
-        head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total = values
-    except:
-        return "Arius gagora"
-    
-    # Mean values for each species (15 features)
-    species_means = {
-        "Arius gagora": [50, 30, 6.5, 15, 38, 25, 9, 18, 15, 28, 20, 16, 18, 8, 45],
-        "Arius leptonotacanthus": [40, 25, 5.5, 12, 30, 20, 7, 16, 13, 22, 16, 12, 14, 6, 35],
-        "Arius maculatus": [58, 38, 6.0, 18, 45, 32, 10, 20, 16, 32, 24, 20, 24, 10, 50],
-        "Arius oetik": [35, 22, 5.0, 10, 25, 18, 6, 15, 12, 18, 14, 10, 12, 5, 30],
-        "Arius venosus": [48, 32, 6.0, 15, 38, 27, 8, 18, 15, 28, 20, 16, 20, 8, 42],
-        "Cryptarius truncatus": [32, 25, 8.0, 12, 28, 22, 7, 15, 12, 20, 16, 12, 14, 6, 35],
-        "Hexanematichthys sagor": [50, 32, 4.5, 16, 48, 32, 10, 22, 17, 30, 22, 18, 20, 8, 45],
-        "Nemapteryx macronotacantha": [42, 28, 5.5, 14, 33, 24, 8, 22, 14, 24, 18, 14, 16, 7, 38],
-        "Nemapteryx nenga": [35, 24, 5.0, 11, 30, 20, 7, 17, 13, 20, 16, 12, 12, 6, 32],
-        "Osteogeneiosus militaris": [55, 38, 6.0, 18, 42, 30, 9, 21, 18, 32, 24, 20, 22, 10, 48],
-        "Plicofollis argyropleuron": [48, 30, 6.0, 15, 38, 27, 8, 19, 15, 28, 20, 16, 18, 8, 40],
-        "Plicofollis layardi": [45, 30, 6.0, 14, 42, 30, 8, 19, 15, 26, 20, 16, 18, 8, 38]
-    }
-    
-    input_values = [head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, 
-                    pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total]
-    
-    weights = [0.14, 0.16, 0.07, 0.11, 0.12, 0.08, 0.05, 0.08, 0.06, 0.02, 0.02, 0.03, 0.04, 0.02, 0.04]
-    
-    distances = {}
-    for species, means in species_means.items():
-        dist = 0
-        for i in range(15):
-            if means[i] > 0:
-                diff = (input_values[i] - means[i]) / means[i]
-                dist += weights[i] * (diff ** 2)
-        distances[species] = dist
-    
-    return min(distances, key=distances.get)
 
 # ============================================
 # LOAD MODELS
@@ -204,7 +193,7 @@ models, models_loaded = load_models()
 # ============================================
 
 def predict_real(features):
-    """Predict using Real Data model"""
+    """Predict using Real Data model - returns FULL NAME"""
     try:
         if not models_loaded or models is None:
             return "Arius maculatus"
@@ -251,10 +240,10 @@ def predict_real(features):
         return "Arius maculatus"
 
 def predict_sim(features):
-    """Predict using Simulated Data model"""
+    """Predict using Simulated Data model - returns SHORT NAME"""
     try:
         if not models_loaded or models is None:
-            return predict_simulated(features[0])
+            return predict_sim_fallback(features[0])
         
         # Try hybrid pipeline
         if models.get('selector_sim') is not None:
@@ -280,9 +269,48 @@ def predict_sim(features):
                 pass
         
         # Fallback to rule-based
-        return predict_simulated(features[0])
+        return predict_sim_fallback(features[0])
     except:
-        return predict_simulated(features[0])
+        return predict_sim_fallback(features[0])
+
+def predict_sim_fallback(values):
+    """Fallback prediction for simulated data - returns SHORT NAME"""
+    try:
+        head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total = values
+    except:
+        return "A.GAGORA"
+    
+    # Mean values for each species (15 features) - SHORT NAMES
+    species_means = {
+        "A.GAGORA": [50, 30, 6.5, 15, 38, 25, 9, 18, 15, 28, 20, 16, 18, 8, 45],
+        "A.LEPTONOTACANTHUS": [40, 25, 5.5, 12, 30, 20, 7, 16, 13, 22, 16, 12, 14, 6, 35],
+        "A.MACULATUS": [58, 38, 6.0, 18, 45, 32, 10, 20, 16, 32, 24, 20, 24, 10, 50],
+        "A.OETIK": [35, 22, 5.0, 10, 25, 18, 6, 15, 12, 18, 14, 10, 12, 5, 30],
+        "A.VENOSUS": [48, 32, 6.0, 15, 38, 27, 8, 18, 15, 28, 20, 16, 20, 8, 42],
+        "C.TRUNCATUS": [32, 25, 8.0, 12, 28, 22, 7, 15, 12, 20, 16, 12, 14, 6, 35],
+        "H.SAGOR": [50, 32, 4.5, 16, 48, 32, 10, 22, 17, 30, 22, 18, 20, 8, 45],
+        "N.MACRONOTACANTHA": [42, 28, 5.5, 14, 33, 24, 8, 22, 14, 24, 18, 14, 16, 7, 38],
+        "N.NENGA": [35, 24, 5.0, 11, 30, 20, 7, 17, 13, 20, 16, 12, 12, 6, 32],
+        "O.MILITARIS": [55, 38, 6.0, 18, 42, 30, 9, 21, 18, 32, 24, 20, 22, 10, 48],
+        "P.ARGYROPLEURON": [48, 30, 6.0, 15, 38, 27, 8, 19, 15, 28, 20, 16, 18, 8, 40],
+        "P.LAYARDI": [45, 30, 6.0, 14, 42, 30, 8, 19, 15, 26, 20, 16, 18, 8, 38]
+    }
+    
+    input_values = [head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, 
+                    pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total]
+    
+    weights = [0.14, 0.16, 0.07, 0.11, 0.12, 0.08, 0.05, 0.08, 0.06, 0.02, 0.02, 0.03, 0.04, 0.02, 0.04]
+    
+    distances = {}
+    for species, means in species_means.items():
+        dist = 0
+        for i in range(15):
+            if means[i] > 0:
+                diff = (input_values[i] - means[i]) / means[i]
+                dist += weights[i] * (diff ** 2)
+        distances[species] = dist
+    
+    return min(distances, key=distances.get)
 
 # ============================================
 # SIDEBAR
@@ -365,26 +393,25 @@ with tab1:
                                 head_width, inter_orbital, total]])
         
         prediction = predict_real(input_data)
-        full_name = find_full_name(prediction)
         
         st.markdown(f"""
         <div class="prediction-card">
             <div>🎯 Predicted Species</div>
-            <div class="prediction-species">{full_name}</div>
+            <div class="prediction-species">{prediction}</div>
             <div>🏆 Optimized Hybrid CART-SVM | 92.3% Accuracy</div>
             <div style="font-size: 0.9rem; margin-top: 5px;">✅ 15 Features + PCA + GridSearchCV</div>
         </div>
         """, unsafe_allow_html=True)
         
         # Image
-        img = get_image(full_name)
+        img = get_image(prediction)
         if img:
-            st.image(img, caption=full_name, use_column_width=True)
+            st.image(img, caption=prediction, use_column_width=True)
         else:
-            st.info(f"📸 Image for {full_name} will be available soon")
+            st.info(f"📸 Image for {prediction} will be available soon")
 
 # ============================================
-# MODE 2: SIMULATED DATA
+# MODE 2: SIMULATED DATA - FIXED
 # ============================================
 with tab2:
     st.markdown("""
@@ -425,24 +452,41 @@ with tab2:
                                 dorsal, anal, pre_dorsal, pre_pelvic, pectoral, 
                                 head_width, inter_orbital, total]])
         
-        prediction = predict_sim(input_data)
-        full_name = find_full_name(prediction)
+        # Predict - returns SHORT NAME
+        prediction_short = predict_sim(input_data)
+        
+        # Convert short name to full name for display
+        prediction_full = get_sim_full_name(prediction_short)
+        
+        # Get common name
+        common_name = SIM_SPECIES.get(prediction_short, {}).get("common", "")
         
         st.markdown(f"""
         <div class="prediction-card-sim">
             <div>🎯 Predicted Species (Simulated Data)</div>
-            <div class="prediction-species">{full_name}</div>
-            <div>🏆 Optimized Hybrid CART-SVM | 98.1% Accuracy (BEST!)</div>
+            <div class="prediction-species">{prediction_full}</div>
+            <div style="font-size: 1.2rem; color: #fff; opacity: 0.9;">{prediction_short}</div>
+            <div style="font-size: 0.9rem; color: #fff; opacity: 0.8;">{common_name}</div>
+            <div style="margin-top: 10px;">🏆 Optimized Hybrid CART-SVM | 98.1% Accuracy (BEST!)</div>
             <div style="font-size: 0.9rem; margin-top: 5px;">✅ 15 Features + PCA + GridSearchCV</div>
         </div>
         """, unsafe_allow_html=True)
         
-        # Image
-        img = get_image(full_name)
+        # Image - try both short name and full name
+        img = get_image(prediction_short)
+        if img is None:
+            img = get_image(prediction_full)
+        
         if img:
-            st.image(img, caption=full_name, use_column_width=True)
+            st.image(img, caption=f"{prediction_full} ({prediction_short})", use_column_width=True)
         else:
-            st.info(f"📸 Image for {full_name} will be available soon")
+            st.info(f"📸 Image for {prediction_full} will be available soon")
+        
+        # Show debug info
+        with st.expander("🔧 Debug Info"):
+            st.write(f"Short Name: {prediction_short}")
+            st.write(f"Full Name: {prediction_full}")
+            st.write(f"Common Name: {common_name}")
 
 # ============================================
 # FOOTER
