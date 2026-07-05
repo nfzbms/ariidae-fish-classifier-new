@@ -198,12 +198,12 @@ def predict_real(features):
         return "Arius maculatus"
 
 # ============================================
-# SIMULATED PREDICTION - DENGAN RULE KHAS UNTUK A.OETIK
+# SIMULATED PREDICTION - DENGAN RULE UNTUK H.SAGOR
 # ============================================
 
 def predict_sim_rule_based(vals):
     """
-    RULE-BASED PREDICTION dengan RULE KHAS untuk A.OETIK
+    RULE-BASED PREDICTION dengan RULE KHAS untuk semua species
     """
     try:
         head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total = vals
@@ -211,17 +211,33 @@ def predict_sim_rule_based(vals):
         return "A.GAGORA"
     
     # ============================================
-    # RULE KHAS UNTUK A.OETIK (DITAMBAH)
+    # RULE KHAS UNTUK O.MILITARIS (tiada barbel)
     # ============================================
-    # Ciri-ciri A.OETIK dari data anda:
-    # - Head Length: 35-45
-    # - Body Depth: 20-30
-    # - Total Length: 170-200
-    # - Mental Barbell: 5-10 (SANGAT PENDEK)
-    # - Maxillary Barbell: 25-35
-    # - Mandibullary Barbell: 15-25
-    # - Eye Diameter: 8-10
+    if mandibullary == 0 and mental == 0:
+        return "O.MILITARIS"
     
+    # ============================================
+    # RULE KHAS UNTUK H.SAGOR (Sagor Catfish)
+    # ============================================
+    # Ciri-ciri H.SAGOR dari data anda:
+    # - Maxillary Barbell: SANGAT PANJANG (70-110)
+    # - Mental Barbell: PANJANG (40-70)
+    # - Total Length: BESAR (220-450)
+    # - Head Length: 50-110
+    # - Body Depth: 30-70
+    # - Mandibullary Barbell: 20-35
+    
+    if (maxillary >= 60 and 
+        mental >= 40 and 
+        total >= 220 and
+        head >= 50 and
+        body >= 30 and
+        20 <= mandibullary <= 35):
+        return "H.SAGOR"
+    
+    # ============================================
+    # RULE KHAS UNTUK A.OETIK
+    # ============================================
     if (35 <= head <= 45 and 
         20 <= body <= 30 and 
         170 <= total <= 200 and
@@ -234,14 +250,6 @@ def predict_sim_rule_based(vals):
     # ============================================
     # RULE KHAS UNTUK A.VENOSUS
     # ============================================
-    # Ciri-ciri A.VENOSUS dari data anda:
-    # - Head Length: 40-50
-    # - Body Depth: 25-35
-    # - Total Length: 180-210
-    # - Mental Barbell: 15-25 (PANJANG)
-    # - Maxillary Barbell: 35-45
-    # - Mandibullary Barbell: 20-30
-    
     if (40 <= head <= 50 and 
         25 <= body <= 35 and 
         180 <= total <= 210 and
@@ -253,32 +261,62 @@ def predict_sim_rule_based(vals):
     # ============================================
     # RULE KHAS UNTUK A.GAGORA
     # ============================================
-    if (head > 55 and body > 40 and total > 250):
+    if (head > 55 and body > 40 and total > 250 and 
+        maxillary < 60 and mental < 40):
         return "A.GAGORA"
     
     # ============================================
     # RULE KHAS UNTUK A.MACULATUS
     # ============================================
-    if (head > 55 and body > 40 and 220 <= total <= 280):
+    if (head > 55 and body > 40 and 220 <= total <= 280 and
+        maxillary < 60 and mental < 40):
         return "A.MACULATUS"
     
     # ============================================
     # RULE KHAS UNTUK C.TRUNCATUS
     # ============================================
-    if (head > 50 and eye < 8 and total > 250):
+    if (head > 50 and eye < 8 and total > 250 and
+        maxillary >= 40 and mental >= 30):
         return "C.TRUNCATUS"
     
     # ============================================
-    # RULE KHAS UNTUK O.MILITARIS (tiada barbel)
+    # RULE KHAS UNTUK P.LAYARDI (sangat besar)
     # ============================================
-    if (mandibullary == 0 and mental == 0):
-        return "O.MILITARIS"
+    if (head > 120 and total > 400 and body > 70):
+        return "P.LAYARDI"
+    
+    # ============================================
+    # RULE KHAS UNTUK P.ARGYROPLEURON
+    # ============================================
+    if (head > 60 and total > 250 and maxillary > 40 and mental > 30 and
+        head < 100 and total < 350):
+        return "P.ARGYROPLEURON"
+    
+    # ============================================
+    # RULE KHAS UNTUK N.MACRONOTACANTHA
+    # ============================================
+    if (head > 50 and body > 40 and maxillary > 50 and mental > 25 and
+        mandibullary > 30 and total > 230):
+        return "N.MACRONOTACANTHA"
+    
+    # ============================================
+    # RULE KHAS UNTUK N.NENGA
+    # ============================================
+    if (head > 50 and body > 40 and maxillary > 50 and mental > 25 and
+        mandibullary > 40 and total > 230):
+        return "N.NENGA"
+    
+    # ============================================
+    # RULE KHAS UNTUK A.LEPTONOTACANTHUS
+    # ============================================
+    if (head > 60 and body > 40 and maxillary < 50 and mental < 30 and
+        mandibullary < 25 and total > 250):
+        return "A.LEPTONOTACANTHUS"
     
     # ============================================
     # DISTANCE-BASED PREDICTION (FALLBACK)
     # ============================================
     
-    # MEAN VALUES - DIKIRA DARI DATA ANDA
     species_means = {
         "A.GAGORA": [63.5, 46.5, 10.6, 18.5, 48.0, 34.0, 20.0, 8.0, 17.0, 82.0, 120.0, 8.5, 45.0, 32.0, 288.0],
         "A.LEPTONOTACANTHUS": [70.5, 45.0, 10.2, 21.0, 46.5, 19.5, 28.5, 8.0, 18.0, 93.0, 111.0, 9.5, 44.0, 36.5, 265.0],
@@ -297,8 +335,7 @@ def predict_sim_rule_based(vals):
     input_vals = [head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, 
                   pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total]
     
-    # WEIGHTS - Total Length sangat penting
-    weights = [0.12, 0.10, 0.04, 0.06, 0.06, 0.04, 0.02, 0.04, 0.02, 0.02, 0.02, 0.02, 0.03, 0.01, 0.40]
+    weights = [0.12, 0.10, 0.04, 0.06, 0.08, 0.04, 0.06, 0.04, 0.02, 0.02, 0.02, 0.02, 0.03, 0.01, 0.34]
     
     distances = {}
     for species, means in species_means.items():
@@ -402,7 +439,7 @@ with tab1:
             st.info(f"📸 Image for {prediction} will be available soon")
 
 # ============================================
-# MODE 2: SIMULATED DATA - DENGAN RULE KHAS A.OETIK
+# MODE 2: SIMULATED DATA - DENGAN RULE UNTUK H.SAGOR
 # ============================================
 with tab2:
     st.markdown("""
@@ -416,33 +453,33 @@ with tab2:
     
     with col1:
         st.markdown("**📏 Head & Body**")
-        head = st.number_input("Head Length (mm)", 0.0, 200.0, 40.3, 0.1, key="h_s")
-        body = st.number_input("Body Depth (mm)", 0.0, 100.0, 26.7, 0.1, key="b_s")
-        eye = st.number_input("Eye Diameter (mm)", 0.0, 30.0, 9.3, 0.1, key="e_s")
-        snout = st.number_input("Snout Length (mm)", 0.0, 50.0, 13.0, 0.1, key="s_s")
-        head_width = st.number_input("Head Width (mm)", 0.0, 100.0, 29.5, 0.1, key="hw_s")
+        head = st.number_input("Head Length (mm)", 0.0, 200.0, 51.2, 0.1, key="h_s")
+        body = st.number_input("Body Depth (mm)", 0.0, 100.0, 21.8, 0.1, key="b_s")
+        eye = st.number_input("Eye Diameter (mm)", 0.0, 30.0, 7.2, 0.1, key="e_s")
+        snout = st.number_input("Snout Length (mm)", 0.0, 50.0, 22.7, 0.1, key="s_s")
+        head_width = st.number_input("Head Width (mm)", 0.0, 100.0, 41.0, 0.1, key="hw_s")
     
     with col2:
         st.markdown("**🪢 Barbell**")
-        maxillary = st.number_input("Maxillary Barbell (mm)", 0.0, 150.0, 32.9, 0.1, key="m_s")
-        mandibullary = st.number_input("Mandibullary Barbell (mm)", 0.0, 100.0, 20.5, 0.1, key="md_s")
-        mental = st.number_input("Mental Barbell (mm)", 0.0, 80.0, 6.8, 0.1, key="mt_s")
-        inter_orbital = st.number_input("Inter-orbital Space (mm)", 0.0, 50.0, 19.0, 0.1, key="io_s")
-        total = st.number_input("Total Length (mm)", 0.0, 500.0, 187.0, 0.1, key="t_s")
+        maxillary = st.number_input("Maxillary Barbell (mm)", 0.0, 150.0, 73.0, 0.1, key="m_s")
+        mandibullary = st.number_input("Mandibullary Barbell (mm)", 0.0, 100.0, 21.8, 0.1, key="md_s")
+        mental = st.number_input("Mental Barbell (mm)", 0.0, 80.0, 42.5, 0.1, key="mt_s")
+        inter_orbital = st.number_input("Inter-orbital Space (mm)", 0.0, 50.0, 21.8, 0.1, key="io_s")
+        total = st.number_input("Total Length (mm)", 0.0, 500.0, 221.8, 0.1, key="t_s")
     
     with col3:
         st.markdown("**🎯 Fins**")
         dorsal = st.number_input("Dorsal Fin Ray", 0, 30, 8, 1, key="d_s")
-        anal = st.number_input("Anal Fin Ray", 0, 30, 14, 1, key="a_s")
+        anal = st.number_input("Anal Fin Ray", 0, 30, 16, 1, key="a_s")
         pectoral = st.number_input("Pectoral Fin Ray", 0, 30, 9, 1, key="p_s")
-        pre_dorsal = st.number_input("Pre-dorsal Length (mm)", 0.0, 200.0, 53.1, 0.1, key="pd_s")
-        pre_pelvic = st.number_input("Pre-pelvic Length (mm)", 0.0, 250.0, 64.1, 0.1, key="pp_s")
+        pre_dorsal = st.number_input("Pre-dorsal Length (mm)", 0.0, 200.0, 68.7, 0.1, key="pd_s")
+        pre_pelvic = st.number_input("Pre-pelvic Length (mm)", 0.0, 250.0, 94.2, 0.1, key="pp_s")
     
     if st.button("🔍 Identify Species (Simulated)", key="btn_sim", use_container_width=True):
         vals = [head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, 
                 pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total]
         
-        # RULE-BASED PREDICTION dengan rule khas untuk A.OETIK
+        # RULE-BASED PREDICTION
         pred_short = predict_sim_rule_based(vals)
         
         # Convert to full name
@@ -459,21 +496,26 @@ with tab2:
         </div>
         """, unsafe_allow_html=True)
         
-        # Debug - tunjukkan keputusan rule-based
+        # Debug - tunjukkan rule check
         with st.expander("🔧 Debug - Rule Check"):
-            st.write("**Rule Checks:**")
+            st.write("**Input Values:**")
+            st.write(f"Head: {head}, Body: {body}, Eye: {eye}, Snout: {snout}")
+            st.write(f"Maxillary: {maxillary}, Mandibullary: {mandibullary}, Mental: {mental}")
+            st.write(f"Total Length: {total}")
+            st.write(f"Pre-dorsal: {pre_dorsal}, Pre-pelvic: {pre_pelvic}")
             
-            # Check A.OETIK
-            is_oetik = (35 <= head <= 45 and 20 <= body <= 30 and 170 <= total <= 200 and
-                       5 <= mental <= 10 and 25 <= maxillary <= 35 and 15 <= mandibullary <= 25 and 8 <= eye <= 10)
-            st.write(f"A.OETIK rule: {is_oetik} {'✅' if is_oetik else '❌'}")
+            st.write("\n**Rule Checks:**")
             
-            # Check A.VENOSUS
-            is_venosus = (40 <= head <= 50 and 25 <= body <= 35 and 180 <= total <= 210 and
-                         15 <= mental <= 25 and 35 <= maxillary <= 45 and 20 <= mandibullary <= 30)
-            st.write(f"A.VENOSUS rule: {is_venosus} {'✅' if is_venosus else '❌'}")
+            # Check H.SAGOR
+            is_hsagor = (maxillary >= 60 and mental >= 40 and total >= 220 and
+                        head >= 50 and body >= 30 and 20 <= mandibullary <= 35)
+            st.write(f"H.SAGOR rule: {is_hsagor} {'✅' if is_hsagor else '❌'}")
             
-            st.write(f"\n**Predicted: {pred_short}**")
+            # Check O.MILITARIS
+            is_omilitaris = (mandibullary == 0 and mental == 0)
+            st.write(f"O.MILITARIS rule (no barbels): {is_omilitaris} {'✅' if is_omilitaris else '❌'}")
+            
+            st.write(f"\n✅ **Predicted: {pred_short}**")
         
         # Image
         img = get_image(pred_short)
