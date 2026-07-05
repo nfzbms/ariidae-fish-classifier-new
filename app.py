@@ -70,27 +70,27 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ============================================
-# SPECIES MAPPING
+# SPECIES MAPPING - PENTING UNTUK MODE 2
 # ============================================
 
-# Full name to short name mapping
-FULL_TO_SHORT = {
-    "Arius gagora": "A.GAGORA",
-    "Arius leptonotacanthus": "A.LEPTONOTACANTHUS",
-    "Arius maculatus": "A.MACULATUS",
-    "Arius oetik": "A.OETIK",
-    "Arius venosus": "A.VENOSUS",
-    "Cryptarius truncatus": "C.TRUNCATUS",
-    "Hexanematichthys sagor": "H.SAGOR",
-    "Nemapteryx macronotacantha": "N.MACRONOTACANTHA",
-    "Nemapteryx nenga": "N.NENGA",
-    "Osteogeneiosus militaris": "O.MILITARIS",
-    "Plicofollis argyropleuron": "P.ARGYROPLEURON",
-    "Plicofollis layardi": "P.LAYARDI"
+# SHORT NAME -> FULL NAME (untuk simulated data)
+SHORT_TO_FULL = {
+    "A.GAGORA": "Arius gagora",
+    "A.LEPTONOTACANTHUS": "Arius leptonotacanthus",
+    "A.MACULATUS": "Arius maculatus",
+    "A.OETIK": "Arius oetik",
+    "A.VENOSUS": "Arius venosus",
+    "C.TRUNCATUS": "Cryptarius truncatus",
+    "H.SAGOR": "Hexanematichthys sagor",
+    "N.MACRONOTACANTHA": "Nemapteryx macronotacantha",
+    "N.NENGA": "Nemapteryx nenga",
+    "O.MILITARIS": "Osteogeneiosus militaris",
+    "P.ARGYROPLEURON": "Plicofollis argyropleuron",
+    "P.LAYARDI": "Plicofollis layardi"
 }
 
-# Short name to full name mapping
-SHORT_TO_FULL = {v: k for k, v in FULL_TO_SHORT.items()}
+# FULL NAME -> SHORT NAME (untuk rujukan)
+FULL_TO_SHORT = {v: k for k, v in SHORT_TO_FULL.items()}
 
 # Common names
 COMMON_NAMES = {
@@ -108,8 +108,8 @@ COMMON_NAMES = {
     "Plicofollis layardi": "Layard's Catfish"
 }
 
-# Real species (6 species)
-REAL_SPECIES_LIST = [
+# REAL SPECIES LIST (6 species)
+REAL_SPECIES = [
     "Arius maculatus",
     "Arius venosus",
     "Cryptarius truncatus",
@@ -124,14 +124,12 @@ REAL_SPECIES_LIST = [
 
 def get_image(species_name):
     """Get image for species - tries multiple naming formats"""
-    # Clean the name
     clean_name = species_name.strip()
     
     # Try different filename formats
     possible_names = [
         clean_name.lower().replace(' ', '_'),
         clean_name.upper().replace(' ', '_'),
-        clean_name.upper().replace('.', '_'),
     ]
     
     # If it's a full name, also try the short name
@@ -145,7 +143,6 @@ def get_image(species_name):
         full = SHORT_TO_FULL[clean_name]
         possible_names.append(full.lower().replace(' ', '_'))
     
-    # Try different extensions
     extensions = ['.png', '.jpg', '.jpeg']
     
     for name in possible_names:
@@ -153,8 +150,7 @@ def get_image(species_name):
             path = os.path.join('images', f"{name}{ext}")
             if os.path.exists(path):
                 try:
-                    img = Image.open(path)
-                    return img
+                    return Image.open(path)
                 except:
                     pass
     
@@ -207,7 +203,7 @@ models, models_loaded = load_models()
 # ============================================
 
 def predict_real(features):
-    """Predict using Real Data model"""
+    """Predict using Real Data model - returns FULL NAME"""
     try:
         if not models_loaded or models is None:
             return "Arius maculatus"
@@ -235,7 +231,7 @@ def predict_real(features):
             except:
                 pass
         
-        # Fallback rule-based
+        # Fallback
         vals = features[0]
         if vals[0] > 55:
             return "Arius maculatus"
@@ -254,7 +250,10 @@ def predict_real(features):
         return "Arius maculatus"
 
 def predict_sim(features):
-    """Predict using Simulated Data model - returns SHORT NAME"""
+    """
+    Predict using Simulated Data model - returns SHORT NAME
+    Ini PENTING: model simulated dilatih dengan SHORT NAMES
+    """
     try:
         if not models_loaded or models is None:
             return "A.GAGORA"
@@ -282,7 +281,7 @@ def predict_sim(features):
             except:
                 pass
         
-        # Fallback - distance based with SHORT NAMES
+        # Fallback - distance based
         vals = features[0]
         return predict_sim_fallback(vals)
     except:
@@ -295,7 +294,7 @@ def predict_sim_fallback(vals):
     except:
         return "A.GAGORA"
     
-    # Mean values for each species (SHORT NAMES)
+    # Mean values for each species - GUNA SHORT NAMES
     species_means = {
         "A.GAGORA": [50, 30, 6.5, 15, 38, 25, 9, 18, 15, 28, 20, 16, 18, 8, 45],
         "A.LEPTONOTACANTHUS": [40, 25, 5.5, 12, 30, 20, 7, 16, 13, 22, 16, 12, 14, 6, 35],
@@ -420,7 +419,7 @@ with tab1:
             st.info(f"📸 Image for {prediction} will be available soon")
 
 # ============================================
-# MODE 2: SIMULATED DATA
+# MODE 2: SIMULATED DATA - GUNA SHORT NAMES
 # ============================================
 with tab2:
     st.markdown("""
@@ -461,10 +460,10 @@ with tab2:
                                 dorsal, anal, pre_dorsal, pre_pelvic, pectoral, 
                                 head_width, inter_orbital, total]])
         
-        # Predict - returns SHORT NAME
+        # PREDICT - returns SHORT NAME (e.g. "A.GAGORA")
         pred_short = predict_sim(input_data)
         
-        # Convert to full name
+        # Convert SHORT NAME to FULL NAME for display
         pred_full = SHORT_TO_FULL.get(pred_short, pred_short)
         common = COMMON_NAMES.get(pred_full, "")
         
