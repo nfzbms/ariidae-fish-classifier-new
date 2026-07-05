@@ -70,73 +70,93 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ============================================
-# SPECIES INFORMATION - FOR REAL DATA (FULL NAMES)
+# SPECIES MAPPING
 # ============================================
 
-REAL_SPECIES = {
-    "Arius maculatus": {"short": "A.MACULATUS", "common": "Spotted Catfish"},
-    "Arius venosus": {"short": "A.VENOSUS", "common": "Veined Catfish"},
-    "Cryptarius truncatus": {"short": "C.TRUNCATUS", "common": "Truncate Catfish"},
-    "Nemapteryx macronotacantha": {"short": "N.MACRONOTACANTHA", "common": "Large-spined Catfish"},
-    "Nemapteryx nenga": {"short": "N.NENGA", "common": "Nenga Catfish"},
-    "Osteogeneiosus militaris": {"short": "O.MILITARIS", "common": "Soldier Catfish"}
+# Full name to short name mapping
+FULL_TO_SHORT = {
+    "Arius gagora": "A.GAGORA",
+    "Arius leptonotacanthus": "A.LEPTONOTACANTHUS",
+    "Arius maculatus": "A.MACULATUS",
+    "Arius oetik": "A.OETIK",
+    "Arius venosus": "A.VENOSUS",
+    "Cryptarius truncatus": "C.TRUNCATUS",
+    "Hexanematichthys sagor": "H.SAGOR",
+    "Nemapteryx macronotacantha": "N.MACRONOTACANTHA",
+    "Nemapteryx nenga": "N.NENGA",
+    "Osteogeneiosus militaris": "O.MILITARIS",
+    "Plicofollis argyropleuron": "P.ARGYROPLEURON",
+    "Plicofollis layardi": "P.LAYARDI"
 }
 
-# ============================================
-# SPECIES INFORMATION - FOR SIMULATED DATA (SHORT NAMES)
-# ============================================
+# Short name to full name mapping
+SHORT_TO_FULL = {v: k for k, v in FULL_TO_SHORT.items()}
 
-SIM_SPECIES = {
-    "A.GAGORA": {"full": "Arius gagora", "common": "Gagora Catfish"},
-    "A.LEPTONOTACANTHUS": {"full": "Arius leptonotacanthus", "common": "Thin-spined Catfish"},
-    "A.MACULATUS": {"full": "Arius maculatus", "common": "Spotted Catfish"},
-    "A.OETIK": {"full": "Arius oetik", "common": "Oetik Catfish"},
-    "A.VENOSUS": {"full": "Arius venosus", "common": "Veined Catfish"},
-    "C.TRUNCATUS": {"full": "Cryptarius truncatus", "common": "Truncate Catfish"},
-    "H.SAGOR": {"full": "Hexanematichthys sagor", "common": "Sagor Catfish"},
-    "N.MACRONOTACANTHA": {"full": "Nemapteryx macronotacantha", "common": "Large-spined Catfish"},
-    "N.NENGA": {"full": "Nemapteryx nenga", "common": "Nenga Catfish"},
-    "O.MILITARIS": {"full": "Osteogeneiosus militaris", "common": "Soldier Catfish"},
-    "P.ARGYROPLEURON": {"full": "Plicofollis argyropleuron", "common": "Silver-lined Catfish"},
-    "P.LAYARDI": {"full": "Plicofollis layardi", "common": "Layard's Catfish"}
+# Common names
+COMMON_NAMES = {
+    "Arius gagora": "Gagora Catfish",
+    "Arius leptonotacanthus": "Thin-spined Catfish",
+    "Arius maculatus": "Spotted Catfish",
+    "Arius oetik": "Oetik Catfish",
+    "Arius venosus": "Veined Catfish",
+    "Cryptarius truncatus": "Truncate Catfish",
+    "Hexanematichthys sagor": "Sagor Catfish",
+    "Nemapteryx macronotacantha": "Large-spined Catfish",
+    "Nemapteryx nenga": "Nenga Catfish",
+    "Osteogeneiosus militaris": "Soldier Catfish",
+    "Plicofollis argyropleuron": "Silver-lined Catfish",
+    "Plicofollis layardi": "Layard's Catfish"
 }
 
-def get_real_full_name(short_name):
-    for full, info in REAL_SPECIES.items():
-        if info["short"] == short_name:
-            return full
-    return short_name
-
-def get_sim_full_name(short_name):
-    if short_name in SIM_SPECIES:
-        return SIM_SPECIES[short_name]["full"]
-    return short_name
+# Real species (6 species)
+REAL_SPECIES_LIST = [
+    "Arius maculatus",
+    "Arius venosus",
+    "Cryptarius truncatus",
+    "Nemapteryx macronotacantha",
+    "Nemapteryx nenga",
+    "Osteogeneiosus militaris"
+]
 
 # ============================================
-# GET IMAGE
+# GET IMAGE - FIXED
 # ============================================
 
 def get_image(species_name):
-    # Try full name format
-    filename = species_name.lower().replace(' ', '_') + '.png'
-    path = os.path.join('images', filename)
-    if os.path.exists(path):
-        try:
-            return Image.open(path)
-        except:
-            pass
+    """Get image for species - tries multiple naming formats"""
+    # Clean the name
+    clean_name = species_name.strip()
     
-    # Try short name format
-    short_name = species_name.upper().replace(' ', '_')
-    if '.' in short_name:
-        short_name = short_name.replace('.', '_')
-    filename2 = short_name.lower() + '.png'
-    path2 = os.path.join('images', filename2)
-    if os.path.exists(path2):
-        try:
-            return Image.open(path2)
-        except:
-            pass
+    # Try different filename formats
+    possible_names = [
+        clean_name.lower().replace(' ', '_'),
+        clean_name.upper().replace(' ', '_'),
+        clean_name.upper().replace('.', '_'),
+    ]
+    
+    # If it's a full name, also try the short name
+    if clean_name in FULL_TO_SHORT:
+        short = FULL_TO_SHORT[clean_name]
+        possible_names.append(short.lower().replace('.', '_'))
+        possible_names.append(short)
+    
+    # If it's a short name, also try the full name
+    if clean_name in SHORT_TO_FULL:
+        full = SHORT_TO_FULL[clean_name]
+        possible_names.append(full.lower().replace(' ', '_'))
+    
+    # Try different extensions
+    extensions = ['.png', '.jpg', '.jpeg']
+    
+    for name in possible_names:
+        for ext in extensions:
+            path = os.path.join('images', f"{name}{ext}")
+            if os.path.exists(path):
+                try:
+                    img = Image.open(path)
+                    return img
+                except:
+                    pass
     
     return None
 
@@ -151,32 +171,26 @@ def load_models():
     try:
         # Real Data
         models['scaler_real'] = joblib.load('scaler_real_15.pkl')
-        models['cart_real'] = joblib.load('cart_real_15.pkl')
-        models['svm_real'] = joblib.load('svm_real_15.pkl')
-        models['knn_real'] = joblib.load('knn_real_15.pkl')
+        models['scaler_hybrid_real'] = joblib.load('scaler_hybrid_real_15.pkl')
+        models['svm_hybrid_real'] = joblib.load('svm_hybrid_real_15.pkl')
         
         try:
             models['selector_real'] = joblib.load('feature_selector_real_15.pkl')
-            models['scaler_hybrid_real'] = joblib.load('scaler_hybrid_real_15.pkl')
             models['pca_real'] = joblib.load('pca_hybrid_real_15.pkl')
-            models['svm_hybrid_real'] = joblib.load('svm_hybrid_real_15.pkl')
         except:
             models['selector_real'] = None
-            models['scaler_hybrid_real'] = None
             models['pca_real'] = None
-            models['svm_hybrid_real'] = joblib.load('svm_hybrid_real_15.pkl')
         
         # Simulated Data
         models['scaler_sim'] = joblib.load('scaler_sim_15.pkl')
+        models['scaler_hybrid_sim'] = joblib.load('scaler_hybrid_sim_15.pkl')
         models['svm_hybrid_sim'] = joblib.load('svm_hybrid_sim_15.pkl')
         
         try:
             models['selector_sim'] = joblib.load('feature_selector_sim_15.pkl')
-            models['scaler_hybrid_sim'] = joblib.load('scaler_hybrid_sim_15.pkl')
             models['pca_sim'] = joblib.load('pca_hybrid_sim_15.pkl')
         except:
             models['selector_sim'] = None
-            models['scaler_hybrid_sim'] = None
             models['pca_sim'] = None
         
         loaded = True
@@ -193,7 +207,7 @@ models, models_loaded = load_models()
 # ============================================
 
 def predict_real(features):
-    """Predict using Real Data model - returns FULL NAME"""
+    """Predict using Real Data model"""
     try:
         if not models_loaded or models is None:
             return "Arius maculatus"
@@ -206,7 +220,7 @@ def predict_real(features):
                 if models.get('pca_real') is not None:
                     feat = models['pca_real'].transform(feat)
                 pred = models['svm_hybrid_real'].predict(feat)
-                if pred is not None:
+                if pred is not None and len(pred) > 0:
                     return pred[0]
             except:
                 pass
@@ -216,24 +230,24 @@ def predict_real(features):
             try:
                 feat = models['scaler_real'].transform(features)
                 pred = models['svm_hybrid_real'].predict(feat)
-                if pred is not None:
+                if pred is not None and len(pred) > 0:
                     return pred[0]
             except:
                 pass
         
-        # Fallback
-        values = features[0]
-        if values[0] > 55:
+        # Fallback rule-based
+        vals = features[0]
+        if vals[0] > 55:
             return "Arius maculatus"
-        elif values[1] > 35:
+        elif vals[1] > 35:
             return "Arius venosus"
-        elif values[2] > 7:
+        elif vals[2] > 7:
             return "Cryptarius truncatus"
-        elif values[4] > 45:
+        elif vals[4] > 45:
             return "Nemapteryx macronotacantha"
-        elif values[7] > 22:
+        elif vals[7] > 22:
             return "Nemapteryx nenga"
-        elif values[8] > 18:
+        elif vals[8] > 18:
             return "Osteogeneiosus militaris"
         return "Arius maculatus"
     except:
@@ -243,7 +257,7 @@ def predict_sim(features):
     """Predict using Simulated Data model - returns SHORT NAME"""
     try:
         if not models_loaded or models is None:
-            return predict_sim_fallback(features[0])
+            return "A.GAGORA"
         
         # Try hybrid pipeline
         if models.get('selector_sim') is not None:
@@ -253,7 +267,7 @@ def predict_sim(features):
                 if models.get('pca_sim') is not None:
                     feat = models['pca_sim'].transform(feat)
                 pred = models['svm_hybrid_sim'].predict(feat)
-                if pred is not None:
+                if pred is not None and len(pred) > 0:
                     return pred[0]
             except:
                 pass
@@ -263,24 +277,25 @@ def predict_sim(features):
             try:
                 feat = models['scaler_sim'].transform(features)
                 pred = models['svm_hybrid_sim'].predict(feat)
-                if pred is not None:
+                if pred is not None and len(pred) > 0:
                     return pred[0]
             except:
                 pass
         
-        # Fallback to rule-based
-        return predict_sim_fallback(features[0])
+        # Fallback - distance based with SHORT NAMES
+        vals = features[0]
+        return predict_sim_fallback(vals)
     except:
-        return predict_sim_fallback(features[0])
+        return "A.GAGORA"
 
-def predict_sim_fallback(values):
-    """Fallback prediction for simulated data - returns SHORT NAME"""
+def predict_sim_fallback(vals):
+    """Fallback for simulated data - returns SHORT NAME"""
     try:
-        head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total = values
+        head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total = vals
     except:
         return "A.GAGORA"
     
-    # Mean values for each species (15 features) - SHORT NAMES
+    # Mean values for each species (SHORT NAMES)
     species_means = {
         "A.GAGORA": [50, 30, 6.5, 15, 38, 25, 9, 18, 15, 28, 20, 16, 18, 8, 45],
         "A.LEPTONOTACANTHUS": [40, 25, 5.5, 12, 30, 20, 7, 16, 13, 22, 16, 12, 14, 6, 35],
@@ -296,8 +311,8 @@ def predict_sim_fallback(values):
         "P.LAYARDI": [45, 30, 6.0, 14, 42, 30, 8, 19, 15, 26, 20, 16, 18, 8, 38]
     }
     
-    input_values = [head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, 
-                    pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total]
+    input_vals = [head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, 
+                  pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total]
     
     weights = [0.14, 0.16, 0.07, 0.11, 0.12, 0.08, 0.05, 0.08, 0.06, 0.02, 0.02, 0.03, 0.04, 0.02, 0.04]
     
@@ -306,7 +321,7 @@ def predict_sim_fallback(values):
         dist = 0
         for i in range(15):
             if means[i] > 0:
-                diff = (input_values[i] - means[i]) / means[i]
+                diff = (input_vals[i] - means[i]) / means[i]
                 dist += weights[i] * (diff ** 2)
         distances[species] = dist
     
@@ -324,21 +339,13 @@ with st.sidebar:
     st.markdown("✅ **Simulated Data: 98.1%**")
     st.markdown("---")
     st.markdown("### 🎯 15 Features")
-    st.markdown("1. Head Length")
-    st.markdown("2. Body Depth")
-    st.markdown("3. Eye Diameter")
-    st.markdown("4. Snout Length")
-    st.markdown("5. Maxillary Barbell")
-    st.markdown("6. Mandibullary Barbell")
-    st.markdown("7. Mental Barbell")
-    st.markdown("8. Dorsal Fin Ray")
-    st.markdown("9. Anal Fin Ray")
-    st.markdown("10. Pre-dorsal Length")
-    st.markdown("11. Pre-pelvic Length")
-    st.markdown("12. Pectoral Fin Ray")
-    st.markdown("13. Head Width")
-    st.markdown("14. Inter-orbital Space")
-    st.markdown("15. Total Length")
+    feats = ["Head Length", "Body Depth", "Eye Diameter", "Snout Length", 
+             "Maxillary Barbell", "Mandibullary Barbell", "Mental Barbell",
+             "Dorsal Fin Ray", "Anal Fin Ray", "Pre-dorsal Length",
+             "Pre-pelvic Length", "Pectoral Fin Ray", "Head Width",
+             "Inter-orbital Space", "Total Length"]
+    for i, f in enumerate(feats, 1):
+        st.markdown(f"{i}. {f}")
     st.caption("Final Year Project | 15 Features")
 
 # ============================================
@@ -393,12 +400,14 @@ with tab1:
                                 head_width, inter_orbital, total]])
         
         prediction = predict_real(input_data)
+        common = COMMON_NAMES.get(prediction, "")
         
         st.markdown(f"""
         <div class="prediction-card">
             <div>🎯 Predicted Species</div>
             <div class="prediction-species">{prediction}</div>
-            <div>🏆 Optimized Hybrid CART-SVM | 92.3% Accuracy</div>
+            <div style="font-size: 1.1rem; opacity: 0.9;">{common}</div>
+            <div style="margin-top: 10px;">🏆 Optimized Hybrid CART-SVM | 92.3% Accuracy</div>
             <div style="font-size: 0.9rem; margin-top: 5px;">✅ 15 Features + PCA + GridSearchCV</div>
         </div>
         """, unsafe_allow_html=True)
@@ -406,12 +415,12 @@ with tab1:
         # Image
         img = get_image(prediction)
         if img:
-            st.image(img, caption=prediction, use_column_width=True)
+            st.image(img, caption=f"{prediction} - {common}", use_column_width=True)
         else:
             st.info(f"📸 Image for {prediction} will be available soon")
 
 # ============================================
-# MODE 2: SIMULATED DATA - FIXED
+# MODE 2: SIMULATED DATA
 # ============================================
 with tab2:
     st.markdown("""
@@ -453,40 +462,32 @@ with tab2:
                                 head_width, inter_orbital, total]])
         
         # Predict - returns SHORT NAME
-        prediction_short = predict_sim(input_data)
+        pred_short = predict_sim(input_data)
         
-        # Convert short name to full name for display
-        prediction_full = get_sim_full_name(prediction_short)
-        
-        # Get common name
-        common_name = SIM_SPECIES.get(prediction_short, {}).get("common", "")
+        # Convert to full name
+        pred_full = SHORT_TO_FULL.get(pred_short, pred_short)
+        common = COMMON_NAMES.get(pred_full, "")
         
         st.markdown(f"""
         <div class="prediction-card-sim">
             <div>🎯 Predicted Species (Simulated Data)</div>
-            <div class="prediction-species">{prediction_full}</div>
-            <div style="font-size: 1.2rem; color: #fff; opacity: 0.9;">{prediction_short}</div>
-            <div style="font-size: 0.9rem; color: #fff; opacity: 0.8;">{common_name}</div>
+            <div class="prediction-species">{pred_full}</div>
+            <div style="font-size: 1.2rem; opacity: 0.9;">{pred_short}</div>
+            <div style="font-size: 1rem; opacity: 0.85;">{common}</div>
             <div style="margin-top: 10px;">🏆 Optimized Hybrid CART-SVM | 98.1% Accuracy (BEST!)</div>
             <div style="font-size: 0.9rem; margin-top: 5px;">✅ 15 Features + PCA + GridSearchCV</div>
         </div>
         """, unsafe_allow_html=True)
         
-        # Image - try both short name and full name
-        img = get_image(prediction_short)
+        # Image - try both short and full
+        img = get_image(pred_short)
         if img is None:
-            img = get_image(prediction_full)
+            img = get_image(pred_full)
         
         if img:
-            st.image(img, caption=f"{prediction_full} ({prediction_short})", use_column_width=True)
+            st.image(img, caption=f"{pred_full} ({pred_short})", use_column_width=True)
         else:
-            st.info(f"📸 Image for {prediction_full} will be available soon")
-        
-        # Show debug info
-        with st.expander("🔧 Debug Info"):
-            st.write(f"Short Name: {prediction_short}")
-            st.write(f"Full Name: {prediction_full}")
-            st.write(f"Common Name: {common_name}")
+            st.info(f"📸 Image for {pred_full} will be available soon")
 
 # ============================================
 # FOOTER
