@@ -198,18 +198,85 @@ def predict_real(features):
         return "Arius maculatus"
 
 # ============================================
-# SIMULATED PREDICTION - DIPERBAIKI UNTUK A.OETIK
+# SIMULATED PREDICTION - DENGAN RULE KHAS UNTUK A.OETIK
 # ============================================
 
 def predict_sim_rule_based(vals):
     """
-    RULE-BASED PREDICTION - MEAN VALUES DARI DATA ANDA
-    DIPERBAIKI: Weight Total Length dinaikkan untuk bezakan A.OETIK vs A.VENOSUS
+    RULE-BASED PREDICTION dengan RULE KHAS untuk A.OETIK
     """
     try:
         head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total = vals
     except:
         return "A.GAGORA"
+    
+    # ============================================
+    # RULE KHAS UNTUK A.OETIK (DITAMBAH)
+    # ============================================
+    # Ciri-ciri A.OETIK dari data anda:
+    # - Head Length: 35-45
+    # - Body Depth: 20-30
+    # - Total Length: 170-200
+    # - Mental Barbell: 5-10 (SANGAT PENDEK)
+    # - Maxillary Barbell: 25-35
+    # - Mandibullary Barbell: 15-25
+    # - Eye Diameter: 8-10
+    
+    if (35 <= head <= 45 and 
+        20 <= body <= 30 and 
+        170 <= total <= 200 and
+        5 <= mental <= 10 and
+        25 <= maxillary <= 35 and
+        15 <= mandibullary <= 25 and
+        8 <= eye <= 10):
+        return "A.OETIK"
+    
+    # ============================================
+    # RULE KHAS UNTUK A.VENOSUS
+    # ============================================
+    # Ciri-ciri A.VENOSUS dari data anda:
+    # - Head Length: 40-50
+    # - Body Depth: 25-35
+    # - Total Length: 180-210
+    # - Mental Barbell: 15-25 (PANJANG)
+    # - Maxillary Barbell: 35-45
+    # - Mandibullary Barbell: 20-30
+    
+    if (40 <= head <= 50 and 
+        25 <= body <= 35 and 
+        180 <= total <= 210 and
+        15 <= mental <= 25 and
+        35 <= maxillary <= 45 and
+        20 <= mandibullary <= 30):
+        return "A.VENOSUS"
+    
+    # ============================================
+    # RULE KHAS UNTUK A.GAGORA
+    # ============================================
+    if (head > 55 and body > 40 and total > 250):
+        return "A.GAGORA"
+    
+    # ============================================
+    # RULE KHAS UNTUK A.MACULATUS
+    # ============================================
+    if (head > 55 and body > 40 and 220 <= total <= 280):
+        return "A.MACULATUS"
+    
+    # ============================================
+    # RULE KHAS UNTUK C.TRUNCATUS
+    # ============================================
+    if (head > 50 and eye < 8 and total > 250):
+        return "C.TRUNCATUS"
+    
+    # ============================================
+    # RULE KHAS UNTUK O.MILITARIS (tiada barbel)
+    # ============================================
+    if (mandibullary == 0 and mental == 0):
+        return "O.MILITARIS"
+    
+    # ============================================
+    # DISTANCE-BASED PREDICTION (FALLBACK)
+    # ============================================
     
     # MEAN VALUES - DIKIRA DARI DATA ANDA
     species_means = {
@@ -230,7 +297,7 @@ def predict_sim_rule_based(vals):
     input_vals = [head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, 
                   pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total]
     
-    # WEIGHTS - Total Length dinaikkan ke 0.30 untuk bezakan A.OETIK vs A.VENOSUS
+    # WEIGHTS - Total Length sangat penting
     weights = [0.12, 0.10, 0.04, 0.06, 0.06, 0.04, 0.02, 0.04, 0.02, 0.02, 0.02, 0.02, 0.03, 0.01, 0.40]
     
     distances = {}
@@ -335,7 +402,7 @@ with tab1:
             st.info(f"📸 Image for {prediction} will be available soon")
 
 # ============================================
-# MODE 2: SIMULATED DATA - FIXED FOR A.OETIK
+# MODE 2: SIMULATED DATA - DENGAN RULE KHAS A.OETIK
 # ============================================
 with tab2:
     st.markdown("""
@@ -375,7 +442,7 @@ with tab2:
         vals = [head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, 
                 pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total]
         
-        # RULE-BASED PREDICTION
+        # RULE-BASED PREDICTION dengan rule khas untuk A.OETIK
         pred_short = predict_sim_rule_based(vals)
         
         # Convert to full name
@@ -392,29 +459,21 @@ with tab2:
         </div>
         """, unsafe_allow_html=True)
         
-        # Debug - tunjukkan jarak untuk setiap species
-        with st.expander("🔧 Debug - Distance to each species"):
-            input_vals = vals
-            weights = [0.12, 0.10, 0.04, 0.06, 0.06, 0.04, 0.02, 0.04, 0.02, 0.02, 0.02, 0.02, 0.03, 0.01, 0.40]
+        # Debug - tunjukkan keputusan rule-based
+        with st.expander("🔧 Debug - Rule Check"):
+            st.write("**Rule Checks:**")
             
-            species_means = {
-                "A.OETIK": [40.0, 26.0, 9.0, 13.0, 32.5, 19.5, 8.0, 8.0, 14.0, 52.0, 63.0, 1.5, 29.0, 18.5, 185.0],
-                "A.VENOSUS": [42.0, 28.5, 8.5, 14.5, 38.0, 24.5, 19.5, 7.8, 15.0, 55.0, 77.0, 5.5, 28.5, 17.5, 185.0],
-                "A.GAGORA": [63.5, 46.5, 10.6, 18.5, 48.0, 34.0, 20.0, 8.0, 17.0, 82.0, 120.0, 8.5, 45.0, 32.0, 288.0],
-                "A.MACULATUS": [64.0, 45.5, 11.2, 21.0, 51.0, 32.0, 26.0, 7.8, 16.8, 85.0, 119.0, 7.5, 43.0, 31.5, 258.0],
-            }
+            # Check A.OETIK
+            is_oetik = (35 <= head <= 45 and 20 <= body <= 30 and 170 <= total <= 200 and
+                       5 <= mental <= 10 and 25 <= maxillary <= 35 and 15 <= mandibullary <= 25 and 8 <= eye <= 10)
+            st.write(f"A.OETIK rule: {is_oetik} {'✅' if is_oetik else '❌'}")
             
-            distances = {}
-            for species, means in species_means.items():
-                dist = 0
-                for i in range(15):
-                    if means[i] > 0:
-                        diff = (input_vals[i] - means[i]) / means[i]
-                        dist += weights[i] * (diff ** 2)
-                distances[species] = dist
-                st.write(f"{species}: {dist:.4f}")
+            # Check A.VENOSUS
+            is_venosus = (40 <= head <= 50 and 25 <= body <= 35 and 180 <= total <= 210 and
+                         15 <= mental <= 25 and 35 <= maxillary <= 45 and 20 <= mandibullary <= 30)
+            st.write(f"A.VENOSUS rule: {is_venosus} {'✅' if is_venosus else '❌'}")
             
-            st.write(f"\n✅ **Predicted: {min(distances, key=distances.get)}**")
+            st.write(f"\n**Predicted: {pred_short}**")
         
         # Image
         img = get_image(pred_short)
