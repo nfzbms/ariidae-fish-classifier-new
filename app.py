@@ -58,8 +58,6 @@ st.markdown("""
         padding: 1rem;
         border-top: 2px solid #e0e0e0;
     }
-    .rule-pass { color: green; font-weight: bold; }
-    .rule-fail { color: red; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -134,7 +132,7 @@ def get_image(species_name):
     return None
 
 # ============================================
-# LOAD MODELS (UNTUK MODE 1 SAHAJA)
+# LOAD MODELS
 # ============================================
 
 @st.cache_resource
@@ -200,12 +198,12 @@ def predict_real(features):
         return "Arius maculatus"
 
 # ============================================
-# SIMULATED PREDICTION - RULE UNTUK SETIAP SPECIES (DIPERBAIKI)
+# SIMULATED PREDICTION - RULE UNTUK SETIAP SPECIES
 # ============================================
 
 def predict_sim_rule_based(vals):
     """
-    RULE-BASED PREDICTION dengan RULE UNTUK SETIAP SPECIES - DIPERBAIKI
+    RULE-BASED PREDICTION - DIPERBAIKI UNTUK H.SAGOR
     """
     try:
         head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total = vals
@@ -219,9 +217,10 @@ def predict_sim_rule_based(vals):
         return "O.MILITARIS"
     
     # ============================================
-    # 2. H.SAGOR - BARBEL SANGAT PANJANG
+    # 2. H.SAGOR - BARBEL SANGAT PANJANG (DIPERBAIKI)
     # ============================================
-    if maxillary > 60 and mental > 45 and total > 220:
+    # Ciri: Maxillary > 60, Mental > 40, Total > 220
+    if maxillary > 60 and mental > 40 and total > 220:
         return "H.SAGOR"
     
     # ============================================
@@ -255,9 +254,8 @@ def predict_sim_rule_based(vals):
         return "N.NENGA"
     
     # ============================================
-    # 8. A.LEPTONOTACANTHUS - KEPALA BESAR, MANDIBULLARY PENDEK, MENTAL SEDERHANA
+    # 8. A.LEPTONOTACANTHUS - KEPALA BESAR, MANDIBULLARY PENDEK
     # ============================================
-    # Ciri: Head > 65, Mandibullary < 25, Mental 25-35, Total 250-280
     if head > 65 and mandibullary < 25 and 25 <= mental <= 35 and 250 <= total <= 280:
         return "A.LEPTONOTACANTHUS"
     
@@ -425,36 +423,33 @@ with tab2:
     
     with col1:
         st.markdown("**📏 Head & Body**")
-        head = st.number_input("Head Length (mm)", 0.0, 200.0, 71.2, 0.1, key="h_s")
-        body = st.number_input("Body Depth (mm)", 0.0, 100.0, 45.2, 0.1, key="b_s")
-        eye = st.number_input("Eye Diameter (mm)", 0.0, 30.0, 10.3, 0.1, key="e_s")
-        snout = st.number_input("Snout Length (mm)", 0.0, 50.0, 21.6, 0.1, key="s_s")
-        head_width = st.number_input("Head Width (mm)", 0.0, 100.0, 44.1, 0.1, key="hw_s")
+        head = st.number_input("Head Length (mm)", 0.0, 200.0, 51.7, 0.1, key="h_s")
+        body = st.number_input("Body Depth (mm)", 0.0, 100.0, 31.7, 0.1, key="b_s")
+        eye = st.number_input("Eye Diameter (mm)", 0.0, 30.0, 7.3, 0.1, key="e_s")
+        snout = st.number_input("Snout Length (mm)", 0.0, 50.0, 12.3, 0.1, key="s_s")
+        head_width = st.number_input("Head Width (mm)", 0.0, 100.0, 41.0, 0.1, key="hw_s")
     
     with col2:
         st.markdown("**🪢 Barbell**")
-        maxillary = st.number_input("Maxillary Barbell (mm)", 0.0, 150.0, 46.8, 0.1, key="m_s")
-        mandibullary = st.number_input("Mandibullary Barbell (mm)", 0.0, 100.0, 20.1, 0.1, key="md_s")
-        mental = st.number_input("Mental Barbell (mm)", 0.0, 80.0, 28.7, 0.1, key="mt_s")
-        inter_orbital = st.number_input("Inter-orbital Space (mm)", 0.0, 50.0, 37.0, 0.1, key="io_s")
-        total = st.number_input("Total Length (mm)", 0.0, 500.0, 268.0, 0.1, key="t_s")
+        maxillary = st.number_input("Maxillary Barbell (mm)", 0.0, 150.0, 73.0, 0.1, key="m_s")
+        mandibullary = st.number_input("Mandibullary Barbell (mm)", 0.0, 100.0, 21.8, 0.1, key="md_s")
+        mental = st.number_input("Mental Barbell (mm)", 0.0, 80.0, 42.5, 0.1, key="mt_s")
+        inter_orbital = st.number_input("Inter-orbital Space (mm)", 0.0, 50.0, 21.8, 0.1, key="io_s")
+        total = st.number_input("Total Length (mm)", 0.0, 500.0, 222.0, 0.1, key="t_s")
     
     with col3:
         st.markdown("**🎯 Fins**")
         dorsal = st.number_input("Dorsal Fin Ray", 0, 30, 8, 1, key="d_s")
-        anal = st.number_input("Anal Fin Ray", 0, 30, 18, 1, key="a_s")
+        anal = st.number_input("Anal Fin Ray", 0, 30, 16, 1, key="a_s")
         pectoral = st.number_input("Pectoral Fin Ray", 0, 30, 9, 1, key="p_s")
-        pre_dorsal = st.number_input("Pre-dorsal Length (mm)", 0.0, 200.0, 95.1, 0.1, key="pd_s")
-        pre_pelvic = st.number_input("Pre-pelvic Length (mm)", 0.0, 250.0, 112.5, 0.1, key="pp_s")
+        pre_dorsal = st.number_input("Pre-dorsal Length (mm)", 0.0, 200.0, 68.7, 0.1, key="pd_s")
+        pre_pelvic = st.number_input("Pre-pelvic Length (mm)", 0.0, 250.0, 94.2, 0.1, key="pp_s")
     
     if st.button("🔍 Identify Species (Simulated)", key="btn_sim", use_container_width=True):
         vals = [head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, 
                 pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total]
         
-        # RULE-BASED PREDICTION
         pred_short = predict_sim_rule_based(vals)
-        
-        # Convert to full name
         pred_full = SHORT_TO_FULL.get(pred_short, pred_short)
         common = COMMON_NAMES.get(pred_full, "")
         
@@ -468,40 +463,24 @@ with tab2:
         </div>
         """, unsafe_allow_html=True)
         
-        # ============================================
-        # DEBUG - TUNJUKKAN RULE UNTUK SETIAP SPECIES
-        # ============================================
-        with st.expander("🔧 Debug - Rule Check for Each Species"):
-            st.markdown("### Input Values")
-            st.write(f"**Head:** {head}, **Body:** {body}, **Eye:** {eye}, **Snout:** {snout}")
-            st.write(f"**Maxillary:** {maxillary}, **Mandibullary:** {mandibullary}, **Mental:** {mental}")
-            st.write(f"**Total Length:** {total}, **Pre-dorsal:** {pre_dorsal}, **Pre-pelvic:** {pre_pelvic}")
+        # Debug
+        with st.expander("🔧 Debug - Rule Check"):
+            st.write("### Input Values")
+            st.write(f"Maxillary: {maxillary}, Mental: {mental}, Total: {total}")
+            st.write(f"Head: {head}, Body: {body}, Mandibullary: {mandibullary}")
             
-            st.markdown("---")
-            st.markdown("### Rule Checks")
+            st.write("### Rule Checks")
+            is_hsagor = (maxillary > 60 and mental > 40 and total > 220)
+            is_omilitaris = (mandibullary == 0 and mental == 0)
             
-            # A.LEPTONOTACANTHUS rule
-            is_lepto = (head > 65 and mandibullary < 25 and 25 <= mental <= 35 and 250 <= total <= 280)
+            st.write(f"H.SAGOR: Maxillary>60 ({maxillary>60}), Mental>40 ({mental>40}), Total>220 ({total>220})")
+            st.write(f"Result: {'✅ PASS' if is_hsagor else '❌ FAIL'}")
             
-            # A.GAGORA rule
-            is_gagora = (head > 55 and body > 40 and total > 250 and maxillary < 55 and mandibullary > 25)
+            st.write(f"O.MILITARIS: Mandibullary==0 ({mandibullary==0}), Mental==0 ({mental==0})")
+            st.write(f"Result: {'✅ PASS' if is_omilitaris else '❌ FAIL'}")
             
-            # A.MACULATUS rule
-            is_maculatus = (head > 55 and body > 40 and 220 <= total <= 280 and 40 <= maxillary <= 55)
-            
-            st.write(f"**A.LEPTONOTACANTHUS**: Head>65 ({head>65}), Mandibullary<25 ({mandibullary<25}), Mental 25-35 ({25 <= mental <= 35}), Total 250-280 ({250 <= total <= 280})")
-            st.write(f"Result: {'✅ PASS' if is_lepto else '❌ FAIL'}")
-            
-            st.write(f"**A.GAGORA**: Head>55 ({head>55}), Body>40 ({body>40}), Total>250 ({total>250}), Maxillary<55 ({maxillary<55}), Mandibullary>25 ({mandibullary>25})")
-            st.write(f"Result: {'✅ PASS' if is_gagora else '❌ FAIL'}")
-            
-            st.write(f"**A.MACULATUS**: Head>55 ({head>55}), Body>40 ({body>40}), Total 220-280 ({220 <= total <= 280}), Maxillary 40-55 ({40 <= maxillary <= 55})")
-            st.write(f"Result: {'✅ PASS' if is_maculatus else '❌ FAIL'}")
-            
-            st.markdown("---")
-            st.markdown(f"### 🎯 Final Prediction: **{pred_short}**")
+            st.write(f"### Final Prediction: {pred_short}")
         
-        # Image
         img = get_image(pred_short)
         if img is None:
             img = get_image(pred_full)
