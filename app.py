@@ -198,12 +198,12 @@ def predict_real(features):
         return "Arius maculatus"
 
 # ============================================
-# SIMULATED PREDICTION - RULE UNTUK SETIAP SPECIES
+# SIMULATED PREDICTION - DIPERBAIKI UNTUK P.ARGYROPLEURON
 # ============================================
 
 def predict_sim_rule_based(vals):
     """
-    RULE-BASED PREDICTION - DIPERBAIKI UNTUK P.LAYARDI
+    RULE-BASED PREDICTION - DIPERBAIKI UNTUK P.ARGYROPLEURON
     """
     try:
         head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total = vals
@@ -217,21 +217,21 @@ def predict_sim_rule_based(vals):
         return "O.MILITARIS"
     
     # ============================================
-    # 2. P.LAYARDI - SANGAT BESAR (DIPERBAIKI)
-    # ============================================
-    # Ciri: Head > 100, Total > 350, Body > 60
-    if head > 100 and total > 350 and body > 60:
-        return "P.LAYARDI"
-    
-    # ============================================
-    # 3. H.SAGOR - BARBEL SANGAT PANJANG
+    # 2. H.SAGOR - BARBEL SANGAT PANJANG
     # ============================================
     if maxillary > 60 and mental > 40 and total > 220:
         return "H.SAGOR"
     
     # ============================================
-    # 4. P.ARGYROPLEURON - SEDERHANA BESAR
+    # 3. P.LAYARDI - SANGAT BESAR
     # ============================================
+    if head > 120 and total > 400:
+        return "P.LAYARDI"
+    
+    # ============================================
+    # 4. P.ARGYROPLEURON - DIPERBAIKI
+    # ============================================
+    # Ciri: Head > 60, Total > 230, Maxillary > 45, Mental > 30
     if head > 60 and total > 230 and maxillary > 45 and mental > 30:
         return "P.ARGYROPLEURON"
     
@@ -423,27 +423,27 @@ with tab2:
     
     with col1:
         st.markdown("**📏 Head & Body**")
-        head = st.number_input("Head Length (mm)", 0.0, 200.0, 123.7, 0.1, key="h_s")
-        body = st.number_input("Body Depth (mm)", 0.0, 100.0, 66.3, 0.1, key="b_s")
-        eye = st.number_input("Eye Diameter (mm)", 0.0, 30.0, 17.4, 0.1, key="e_s")
-        snout = st.number_input("Snout Length (mm)", 0.0, 50.0, 41.0, 0.1, key="s_s")
-        head_width = st.number_input("Head Width (mm)", 0.0, 100.0, 70.5, 0.1, key="hw_s")
+        head = st.number_input("Head Length (mm)", 0.0, 200.0, 62.1, 0.1, key="h_s")
+        body = st.number_input("Body Depth (mm)", 0.0, 100.0, 42.6, 0.1, key="b_s")
+        eye = st.number_input("Eye Diameter (mm)", 0.0, 30.0, 10.2, 0.1, key="e_s")
+        snout = st.number_input("Snout Length (mm)", 0.0, 50.0, 23.5, 0.1, key="s_s")
+        head_width = st.number_input("Head Width (mm)", 0.0, 100.0, 41.8, 0.1, key="hw_s")
     
     with col2:
         st.markdown("**🪢 Barbell**")
-        maxillary = st.number_input("Maxillary Barbell (mm)", 0.0, 150.0, 59.7, 0.1, key="m_s")
-        mandibullary = st.number_input("Mandibullary Barbell (mm)", 0.0, 100.0, 31.7, 0.1, key="md_s")
-        mental = st.number_input("Mental Barbell (mm)", 0.0, 80.0, 38.2, 0.1, key="mt_s")
-        inter_orbital = st.number_input("Inter-orbital Space (mm)", 0.0, 50.0, 59.2, 0.1, key="io_s")
-        total = st.number_input("Total Length (mm)", 0.0, 500.0, 416.9, 0.1, key="t_s")
+        maxillary = st.number_input("Maxillary Barbell (mm)", 0.0, 150.0, 48.6, 0.1, key="m_s")
+        mandibullary = st.number_input("Mandibullary Barbell (mm)", 0.0, 100.0, 22.7, 0.1, key="md_s")
+        mental = st.number_input("Mental Barbell (mm)", 0.0, 80.0, 32.0, 0.1, key="mt_s")
+        inter_orbital = st.number_input("Inter-orbital Space (mm)", 0.0, 50.0, 32.6, 0.1, key="io_s")
+        total = st.number_input("Total Length (mm)", 0.0, 500.0, 239.5, 0.1, key="t_s")
     
     with col3:
         st.markdown("**🎯 Fins**")
-        dorsal = st.number_input("Dorsal Fin Ray", 0, 30, 7, 1, key="d_s")
-        anal = st.number_input("Anal Fin Ray", 0, 30, 16, 1, key="a_s")
+        dorsal = st.number_input("Dorsal Fin Ray", 0, 30, 8, 1, key="d_s")
+        anal = st.number_input("Anal Fin Ray", 0, 30, 15, 1, key="a_s")
         pectoral = st.number_input("Pectoral Fin Ray", 0, 30, 11, 1, key="p_s")
-        pre_dorsal = st.number_input("Pre-dorsal Length (mm)", 0.0, 200.0, 160.5, 0.1, key="pd_s")
-        pre_pelvic = st.number_input("Pre-pelvic Length (mm)", 0.0, 250.0, 206.0, 0.1, key="pp_s")
+        pre_dorsal = st.number_input("Pre-dorsal Length (mm)", 0.0, 200.0, 88.1, 0.1, key="pd_s")
+        pre_pelvic = st.number_input("Pre-pelvic Length (mm)", 0.0, 250.0, 112.0, 0.1, key="pp_s")
     
     if st.button("🔍 Identify Species (Simulated)", key="btn_sim", use_container_width=True):
         vals = [head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, 
@@ -466,20 +466,20 @@ with tab2:
         # Debug
         with st.expander("🔧 Debug - Rule Check"):
             st.write("### Input Values")
-            st.write(f"Head: {head}, Body: {body}, Total: {total}")
-            st.write(f"Maxillary: {maxillary}, Mandibullary: {mandibullary}, Mental: {mental}")
+            st.write(f"Head: {head}, Total: {total}, Maxillary: {maxillary}, Mental: {mental}")
+            st.write(f"Body: {body}, Mandibullary: {mandibullary}")
             
             st.write("### Rule Checks")
-            
-            # P.LAYARDI
-            is_layardi = (head > 100 and total > 350 and body > 60)
-            st.write(f"P.LAYARDI: Head>100 ({head>100}), Total>350 ({total>350}), Body>60 ({body>60})")
-            st.write(f"Result: {'✅ PASS' if is_layardi else '❌ FAIL'}")
             
             # P.ARGYROPLEURON
             is_argyro = (head > 60 and total > 230 and maxillary > 45 and mental > 30)
             st.write(f"P.ARGYROPLEURON: Head>60 ({head>60}), Total>230 ({total>230}), Maxillary>45 ({maxillary>45}), Mental>30 ({mental>30})")
             st.write(f"Result: {'✅ PASS' if is_argyro else '❌ FAIL'}")
+            
+            # A.MACULATUS
+            is_maculatus = (head > 55 and body > 40 and 220 <= total <= 280 and 40 <= maxillary <= 55 and mental < 30)
+            st.write(f"A.MACULATUS: Head>55 ({head>55}), Body>40 ({body>40}), Total 220-280 ({220 <= total <= 280}), Maxillary 40-55 ({40 <= maxillary <= 55}), Mental<30 ({mental<30})")
+            st.write(f"Result: {'✅ PASS' if is_maculatus else '❌ FAIL'}")
             
             st.write(f"### Final Prediction: {pred_short}")
         
