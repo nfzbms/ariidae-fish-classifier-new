@@ -9,63 +9,267 @@ warnings.filterwarnings('ignore')
 st.set_page_config(page_title="Ariidae Classification System", page_icon="🐟", layout="wide")
 
 # ============================================
-# CUSTOM CSS
+# CUSTOM CSS - LEBIH CANTIK
 # ============================================
 st.markdown("""
 <style>
+    /* Main Header */
     .main-header {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-        padding: 2rem;
-        border-radius: 20px;
+        background: linear-gradient(135deg, #0c0c3a 0%, #1a1a5e 30%, #2d2d7a 60%, #1a1a5e 100%);
+        padding: 2.5rem;
+        border-radius: 25px;
         text-align: center;
         color: white;
         margin-bottom: 2rem;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.1);
+        position: relative;
+        overflow: hidden;
     }
+    .main-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(ellipse at center, rgba(100,149,237,0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+    @keyframes rotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .main-header h1 {
+        font-size: 2.8rem;
+        font-weight: 700;
+        text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        position: relative;
+        z-index: 1;
+    }
+    .main-header p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Info Box */
+    .info-box {
+        background: linear-gradient(135deg, #e8f0fe 0%, #d4e4f7 100%);
+        padding: 1.2rem;
+        border-radius: 15px;
+        border-left: 5px solid #4a6fa5;
+        margin: 1rem 0;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    /* Prediction Cards */
     .prediction-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 2rem;
+        background: linear-gradient(135deg, #4a6fa5 0%, #6c5b9e 50%, #8b4a8b 100%);
+        padding: 2.5rem;
         border-radius: 25px;
         text-align: center;
         color: white;
-        margin: 1rem 0;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        margin: 1.5rem 0;
+        box-shadow: 0 15px 40px rgba(74,111,165,0.3);
+        animation: fadeInUp 0.6s ease-out;
+        border: 1px solid rgba(255,255,255,0.15);
     }
     .prediction-card-sim {
-        background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-        padding: 2rem;
+        background: linear-gradient(135deg, #e67e22 0%, #d35400 50%, #a04000 100%);
+        padding: 2.5rem;
         border-radius: 25px;
         text-align: center;
         color: white;
-        margin: 1rem 0;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        margin: 1.5rem 0;
+        box-shadow: 0 15px 40px rgba(211,84,0,0.3);
+        animation: fadeInUp 0.6s ease-out;
+        border: 1px solid rgba(255,255,255,0.15);
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
     }
     .prediction-species {
-        font-size: 2.5rem;
-        font-weight: bold;
-        margin: 1rem 0;
+        font-size: 2.8rem;
+        font-weight: 700;
+        margin: 0.8rem 0;
+        text-shadow: 0 2px 15px rgba(0,0,0,0.2);
     }
-    .info-box {
-        background: #e3f2fd;
+    .prediction-short {
+        font-size: 1.3rem;
+        opacity: 0.85;
+        letter-spacing: 1px;
+    }
+    .prediction-common {
+        font-size: 1.1rem;
+        opacity: 0.8;
+        margin-top: 5px;
+    }
+    .prediction-badge {
+        display: inline-block;
+        background: rgba(255,255,255,0.2);
+        padding: 0.4rem 1.5rem;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        margin-top: 0.8rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    /* Sidebar */
+    .sidebar-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         padding: 1rem;
-        border-radius: 10px;
-        border-left: 4px solid #2196f3;
-        margin: 1rem 0;
+        border-radius: 15px;
+        margin: 0.5rem 0;
     }
+    
+    /* Tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        padding: 0.8rem 2rem;
+        border-radius: 12px 12px 0 0;
+        font-weight: 600;
+    }
+    .stTabs [data-baseweb="tab"]:hover {
+        background: rgba(74,111,165,0.1);
+    }
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #4a6fa5 0%, #6c5b9e 100%);
+        color: white !important;
+    }
+    
+    /* Number Inputs */
+    .stNumberInput label {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    .stNumberInput input {
+        border-radius: 10px !important;
+        border: 2px solid #e8ecf1 !important;
+    }
+    .stNumberInput input:focus {
+        border-color: #4a6fa5 !important;
+        box-shadow: 0 0 0 3px rgba(74,111,165,0.2) !important;
+    }
+    
+    /* Buttons */
+    .stButton button {
+        background: linear-gradient(135deg, #4a6fa5 0%, #6c5b9e 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 0.7rem 2rem !important;
+        font-weight: 600 !important;
+        font-size: 1.1rem !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 15px rgba(74,111,165,0.3) !important;
+    }
+    .stButton button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 25px rgba(74,111,165,0.4) !important;
+    }
+    .stButton button:active {
+        transform: translateY(0px) !important;
+    }
+    
+    /* Sim Button */
+    .stButton button[data-testid="baseButton-secondary"] {
+        background: linear-gradient(135deg, #e67e22 0%, #d35400 100%) !important;
+        box-shadow: 0 4px 15px rgba(211,84,0,0.3) !important;
+    }
+    .stButton button[data-testid="baseButton-secondary"]:hover {
+        box-shadow: 0 6px 25px rgba(211,84,0,0.4) !important;
+    }
+    
+    /* Expander */
+    .streamlit-expanderHeader {
+        background: #f8f9fa !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+        border: 1px solid #e9ecef !important;
+    }
+    .streamlit-expanderHeader:hover {
+        background: #e9ecef !important;
+    }
+    
+    /* Footer */
     .footer {
         text-align: center;
-        color: gray;
-        margin-top: 2rem;
-        padding: 1rem;
-        border-top: 2px solid #e0e0e0;
+        color: #6c757d;
+        margin-top: 3rem;
+        padding: 1.5rem;
+        border-top: 2px solid #e9ecef;
+        font-size: 0.9rem;
+    }
+    .footer .highlight {
+        color: #4a6fa5;
+        font-weight: 600;
+    }
+    
+    /* Image */
+    .stImage {
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    /* Feature section headers */
+    .feature-header {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-top: 0.5rem;
+        margin-bottom: 0.3rem;
+        padding: 0.3rem 0.8rem;
+        background: linear-gradient(135deg, #e8f0fe 0%, #d4e4f7 100%);
+        border-radius: 8px;
+        display: inline-block;
+    }
+    
+    /* Sidebar styling */
+    .sidebar-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0.5rem 0;
+        padding: 0.5rem 0;
+        border-bottom: 2px solid #e9ecef;
+    }
+    .sidebar-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.3rem 0;
+        font-size: 0.9rem;
+    }
+    .sidebar-item .name {
+        color: #495057;
+    }
+    .sidebar-item .value {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    .sidebar-item .value.green {
+        color: #28a745;
+    }
+    .sidebar-item .value.gold {
+        color: #f39c12;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Header
+# ============================================
+# HEADER - LEBIH CANTIK
+# ============================================
 st.markdown("""
 <div class="main-header">
     <h1>🐟 Ariidae Fish Classification System</h1>
-    <p style="font-size: 1.1rem;">Optimized Hybrid CART-SVM | Real Data 92.3% | Simulated Data 98.1%</p>
+    <p>🌊 Optimized Hybrid CART-SVM • Real Data 92.3% • Simulated Data 98.1%</p>
+    <p style="font-size: 0.9rem; opacity: 0.7;">🎓 Final Year Project - Automated Fish Species Identification</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -197,96 +401,61 @@ def predict_real(features):
     except:
         return "Arius maculatus"
 
-# ============================================
-# SIMULATED PREDICTION - DIPERBAIKI UNTUK P.LAYARDI
-# ============================================
-
 def predict_sim_rule_based(vals):
-    """
-    RULE-BASED PREDICTION - DIPERBAIKI UNTUK P.LAYARDI
-    """
     try:
         head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, pre_dorsal, pre_pelvic, pectoral, head_width, inter_orbital, total = vals
     except:
         return "A.GAGORA"
     
-    # ============================================
-    # 1. O.MILITARIS - TIADA BARBEL
-    # ============================================
+    # O.MILITARIS
     if mandibullary == 0 and mental == 0:
         return "O.MILITARIS"
     
-    # ============================================
-    # 2. P.LAYARDI - SANGAT BESAR (DIPERBAIKI)
-    # ============================================
-    # Ciri: Head > 100, Total > 380, Body > 50
+    # P.LAYARDI
     if head > 100 and total > 380 and body > 50:
         return "P.LAYARDI"
     
-    # ============================================
-    # 3. H.SAGOR - BARBEL SANGAT PANJANG
-    # ============================================
+    # H.SAGOR
     if maxillary > 60 and mental > 40 and total > 220:
         return "H.SAGOR"
     
-    # ============================================
-    # 4. P.ARGYROPLEURON - SEDERHANA BESAR
-    # ============================================
+    # P.ARGYROPLEURON
     if head > 60 and total > 230 and maxillary > 45 and mental > 30 and total < 380:
         return "P.ARGYROPLEURON"
     
-    # ============================================
-    # 5. C.TRUNCATUS - MATA KECIL, TOTAL BESAR
-    # ============================================
+    # C.TRUNCATUS
     if eye < 8 and total > 250 and maxillary > 45:
         return "C.TRUNCATUS"
     
-    # ============================================
-    # 6. N.MACRONOTACANTHA - BARBEL PANJANG, MANDIBULLARY PANJANG
-    # ============================================
+    # N.MACRONOTACANTHA
     if maxillary > 55 and mandibullary > 40 and mental > 25:
         return "N.MACRONOTACANTHA"
     
-    # ============================================
-    # 7. N.NENGA - BARBEL SANGAT PANJANG, MANDIBULLARY SANGAT PANJANG
-    # ============================================
+    # N.NENGA
     if maxillary > 55 and mandibullary > 45 and mental > 25:
         return "N.NENGA"
     
-    # ============================================
-    # 8. A.LEPTONOTACANTHUS - KEPALA BESAR, MANDIBULLARY PENDEK
-    # ============================================
+    # A.LEPTONOTACANTHUS
     if head > 65 and mandibullary < 25 and 25 <= mental <= 35 and 250 <= total <= 280:
         return "A.LEPTONOTACANTHUS"
     
-    # ============================================
-    # 9. A.MACULATUS - SEDERHANA BESAR
-    # ============================================
+    # A.MACULATUS
     if head > 55 and body > 40 and 220 <= total <= 280 and 40 <= maxillary <= 55 and mental < 30:
         return "A.MACULATUS"
     
-    # ============================================
-    # 10. A.GAGORA - SEDERHANA BESAR
-    # ============================================
+    # A.GAGORA
     if head > 55 and body > 40 and total > 250 and maxillary < 55 and mandibullary > 25 and mental < 30:
         return "A.GAGORA"
     
-    # ============================================
-    # 11. A.OETIK - KECIL, MENTAL SANGAT PENDEK
-    # ============================================
+    # A.OETIK
     if head < 45 and body < 30 and total < 200 and mental < 10:
         return "A.OETIK"
     
-    # ============================================
-    # 12. A.VENOSUS - SEDERHANA KECIL, MENTAL SEDERHANA
-    # ============================================
+    # A.VENOSUS
     if head < 50 and body < 35 and total < 220 and 15 <= mental <= 30:
         return "A.VENOSUS"
     
-    # ============================================
     # FALLBACK - DISTANCE BASED
-    # ============================================
-    
     species_means = {
         "A.GAGORA": [63.5, 46.5, 10.6, 18.5, 48.0, 34.0, 20.0, 8.0, 17.0, 82.0, 120.0, 8.5, 45.0, 32.0, 288.0],
         "A.LEPTONOTACANTHUS": [70.5, 45.0, 10.2, 21.0, 46.5, 19.5, 28.5, 8.0, 18.0, 93.0, 111.0, 9.5, 44.0, 36.5, 265.0],
@@ -319,25 +488,57 @@ def predict_sim_rule_based(vals):
     return min(distances, key=distances.get)
 
 # ============================================
-# SIDEBAR
+# SIDEBAR - LEBIH CANTIK
 # ============================================
 
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/3081/3081559.png", width=80)
+    st.markdown("""
+    <div style="text-align: center; padding: 0.5rem 0;">
+        <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" width="80" style="border-radius: 50%; background: #f0f4f8; padding: 10px;">
+        <h3 style="margin: 0.5rem 0 0 0; color: #2c3e50;">Ariidae Classifier</h3>
+        <p style="font-size: 0.8rem; color: #6c757d; margin: 0;">v2.0 - Optimized Hybrid</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
     st.markdown("---")
-    st.markdown("### 📊 Model Performance")
-    st.markdown("✅ **Real Data: 92.3%**")
-    st.markdown("✅ **Simulated Data: 98.1%**")
+    
+    st.markdown("""
+    <div class="sidebar-title">📊 Model Performance</div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9); padding: 0.8rem; border-radius: 12px; text-align: center;">
+            <div style="font-size: 1.8rem; font-weight: 700; color: #2e7d32;">92.3%</div>
+            <div style="font-size: 0.7rem; color: #1b5e20;">Real Data</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #fff3e0, #ffe0b2); padding: 0.8rem; border-radius: 12px; text-align: center;">
+            <div style="font-size: 1.8rem; font-weight: 700; color: #e65100;">98.1%</div>
+            <div style="font-size: 0.7rem; color: #bf360c;">Simulated</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
     st.markdown("---")
-    st.markdown("### 🎯 15 Features")
+    
+    st.markdown("""
+    <div class="sidebar-title">🎯 15 Features</div>
+    """, unsafe_allow_html=True)
+    
     feats = ["Head Length", "Body Depth", "Eye Diameter", "Snout Length", 
              "Maxillary Barbell", "Mandibullary Barbell", "Mental Barbell",
              "Dorsal Fin Ray", "Anal Fin Ray", "Pre-dorsal Length",
              "Pre-pelvic Length", "Pectoral Fin Ray", "Head Width",
              "Inter-orbital Space", "Total Length"]
+    
     for i, f in enumerate(feats, 1):
-        st.markdown(f"{i}. {f}")
-    st.caption("Final Year Project | 15 Features")
+        st.markdown(f"<div style='font-size:0.8rem; padding:2px 0; color:#495057;'>• {f}</div>", unsafe_allow_html=True)
+    
+    st.markdown("---")
+    st.caption("🎓 Final Year Project • 15 Features • Hybrid CART-SVM")
 
 # ============================================
 # MAIN
@@ -353,16 +554,15 @@ tab1, tab2 = st.tabs(["📏 Mode 1: Real Data (92.3%)", "📈 Mode 2: Simulated 
 with tab1:
     st.markdown("""
     <div class="info-box">
-        <strong>ℹ️ Mode 1: Real Data (6 Species)</strong><br>
-        Arius maculatus, Arius venosus, Cryptarius truncatus, 
-        Nemapteryx macronotacantha, Nemapteryx nenga, Osteogeneiosus militaris
+        <strong>ℹ️ Mode 1: Real Data</strong> — 6 species trained on actual specimen data<br>
+        <span style="color: #4a6fa5; font-size:0.9rem;">Arius maculatus • Arius venosus • Cryptarius truncatus • Nemapteryx macronotacantha • Nemapteryx nenga • Osteogeneiosus militaris</span>
     </div>
     """, unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown("**📏 Head & Body**")
+        st.markdown('<div class="feature-header">📏 Head & Body</div>', unsafe_allow_html=True)
         head = st.number_input("Head Length (mm)", 0.0, 200.0, 45.0, 0.1, key="h_r")
         body = st.number_input("Body Depth (mm)", 0.0, 100.0, 28.0, 0.1, key="b_r")
         eye = st.number_input("Eye Diameter (mm)", 0.0, 30.0, 6.0, 0.1, key="e_r")
@@ -370,7 +570,7 @@ with tab1:
         head_width = st.number_input("Head Width (mm)", 0.0, 100.0, 20.0, 0.1, key="hw_r")
     
     with col2:
-        st.markdown("**🪢 Barbell**")
+        st.markdown('<div class="feature-header">🪢 Barbell</div>', unsafe_allow_html=True)
         maxillary = st.number_input("Maxillary Barbell (mm)", 0.0, 150.0, 35.0, 0.1, key="m_r")
         mandibullary = st.number_input("Mandibullary Barbell (mm)", 0.0, 100.0, 25.0, 0.1, key="md_r")
         mental = st.number_input("Mental Barbell (mm)", 0.0, 80.0, 8.0, 0.1, key="mt_r")
@@ -378,7 +578,7 @@ with tab1:
         total = st.number_input("Total Length (mm)", 0.0, 500.0, 45.0, 0.1, key="t_r")
     
     with col3:
-        st.markdown("**🎯 Fins**")
+        st.markdown('<div class="feature-header">🎯 Fins</div>', unsafe_allow_html=True)
         dorsal = st.number_input("Dorsal Fin Ray", 0, 30, 18, 1, key="d_r")
         anal = st.number_input("Anal Fin Ray", 0, 30, 14, 1, key="a_r")
         pectoral = st.number_input("Pectoral Fin Ray", 0, 30, 16, 1, key="p_r")
@@ -395,10 +595,10 @@ with tab1:
         
         st.markdown(f"""
         <div class="prediction-card">
-            <div>🎯 Predicted Species</div>
+            <div style="font-size: 1.1rem; opacity: 0.8;">🎯 Predicted Species</div>
             <div class="prediction-species">{prediction}</div>
-            <div style="font-size: 1.1rem; opacity: 0.9;">{common}</div>
-            <div style="margin-top: 10px;">🏆 Optimized Hybrid CART-SVM | 92.3% Accuracy</div>
+            <div class="prediction-common">{common}</div>
+            <div class="prediction-badge">🏆 Optimized Hybrid CART-SVM • 92.3% Accuracy</div>
         </div>
         """, unsafe_allow_html=True)
         
@@ -414,36 +614,36 @@ with tab1:
 with tab2:
     st.markdown("""
     <div class="info-box">
-        <strong>ℹ️ Mode 2: Simulated Data (12 Species) - 98.1% Accuracy (BEST!)</strong><br>
-        All 12 Ariidae species with optimized Hybrid CART-SVM
+        <strong>ℹ️ Mode 2: Simulated Data</strong> — 12 species with optimized Hybrid CART-SVM<br>
+        <span style="color: #e67e22; font-size:0.9rem;">🏆 BEST PERFORMANCE: 98.1% Accuracy</span>
     </div>
     """, unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown("**📏 Head & Body**")
-        head = st.number_input("Head Length (mm)", 0.0, 200.0, 123.7, 0.1, key="h_s")
-        body = st.number_input("Body Depth (mm)", 0.0, 100.0, 66.3, 0.1, key="b_s")
-        eye = st.number_input("Eye Diameter (mm)", 0.0, 30.0, 17.4, 0.1, key="e_s")
-        snout = st.number_input("Snout Length (mm)", 0.0, 50.0, 41.0, 0.1, key="s_s")
-        head_width = st.number_input("Head Width (mm)", 0.0, 100.0, 70.5, 0.1, key="hw_s")
+        st.markdown('<div class="feature-header">📏 Head & Body</div>', unsafe_allow_html=True)
+        head = st.number_input("Head Length (mm)", 0.0, 200.0, 45.0, 0.1, key="h_s")
+        body = st.number_input("Body Depth (mm)", 0.0, 100.0, 28.0, 0.1, key="b_s")
+        eye = st.number_input("Eye Diameter (mm)", 0.0, 30.0, 6.0, 0.1, key="e_s")
+        snout = st.number_input("Snout Length (mm)", 0.0, 50.0, 12.0, 0.1, key="s_s")
+        head_width = st.number_input("Head Width (mm)", 0.0, 100.0, 20.0, 0.1, key="hw_s")
     
     with col2:
-        st.markdown("**🪢 Barbell**")
-        maxillary = st.number_input("Maxillary Barbell (mm)", 0.0, 150.0, 59.7, 0.1, key="m_s")
-        mandibullary = st.number_input("Mandibullary Barbell (mm)", 0.0, 100.0, 31.7, 0.1, key="md_s")
-        mental = st.number_input("Mental Barbell (mm)", 0.0, 80.0, 38.2, 0.1, key="mt_s")
-        inter_orbital = st.number_input("Inter-orbital Space (mm)", 0.0, 100.0, 59.2, 0.1, key="io_s")
-        total = st.number_input("Total Length (mm)", 0.0, 500.0, 416.9, 0.1, key="t_s")
+        st.markdown('<div class="feature-header">🪢 Barbell</div>', unsafe_allow_html=True)
+        maxillary = st.number_input("Maxillary Barbell (mm)", 0.0, 150.0, 35.0, 0.1, key="m_s")
+        mandibullary = st.number_input("Mandibullary Barbell (mm)", 0.0, 100.0, 25.0, 0.1, key="md_s")
+        mental = st.number_input("Mental Barbell (mm)", 0.0, 80.0, 8.0, 0.1, key="mt_s")
+        inter_orbital = st.number_input("Inter-orbital Space (mm)", 0.0, 100.0, 8.0, 0.1, key="io_s")
+        total = st.number_input("Total Length (mm)", 0.0, 500.0, 45.0, 0.1, key="t_s")
     
     with col3:
-        st.markdown("**🎯 Fins**")
-        dorsal = st.number_input("Dorsal Fin Ray", 0, 30, 7, 1, key="d_s")
-        anal = st.number_input("Anal Fin Ray", 0, 30, 16, 1, key="a_s")
-        pectoral = st.number_input("Pectoral Fin Ray", 0, 30, 11, 1, key="p_s")
-        pre_dorsal = st.number_input("Pre-dorsal Length (mm)", 0.0, 200.0, 160.5, 0.1, key="pd_s")
-        pre_pelvic = st.number_input("Pre-pelvic Length (mm)", 0.0, 250.0, 206.0, 0.1, key="pp_s")
+        st.markdown('<div class="feature-header">🎯 Fins</div>', unsafe_allow_html=True)
+        dorsal = st.number_input("Dorsal Fin Ray", 0, 30, 18, 1, key="d_s")
+        anal = st.number_input("Anal Fin Ray", 0, 30, 14, 1, key="a_s")
+        pectoral = st.number_input("Pectoral Fin Ray", 0, 30, 16, 1, key="p_s")
+        pre_dorsal = st.number_input("Pre-dorsal Length (mm)", 0.0, 200.0, 30.0, 0.1, key="pd_s")
+        pre_pelvic = st.number_input("Pre-pelvic Length (mm)", 0.0, 250.0, 20.0, 0.1, key="pp_s")
     
     if st.button("🔍 Identify Species (Simulated)", key="btn_sim", use_container_width=True):
         vals = [head, body, eye, snout, maxillary, mandibullary, mental, dorsal, anal, 
@@ -455,11 +655,11 @@ with tab2:
         
         st.markdown(f"""
         <div class="prediction-card-sim">
-            <div>🎯 Predicted Species (Simulated Data)</div>
+            <div style="font-size: 1.1rem; opacity: 0.8;">🎯 Predicted Species (Simulated Data)</div>
             <div class="prediction-species">{pred_full}</div>
-            <div style="font-size: 1.2rem; opacity: 0.9;">{pred_short}</div>
-            <div style="font-size: 1rem; opacity: 0.85;">{common}</div>
-            <div style="margin-top: 10px;">🏆 Optimized Hybrid CART-SVM | 98.1% Accuracy (BEST!)</div>
+            <div class="prediction-short">{pred_short}</div>
+            <div class="prediction-common">{common}</div>
+            <div class="prediction-badge">🏆 Optimized Hybrid CART-SVM • 98.1% Accuracy (BEST!)</div>
         </div>
         """, unsafe_allow_html=True)
         
@@ -469,18 +669,17 @@ with tab2:
             st.write(f"Head: {head}, Total: {total}, Body: {body}, Maxillary: {maxillary}, Mental: {mental}")
             
             st.write("### Rule Checks")
-            
-            # P.LAYARDI
             is_layardi = (head > 100 and total > 380 and body > 50)
-            st.write(f"P.LAYARDI: Head>100 ({head>100}), Total>380 ({total>380}), Body>50 ({body>50})")
-            st.write(f"Result: {'✅ PASS' if is_layardi else '❌ FAIL'}")
-            
-            # P.ARGYROPLEURON
             is_argyro = (head > 60 and total > 230 and maxillary > 45 and mental > 30 and total < 380)
-            st.write(f"P.ARGYROPLEURON: Head>60 ({head>60}), Total>230 ({total>230}), Maxillary>45 ({maxillary>45}), Mental>30 ({mental>30}), Total<380 ({total<380})")
-            st.write(f"Result: {'✅ PASS' if is_argyro else '❌ FAIL'}")
+            is_hsagor = (maxillary > 60 and mental > 40 and total > 220)
+            is_omilitaris = (mandibullary == 0 and mental == 0)
             
-            st.write(f"### Final Prediction: {pred_short}")
+            st.write(f"P.LAYARDI: {'✅' if is_layardi else '❌'} Head>100 ({head>100}), Total>380 ({total>380}), Body>50 ({body>50})")
+            st.write(f"P.ARGYROPLEURON: {'✅' if is_argyro else '❌'} Head>60, Total>230, Maxillary>45, Mental>30")
+            st.write(f"H.SAGOR: {'✅' if is_hsagor else '❌'} Maxillary>60, Mental>40, Total>220")
+            st.write(f"O.MILITARIS: {'✅' if is_omilitaris else '❌'} No barbels")
+            
+            st.write(f"### 🎯 Final Prediction: {pred_short}")
         
         img = get_image(pred_short)
         if img is None:
@@ -492,11 +691,12 @@ with tab2:
             st.info(f"📸 Image for {pred_full} will be available soon")
 
 # ============================================
-# FOOTER
+# FOOTER - LEBIH CANTIK
 # ============================================
 st.markdown("""
 <div class="footer">
-    <p>🎓 <strong>Final Year Project</strong> | Hybrid CART-SVM for Ariidae Classification</p>
-    <p>🏆 98.1% (Simulated) | 92.3% (Real) | 15 Features | 12 Species</p>
+    <p>🎓 <strong>Final Year Project</strong> • Hybrid CART-SVM for Ariidae Classification</p>
+    <p>🏆 <span class="highlight">98.1%</span> (Simulated) • <span class="highlight">92.3%</span> (Real) • 15 Features • 12 Species</p>
+    <p style="font-size: 0.8rem; opacity: 0.6;">🔬 Optimization: Feature Selection + PCA + GridSearchCV</p>
 </div>
 """, unsafe_allow_html=True)
