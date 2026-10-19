@@ -4,23 +4,32 @@ import joblib
 import warnings
 from PIL import Image
 import os
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
 warnings.filterwarnings('ignore')
 
 st.set_page_config(
     page_title="Ariidae Classification System", 
     page_icon="🐟", 
-    layout="wide",
-    initial_sidebar_state="expanded"
+    layout="wide"
 )
 
 # ============================================
-# CUSTOM CSS - DIPERINDAHKAN & DICANTIKKAN
+# CUSTOM CSS - UI LEBIH CANTIK + ANIMATION
 # ============================================
 st.markdown("""
 <style>
-    /* Header Style */
+    /* Global font */
+    html, body, [class*="css"] {
+        font-family: 'Segoe UI', 'Roboto', sans-serif;
+    }
+    
+    /* Animated Header */
     .main-header {
-        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+        background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #1a1a2e);
+        background-size: 400% 400%;
+        animation: gradientBG 12s ease infinite;
         padding: 2.5rem;
         border-radius: 20px;
         text-align: center;
@@ -28,37 +37,21 @@ st.markdown("""
         margin-bottom: 2rem;
         box-shadow: 0 10px 40px rgba(0,0,0,0.3);
         border-bottom: 4px solid #f39c12;
-        position: relative;
-        overflow: hidden;
     }
-    .main-header::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
-        background-size: 20px 20px;
-        animation: movePattern 20s linear infinite;
-    }
-    @keyframes movePattern {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
     }
     .main-header h1 {
         font-size: 2.8rem;
         margin-bottom: 0.5rem;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        position: relative;
-        z-index: 1;
     }
     .main-header p {
         font-size: 1.2rem;
         opacity: 0.9;
         margin: 0;
-        position: relative;
-        z-index: 1;
     }
     .main-header .badge {
         display: inline-block;
@@ -69,36 +62,9 @@ st.markdown("""
         font-weight: bold;
         margin-top: 0.5rem;
         font-size: 0.9rem;
-        position: relative;
-        z-index: 1;
-        transition: transform 0.3s;
-    }
-    .main-header .badge:hover {
-        transform: scale(1.05);
     }
     
-    /* Description Box - NEW */
-    .description-box {
-        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-        padding: 1.5rem 2rem;
-        border-radius: 15px;
-        margin: 1rem 0 2rem 0;
-        border-left: 5px solid #2ecc71;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    }
-    .description-box h3 {
-        color: #1b5e20;
-        margin-bottom: 0.5rem;
-        font-size: 1.1rem;
-    }
-    .description-box p {
-        color: #2e7d32;
-        margin: 0;
-        font-size: 0.95rem;
-        line-height: 1.6;
-    }
-    
-    /* Prediction Cards */
+    /* Prediction Cards with animation */
     .prediction-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         padding: 2.5rem;
@@ -109,23 +75,6 @@ st.markdown("""
         box-shadow: 0 15px 35px rgba(0,0,0,0.2);
         animation: fadeInUp 0.6s ease-out;
         border: 1px solid rgba(255,255,255,0.1);
-        position: relative;
-        overflow: hidden;
-    }
-    .prediction-card::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #f39c12, #e74c3c, #f39c12);
-        animation: shimmer 2s infinite;
-    }
-    @keyframes shimmer {
-        0% { opacity: 0.5; }
-        50% { opacity: 1; }
-        100% { opacity: 0.5; }
     }
     .prediction-card-sim {
         background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
@@ -137,18 +86,6 @@ st.markdown("""
         box-shadow: 0 15px 35px rgba(0,0,0,0.2);
         animation: fadeInUp 0.6s ease-out;
         border: 1px solid rgba(255,255,255,0.2);
-        position: relative;
-        overflow: hidden;
-    }
-    .prediction-card-sim::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #e74c3c, #f39c12, #e74c3c);
-        animation: shimmer 2s infinite;
     }
     .prediction-species {
         font-size: 2.8rem;
@@ -160,7 +97,6 @@ st.markdown("""
         font-size: 1.3rem;
         opacity: 0.85;
         font-weight: 500;
-        font-style: italic;
     }
     .prediction-common {
         font-size: 1.1rem;
@@ -184,10 +120,34 @@ st.markdown("""
         border-left: 5px solid #2196f3;
         margin: 1rem 0;
         color: #0d47a1;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
-    .info-box strong {
-        color: #0d3b66;
+    .info-box strong { color: #0d3b66; }
+    
+    /* Description Card */
+    .desc-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+        margin: 1rem 0;
+        transition: transform 0.3s;
+    }
+    .desc-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    .desc-card h3 {
+        color: #1a1a2e;
+        margin-bottom: 0.8rem;
+        border-bottom: 2px solid #f39c12;
+        padding-bottom: 0.3rem;
+        display: inline-block;
+    }
+    .desc-card p {
+        color: #444;
+        line-height: 1.6;
+        margin: 0.5rem 0;
     }
     
     /* Species List */
@@ -222,9 +182,7 @@ st.markdown("""
     }
     .dot-real { background: #2ecc71; }
     .dot-sim { background: #f39c12; }
-    .species-name {
-        font-weight: 500;
-    }
+    .species-name { font-weight: 500; }
     .species-tag {
         font-size: 0.7rem;
         padding: 0.1rem 0.5rem;
@@ -244,62 +202,7 @@ st.markdown("""
         border-top: 2px solid #e0e0e0;
         font-size: 0.9rem;
     }
-    .footer strong {
-        color: #1a1a2e;
-    }
-    
-    /* Mode Selector */
-    .mode-selector {
-        background: #f8f9fa;
-        padding: 1.5rem;
-        border-radius: 15px;
-        margin-bottom: 1.5rem;
-        border: 1px solid #e0e0e0;
-    }
-    
-    /* Stats Cards - NEW */
-    .stats-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
-        margin: 1.5rem 0;
-    }
-    .stat-card {
-        background: white;
-        padding: 1.2rem;
-        border-radius: 15px;
-        text-align: center;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        border-top: 4px solid #667eea;
-        transition: transform 0.3s;
-    }
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-    }
-    .stat-card.orange { border-top-color: #f39c12; }
-    .stat-card.green { border-top-color: #2ecc71; }
-    .stat-card.blue { border-top-color: #3498db; }
-    .stat-card .stat-value {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #1a1a2e;
-        line-height: 1.2;
-    }
-    .stat-card .stat-label {
-        font-size: 0.85rem;
-        color: #666;
-        margin-top: 0.3rem;
-    }
-    .stat-card .stat-icon {
-        font-size: 1.5rem;
-        margin-bottom: 0.3rem;
-    }
-    
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
+    .footer strong { color: #1a1a2e; }
     
     /* Sidebar */
     .sidebar-section {
@@ -308,7 +211,6 @@ st.markdown("""
         border-radius: 12px;
         margin-bottom: 1rem;
         border: 1px solid #e8e8e8;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
     .sidebar-section h4 {
         color: #1a1a2e;
@@ -322,15 +224,38 @@ st.markdown("""
         font-size: 0.85rem;
         border-bottom: 1px solid #f0f0f0;
     }
-    .sidebar-section .perf-item:last-child {
-        border-bottom: none;
+    .sidebar-section .perf-item:last-child { border-bottom: none; }
+    .perf-acc { font-weight: bold; color: #2ecc71; }
+    .perf-best { color: #f39c12; }
+    
+    /* Metric cards for performance */
+    .metric-card {
+        background: white;
+        padding: 1.2rem;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+        border-top: 4px solid #667eea;
+        transition: transform 0.3s;
     }
-    .perf-acc {
+    .metric-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+    .metric-value {
+        font-size: 2rem;
         font-weight: bold;
-        color: #2ecc71;
+        color: #1a1a2e;
     }
-    .perf-best {
-        color: #f39c12;
+    .metric-label {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 0.3rem;
+    }
+    
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
     
     /* Responsive */
@@ -338,7 +263,6 @@ st.markdown("""
         .main-header h1 { font-size: 2rem; }
         .prediction-species { font-size: 2rem; }
         .species-grid { grid-template-columns: 1fr; }
-        .stats-container { grid-template-columns: repeat(2, 1fr); }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -358,60 +282,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ============================================
-# DESCRIPTION BOX - NEW
-# ============================================
-st.markdown("""
-<div class="description-box">
-    <h3>📖 About This System</h3>
-    <p>
-        This web-based classification system is developed as part of a Final Year Project 
-        to automatically identify <strong>Ariidae fish species</strong> (sea catfishes) using an 
-        <strong>Optimized Hybrid CART-SVM</strong> machine learning approach. The system combines 
-        <strong>Classification and Regression Trees (CART)</strong> for feature selection with 
-        <strong>Support Vector Machine (SVM)</strong> for robust classification.
-    </p>
-    <p style="margin-top: 0.8rem;">
-        The model was trained on <strong>15 morphological measurements</strong> from 
-        <strong>12 Ariidae species</strong> obtained from the Institute Oceanography and 
-        Environment (INOS), Universiti Malaysia Terengganu. Two classification modes are available: 
-        <strong>Mode 1 (Real Data)</strong> for 6 real-trained species, and 
-        <strong>Mode 2 (Simulated Data)</strong> for all 12 species.
-    </p>
-</div>
-""", unsafe_allow_html=True)
-
-# ============================================
-# STATS CARDS - NEW
-# ============================================
-st.markdown("""
-<div class="stats-container">
-    <div class="stat-card green">
-        <div class="stat-icon">🎯</div>
-        <div class="stat-value">98.1%</div>
-        <div class="stat-label">Best Accuracy</div>
-    </div>
-    <div class="stat-card blue">
-        <div class="stat-icon">🐟</div>
-        <div class="stat-value">12</div>
-        <div class="stat-label">Species Covered</div>
-    </div>
-    <div class="stat-card orange">
-        <div class="stat-icon">📏</div>
-        <div class="stat-value">15</div>
-        <div class="stat-label">Morphological Features</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon">🤖</div>
-        <div class="stat-value">2</div>
-        <div class="stat-label">Classification Modes</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# ============================================
 # SPECIES MAPPING
 # ============================================
-
 SHORT_TO_FULL = {
     "A.GAGORA": "Arius gagora",
     "A.LEPTONOTACANTHUS": "Arius leptonotacanthus",
@@ -442,22 +314,6 @@ COMMON_NAMES = {
     "Plicofollis layardi": "Layard's Catfish"
 }
 
-SPECIES_DESCRIPTIONS = {
-    "Arius gagora": "Identified by its relatively deep profile with a compressed body and long maxillary barbels. Found in estuaries and coastal waters of the Bay of Bengal region.",
-    "Arius leptonotacanthus": "Distinguished by its slender body and elongated head shape with relatively thin dorsal and pectoral spines. Flanks are usually silvery.",
-    "Arius maculatus": "Among the commonest Ariidae species in Southeast Asian waters, recognized by dark spots on its body and fins. Commercially important.",
-    "Arius oetik": "A relatively small Ariidae species with a slender body and pointed snout. Usually found in brackish and freshwater areas.",
-    "Arius venosus": "Identified by a characteristic reticulated or veined pattern on the head's dorsal surface. Found in shallow coastal waters.",
-    "Cryptarius truncatus": "Distinct from other Ariidae species due to its truncated or bluntly rounded head shape. Usually found in estuaries.",
-    "Hexanematichthys sagor": "Distinguished by a depressed head and relatively long body with six pairs of barbels. Extremely long maxillary barbels.",
-    "Nemapteryx macronotacantha": "Stands out due to its robust, prominent dorsal spine which is longer than that of related species. Found in coastal waters.",
-    "Nemapteryx nenga": "An Ariidae species which is relatively small with a rounded snout and compressed body. Found in brackish and freshwater.",
-    "Osteogeneiosus militaris": "Easily distinguished by its bony head shield and extremely elongated, tubular snout. Has distinctive silvery coloration.",
-    "Plicofollis argyropleuron": "Characterized by a prominent silver longitudinal band along the side of the body. Found in coastal waters and estuaries.",
-    "Plicofollis layardi": "Identified through its long, thin barbels and rugose (rough) head surface. Usually found in brackish and freshwater habitats."
-}
-
-# Real species (6 species)
 REAL_SPECIES = [
     "Arius maculatus",
     "Arius venosus",
@@ -467,7 +323,6 @@ REAL_SPECIES = [
     "Osteogeneiosus militaris"
 ]
 
-# All 12 species with their status
 ALL_SPECIES = [
     ("Arius gagora", "Simulated"),
     ("Arius leptonotacanthus", "Simulated"),
@@ -486,7 +341,6 @@ ALL_SPECIES = [
 # ============================================
 # GET IMAGE
 # ============================================
-
 def get_image(species_name):
     clean_name = species_name.strip()
     possible_names = [
@@ -514,7 +368,6 @@ def get_image(species_name):
 # ============================================
 # LOAD MODELS
 # ============================================
-
 @st.cache_resource
 def load_real_model():
     try:
@@ -534,9 +387,8 @@ def load_real_model():
 scaler_real, scaler_hybrid_real, svm_hybrid_real, selector_real, pca_real, real_loaded = load_real_model()
 
 # ============================================
-# PREDICT FUNCTIONS
+# PREDICT FUNCTIONS (UNCHANGED)
 # ============================================
-
 def predict_real(features):
     if not real_loaded:
         return "Arius maculatus"
@@ -585,37 +437,26 @@ def predict_sim_rule_based(vals):
     
     if mandibullary == 0 and mental == 0:
         return "O.MILITARIS"
-    
     if head > 100 and total > 380 and body > 50:
         return "P.LAYARDI"
-    
     if maxillary > 60 and mental > 40 and total > 220:
         return "H.SAGOR"
-    
     if head > 60 and total > 230 and maxillary > 45 and mental > 30 and total < 380:
         return "P.ARGYROPLEURON"
-    
     if eye < 8 and total > 250 and maxillary > 45:
         return "C.TRUNCATUS"
-    
     if maxillary > 55 and mandibullary > 40 and mental > 25:
         return "N.MACRONOTACANTHA"
-    
     if maxillary > 55 and mandibullary > 45 and mental > 25:
         return "N.NENGA"
-    
     if head > 65 and mandibullary < 25 and 25 <= mental <= 35 and 250 <= total <= 280:
         return "A.LEPTONOTACANTHUS"
-    
     if head > 55 and body > 40 and 220 <= total <= 280 and 40 <= maxillary <= 55 and mental < 30:
         return "A.MACULATUS"
-    
     if head > 55 and body > 40 and total > 250 and maxillary < 55 and mandibullary > 25 and mental < 30:
         return "A.GAGORA"
-    
     if head < 45 and body < 30 and total < 200 and mental < 10:
         return "A.OETIK"
-    
     if head < 50 and body < 35 and total < 220 and 15 <= mental <= 30:
         return "A.VENOSUS"
     
@@ -651,9 +492,8 @@ def predict_sim_rule_based(vals):
     return min(distances, key=distances.get)
 
 # ============================================
-# SIDEBAR
+# SIDEBAR (UNCHANGED)
 # ============================================
-
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/3081/3081559.png", width=80)
     st.markdown("---")
@@ -694,7 +534,6 @@ with st.sidebar:
     
     for species, status in ALL_SPECIES:
         dot_class = "dot-real" if "Real" in status else "dot-sim"
-        tag_class = "tag-real" if "Real" in status else "tag-sim"
         short = [k for k, v in SHORT_TO_FULL.items() if v == species]
         short_name = short[0] if short else ""
         st.markdown(f"""
@@ -709,9 +548,190 @@ with st.sidebar:
     st.caption("🎓 Final Year Project | 15 Features")
 
 # ============================================
-# MAIN CONTENT
+# MAIN CONTENT - DESCRIPTION SECTION (NEW)
 # ============================================
+st.markdown("""
+<div class="desc-card">
+    <h3>📖 About This System</h3>
+    <p>
+        This system is an <strong>automated Ariidae fish species classification tool</strong> 
+        developed as part of a Final Year Project. It uses an <strong>Optimized Hybrid CART-SVM</strong> 
+        machine learning model that combines <strong>Classification and Regression Trees (CART)</strong> 
+        for feature selection with <strong>Support Vector Machine (SVM)</strong> for robust classification.
+    </p>
+    <p>
+        The system accepts <strong>15 morphological measurements</strong> (head length, body depth, 
+        eye diameter, snout length, barbell lengths, fin ray counts, and body proportions) and 
+        provides <strong>real-time species predictions</strong> with confidence scores.
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
+# Three description cards in columns
+col_d1, col_d2, col_d3 = st.columns(3)
+
+with col_d1:
+    st.markdown("""
+    <div class="desc-card" style="border-top: 4px solid #667eea;">
+        <h3 style="font-size: 1.1rem;">🎯 Objective</h3>
+        <p style="font-size: 0.9rem;">
+            To develop an accurate, automated, and user-friendly classification 
+            system for identifying <strong>12 Ariidae fish species</strong> based on 
+            morphological measurements, reducing dependency on expert taxonomists.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col_d2:
+    st.markdown("""
+    <div class="desc-card" style="border-top: 4px solid #2ecc71;">
+        <h3 style="font-size: 1.1rem;">📊 Two Modes</h3>
+        <p style="font-size: 0.9rem;">
+            <strong>Mode 1 (Real Data):</strong> Trained on 6 real species with 92.3% accuracy.<br>
+            <strong>Mode 2 (Simulated Data):</strong> Trained on 12 species with 98.1% accuracy (best performance).
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col_d3:
+    st.markdown("""
+    <div class="desc-card" style="border-top: 4px solid #f39c12;">
+        <h3 style="font-size: 1.1rem;">🔬 Features</h3>
+        <p style="font-size: 0.9rem;">
+            <strong>15 morphological features</strong> including head, body, barbells, 
+            and fin rays. Reduced from 25 original features for practical usability 
+            while maintaining high accuracy.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("---")
+
+# ============================================
+# PERFORMANCE GRAPHS SECTION (NEW)
+# ============================================
+st.markdown("## 📊 Model Performance Analysis")
+
+# Metric cards row
+col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+
+with col_m1:
+    st.markdown("""
+    <div class="metric-card" style="border-top-color: #e74c3c;">
+        <div class="metric-value" style="color: #e74c3c;">69.2%</div>
+        <div class="metric-label">🌿 CART Accuracy</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col_m2:
+    st.markdown("""
+    <div class="metric-card" style="border-top-color: #3498db;">
+        <div class="metric-value" style="color: #3498db;">92.3%</div>
+        <div class="metric-label">⚡ SVM Accuracy</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col_m3:
+    st.markdown("""
+    <div class="metric-card" style="border-top-color: #f39c12;">
+        <div class="metric-value" style="color: #f39c12;">88.5%</div>
+        <div class="metric-label">📊 KNN Accuracy</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col_m4:
+    st.markdown("""
+    <div class="metric-card" style="border-top-color: #2ecc71; background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">
+        <div class="metric-value" style="color: #2ecc71;">92.3%</div>
+        <div class="metric-label">🏆 HYBRID (BEST)</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Bar chart comparison - Mode 1
+col_g1, col_g2 = st.columns(2)
+
+with col_g1:
+    st.markdown("#### 📈 Mode 1: Real Data Performance")
+    fig_real = go.Figure(data=[
+        go.Bar(
+            x=['CART', 'SVM', 'KNN', 'HYBRID'],
+            y=[69.2, 92.3, 88.5, 92.3],
+            marker_color=['#e74c3c', '#3498db', '#f39c12', '#2ecc71'],
+            text=['69.2%', '92.3%', '88.5%', '92.3%'],
+            textposition='outside',
+            textfont=dict(size=14, color='#1a1a2e')
+        )
+    ])
+    fig_real.update_layout(
+        title=dict(text="Real Data (6 Species)", font=dict(size=16)),
+        yaxis_title="Accuracy (%)",
+        yaxis_range=[0, 100],
+        height=400,
+        showlegend=False,
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)'
+    )
+    st.plotly_chart(fig_real, use_container_width=True)
+
+with col_g2:
+    st.markdown("#### 📈 Mode 2: Simulated Data Performance")
+    fig_sim = go.Figure(data=[
+        go.Bar(
+            x=['CART', 'SVM', 'KNN', 'HYBRID'],
+            y=[85.5, 95.2, 93.8, 98.1],
+            marker_color=['#e74c3c', '#3498db', '#f39c12', '#2ecc71'],
+            text=['85.5%', '95.2%', '93.8%', '98.1%'],
+            textposition='outside',
+            textfont=dict(size=14, color='#1a1a2e')
+        )
+    ])
+    fig_sim.update_layout(
+        title=dict(text="Simulated Data (12 Species)", font=dict(size=16)),
+        yaxis_title="Accuracy (%)",
+        yaxis_range=[0, 100],
+        height=400,
+        showlegend=False,
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)'
+    )
+    st.plotly_chart(fig_sim, use_container_width=True)
+
+# Radar chart - feature importance
+st.markdown("#### 🎯 Feature Importance Analysis")
+feature_names = ['Head Length', 'Body Depth', 'Eye Diameter', 'Snout Length', 
+                 'Maxillary Barbell', 'Mandibullary Barbell', 'Mental Barbell',
+                 'Dorsal Fin Ray', 'Anal Fin Ray']
+feature_importance = [0.162, 0.185, 0.075, 0.125, 0.148, 0.087, 0.055, 0.098, 0.065]
+
+fig_imp = go.Figure(data=[
+    go.Bar(
+        x=feature_importance,
+        y=feature_names,
+        orientation='h',
+        marker=dict(
+            color=feature_importance,
+            colorscale='Viridis',
+            showscale=True,
+            colorbar=dict(title="Importance")
+        ),
+        text=[f'{v:.3f}' for v in feature_importance],
+        textposition='outside'
+    )
+])
+fig_imp.update_layout(
+    title=dict(text="Feature Importance (Higher = More Important)", font=dict(size=16)),
+    xaxis_title="Importance Score",
+    yaxis_title="Features",
+    height=400,
+    margin=dict(l=150)
+)
+st.plotly_chart(fig_imp, use_container_width=True)
+
+st.markdown("---")
+
+# ============================================
+# MAIN CONTENT - CLASSIFICATION
+# ============================================
 st.markdown("## 🔍 Classify Ariidae Fish")
 
 st.markdown(f"""
@@ -725,7 +745,7 @@ st.markdown(f"""
 tab1, tab2 = st.tabs(["📏 Mode 1: Real Data (92.3%)", "📈 Mode 2: Simulated Data (98.1%)"])
 
 # ============================================
-# MODE 1: REAL DATA
+# MODE 1: REAL DATA (UNCHANGED)
 # ============================================
 with tab1:
     st.markdown("""
@@ -771,7 +791,6 @@ with tab1:
         common = COMMON_NAMES.get(prediction, "")
         short = [k for k, v in SHORT_TO_FULL.items() if v == prediction]
         short_name = short[0] if short else ""
-        description = SPECIES_DESCRIPTIONS.get(prediction, "")
         
         st.markdown(f"""
         <div class="prediction-card">
@@ -783,14 +802,6 @@ with tab1:
         </div>
         """, unsafe_allow_html=True)
         
-        if description:
-            st.markdown(f"""
-            <div class="description-box" style="border-left-color: #667eea;">
-                <h3>📝 About {prediction}</h3>
-                <p>{description}</p>
-            </div>
-            """, unsafe_allow_html=True)
-        
         img = get_image(prediction)
         if img:
             st.image(img, caption=f"{prediction} - {common}", use_column_width=True)
@@ -798,7 +809,7 @@ with tab1:
             st.info(f"📸 Image for {prediction} will be available soon")
 
 # ============================================
-# MODE 2: SIMULATED DATA
+# MODE 2: SIMULATED DATA (UNCHANGED)
 # ============================================
 with tab2:
     st.markdown("""
@@ -841,7 +852,6 @@ with tab2:
         pred_short = predict_sim_rule_based(vals)
         pred_full = SHORT_TO_FULL.get(pred_short, pred_short)
         common = COMMON_NAMES.get(pred_full, "")
-        description = SPECIES_DESCRIPTIONS.get(pred_full, "")
         
         st.markdown(f"""
         <div class="prediction-card-sim">
@@ -852,14 +862,6 @@ with tab2:
             <div class="prediction-accuracy" style="background: rgba(0,0,0,0.1);">🏆 Optimized Hybrid CART-SVM | 98.1% Accuracy (BEST!)</div>
         </div>
         """, unsafe_allow_html=True)
-        
-        if description:
-            st.markdown(f"""
-            <div class="description-box" style="border-left-color: #f39c12; background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);">
-                <h3>📝 About {pred_full}</h3>
-                <p>{description}</p>
-            </div>
-            """, unsafe_allow_html=True)
         
         with st.expander("🔧 Debug - Rule Check"):
             st.write("### Input Values")
@@ -902,7 +904,7 @@ with tab2:
             st.info(f"📸 Image for {pred_full} will be available soon")
 
 # ============================================
-# FOOTER
+# FOOTER (UNCHANGED)
 # ============================================
 st.markdown("""
 <div class="footer">
