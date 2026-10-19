@@ -14,32 +14,20 @@ st.set_page_config(
 )
 
 # ============================================
-# CUSTOM CSS - PREMIUM DESIGN
+# CUSTOM CSS - DIPERINDAHKAN & DICANTIKKAN
 # ============================================
 st.markdown("""
 <style>
-    /* ===== GLOBAL FONT & BACKGROUND ===== */
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
-    
-    html, body, [class*="css"] {
-        font-family: 'Poppins', sans-serif;
-    }
-    
-    /* Main background - subtle gradient */
-    .stApp {
-        background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
-    }
-    
-    /* ===== HEADER - PREMIUM GRADIENT ===== */
+    /* Header Style */
     .main-header {
-        background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-        padding: 3rem 2rem;
-        border-radius: 24px;
+        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+        padding: 2.5rem;
+        border-radius: 20px;
         text-align: center;
         color: white;
         margin-bottom: 2rem;
-        box-shadow: 0 20px 60px rgba(15, 12, 41, 0.4);
-        border-bottom: 5px solid #f39c12;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        border-bottom: 4px solid #f39c12;
         position: relative;
         overflow: hidden;
     }
@@ -50,312 +38,307 @@ st.markdown("""
         left: -50%;
         width: 200%;
         height: 200%;
-        background: radial-gradient(circle, rgba(243,156,18,0.15) 0%, transparent 70%);
-        animation: rotate 20s linear infinite;
+        background: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+        background-size: 20px 20px;
+        animation: movePattern 20s linear infinite;
     }
-    @keyframes rotate {
+    @keyframes movePattern {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
     }
     .main-header h1 {
-        font-size: 3rem;
+        font-size: 2.8rem;
         margin-bottom: 0.5rem;
-        text-shadow: 2px 4px 8px rgba(0,0,0,0.4);
-        font-weight: 800;
-        letter-spacing: -1px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         position: relative;
         z-index: 1;
     }
     .main-header p {
         font-size: 1.2rem;
-        opacity: 0.95;
-        margin: 0.3rem 0;
-        position: relative;
-        z-index: 1;
-        font-weight: 300;
-    }
-    .header-badges {
-        margin-top: 1rem;
+        opacity: 0.9;
+        margin: 0;
         position: relative;
         z-index: 1;
     }
     .main-header .badge {
         display: inline-block;
-        background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-        color: #0f0c29;
-        padding: 0.5rem 1.2rem;
-        border-radius: 25px;
-        font-weight: 700;
-        margin: 0.3rem;
+        background: #f39c12;
+        color: #1a1a2e;
+        padding: 0.3rem 1rem;
+        border-radius: 20px;
+        font-weight: bold;
+        margin-top: 0.5rem;
         font-size: 0.9rem;
-        box-shadow: 0 4px 15px rgba(243,156,18,0.4);
-        transition: transform 0.2s;
+        position: relative;
+        z-index: 1;
+        transition: transform 0.3s;
     }
     .main-header .badge:hover {
-        transform: translateY(-2px) scale(1.05);
-    }
-    .badge-green {
-        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%) !important;
-        color: white !important;
-        box-shadow: 0 4px 15px rgba(46,204,113,0.4) !important;
+        transform: scale(1.05);
     }
     
-    /* ===== PREDICTION CARDS ===== */
+    /* Description Box - NEW */
+    .description-box {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        padding: 1.5rem 2rem;
+        border-radius: 15px;
+        margin: 1rem 0 2rem 0;
+        border-left: 5px solid #2ecc71;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    .description-box h3 {
+        color: #1b5e20;
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+    }
+    .description-box p {
+        color: #2e7d32;
+        margin: 0;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+    
+    /* Prediction Cards */
     .prediction-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 3rem 2rem;
-        border-radius: 28px;
+        padding: 2.5rem;
+        border-radius: 25px;
         text-align: center;
         color: white;
-        margin: 2rem 0;
-        box-shadow: 0 25px 50px rgba(102, 126, 234, 0.4);
-        animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-        border: 1px solid rgba(255,255,255,0.15);
+        margin: 1.5rem 0;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        animation: fadeInUp 0.6s ease-out;
+        border: 1px solid rgba(255,255,255,0.1);
         position: relative;
         overflow: hidden;
     }
     .prediction-card::after {
-        content: '🎯';
+        content: '';
         position: absolute;
-        top: 1rem;
-        right: 1.5rem;
-        font-size: 2.5rem;
-        opacity: 0.15;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #f39c12, #e74c3c, #f39c12);
+        animation: shimmer 2s infinite;
+    }
+    @keyframes shimmer {
+        0% { opacity: 0.5; }
+        50% { opacity: 1; }
+        100% { opacity: 0.5; }
     }
     .prediction-card-sim {
         background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
-        padding: 3rem 2rem;
-        border-radius: 28px;
+        padding: 2.5rem;
+        border-radius: 25px;
         text-align: center;
         color: #1a1a2e;
-        margin: 2rem 0;
-        box-shadow: 0 25px 50px rgba(247, 151, 30, 0.4);
-        animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-        border: 1px solid rgba(255,255,255,0.3);
+        margin: 1.5rem 0;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        animation: fadeInUp 0.6s ease-out;
+        border: 1px solid rgba(255,255,255,0.2);
         position: relative;
         overflow: hidden;
     }
     .prediction-card-sim::after {
-        content: '🎯';
+        content: '';
         position: absolute;
-        top: 1rem;
-        right: 1.5rem;
-        font-size: 2.5rem;
-        opacity: 0.2;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #e74c3c, #f39c12, #e74c3c);
+        animation: shimmer 2s infinite;
     }
     .prediction-species {
-        font-size: 3rem;
-        font-weight: 800;
+        font-size: 2.8rem;
+        font-weight: bold;
         margin: 0.8rem 0;
-        text-shadow: 2px 3px 6px rgba(0,0,0,0.3);
-        letter-spacing: -1px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
     }
     .prediction-short {
-        font-size: 1.4rem;
-        opacity: 0.9;
-        font-weight: 600;
-        letter-spacing: 1px;
+        font-size: 1.3rem;
+        opacity: 0.85;
+        font-weight: 500;
+        font-style: italic;
     }
     .prediction-common {
         font-size: 1.1rem;
-        opacity: 0.85;
-        margin-top: 0.4rem;
-        font-style: italic;
+        opacity: 0.8;
+        margin-top: 0.3rem;
     }
     .prediction-accuracy {
-        margin-top: 1.2rem;
-        font-size: 1rem;
-        background: rgba(255,255,255,0.2);
-        padding: 0.5rem 1.4rem;
-        border-radius: 25px;
+        margin-top: 0.8rem;
+        font-size: 0.95rem;
+        background: rgba(255,255,255,0.15);
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
         display: inline-block;
-        font-weight: 600;
-        backdrop-filter: blur(10px);
     }
     
-    /* ===== INFO BOX ===== */
+    /* Info Box */
     .info-box {
         background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-        padding: 1.4rem 1.8rem;
-        border-radius: 16px;
+        padding: 1.2rem 1.5rem;
+        border-radius: 12px;
         border-left: 5px solid #2196f3;
-        margin: 1.2rem 0;
+        margin: 1rem 0;
         color: #0d47a1;
-        box-shadow: 0 4px 15px rgba(33, 150, 243, 0.1);
-        transition: all 0.3s;
-    }
-    .info-box:hover {
-        box-shadow: 0 6px 20px rgba(33, 150, 243, 0.2);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
     .info-box strong {
         color: #0d3b66;
-        font-weight: 600;
     }
     
-    /* ===== SIDEBAR ===== */
-    .sidebar-section {
+    /* Species List */
+    .species-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 0.8rem;
+        margin: 1rem 0;
+    }
+    .species-item {
+        background: white;
+        padding: 0.6rem 1rem;
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s;
+        font-size: 0.9rem;
+    }
+    .species-item:hover {
+        border-color: #11998e;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        transform: translateY(-2px);
+    }
+    .species-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    .dot-real { background: #2ecc71; }
+    .dot-sim { background: #f39c12; }
+    .species-name {
+        font-weight: 500;
+    }
+    .species-tag {
+        font-size: 0.7rem;
+        padding: 0.1rem 0.5rem;
+        border-radius: 10px;
+        margin-left: auto;
+        flex-shrink: 0;
+    }
+    .tag-real { background: #d5f5e3; color: #1a7a3a; }
+    .tag-sim { background: #fdebd0; color: #a04000; }
+    
+    /* Footer */
+    .footer {
+        text-align: center;
+        color: #666;
+        margin-top: 3rem;
+        padding: 1.5rem;
+        border-top: 2px solid #e0e0e0;
+        font-size: 0.9rem;
+    }
+    .footer strong {
+        color: #1a1a2e;
+    }
+    
+    /* Mode Selector */
+    .mode-selector {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 15px;
+        margin-bottom: 1.5rem;
+        border: 1px solid #e0e0e0;
+    }
+    
+    /* Stats Cards - NEW */
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin: 1.5rem 0;
+    }
+    .stat-card {
         background: white;
         padding: 1.2rem;
-        border-radius: 16px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border-top: 4px solid #667eea;
+        transition: transform 0.3s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+    .stat-card.orange { border-top-color: #f39c12; }
+    .stat-card.green { border-top-color: #2ecc71; }
+    .stat-card.blue { border-top-color: #3498db; }
+    .stat-card .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #1a1a2e;
+        line-height: 1.2;
+    }
+    .stat-card .stat-label {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 0.3rem;
+    }
+    .stat-card .stat-icon {
+        font-size: 1.5rem;
+        margin-bottom: 0.3rem;
+    }
+    
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Sidebar */
+    .sidebar-section {
+        background: white;
+        padding: 1rem;
+        border-radius: 12px;
         margin-bottom: 1rem;
         border: 1px solid #e8e8e8;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-        transition: all 0.3s;
-    }
-    .sidebar-section:hover {
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
     .sidebar-section h4 {
         color: #1a1a2e;
-        margin-bottom: 0.7rem;
+        margin-bottom: 0.5rem;
         font-size: 0.95rem;
-        font-weight: 700;
     }
     .sidebar-section .perf-item {
         display: flex;
         justify-content: space-between;
-        padding: 0.4rem 0;
-        font-size: 0.88rem;
+        padding: 0.2rem 0;
+        font-size: 0.85rem;
         border-bottom: 1px solid #f0f0f0;
-        transition: all 0.2s;
-    }
-    .sidebar-section .perf-item:hover {
-        padding-left: 0.3rem;
-        background: #fafafa;
     }
     .sidebar-section .perf-item:last-child {
         border-bottom: none;
     }
     .perf-acc {
-        font-weight: 700;
+        font-weight: bold;
         color: #2ecc71;
     }
     .perf-best {
         color: #f39c12;
-        font-size: 1rem;
     }
     
-    /* ===== SPECIES LIST ===== */
-    .species-item {
-        display: flex;
-        align-items: center;
-        padding: 0.5rem 0.7rem;
-        font-size: 0.85rem;
-        border-bottom: 1px solid #f0f0f0;
-        border-radius: 8px;
-        transition: all 0.2s;
-        margin-bottom: 2px;
-    }
-    .species-item:hover {
-        background: #f8f9fa;
-        transform: translateX(3px);
-    }
-    .species-dot {
-        display: inline-block;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        flex-shrink: 0;
-        margin-right: 0.5rem;
-    }
-    .dot-real { 
-        background: #2ecc71; 
-        box-shadow: 0 0 8px rgba(46,204,113,0.6);
-    }
-    .dot-sim { 
-        background: #f39c12; 
-        box-shadow: 0 0 8px rgba(243,156,18,0.6);
-    }
-    
-    /* ===== FOOTER ===== */
-    .footer {
-        text-align: center;
-        color: #666;
-        margin-top: 4rem;
-        padding: 2rem;
-        border-top: 2px solid #e0e0e0;
-        font-size: 0.9rem;
-        background: linear-gradient(180deg, transparent 0%, #f8fafc 100%);
-        border-radius: 16px;
-    }
-    .footer strong {
-        color: #1a1a2e;
-        font-weight: 700;
-    }
-    .footer-species {
-        font-size: 0.78rem;
-        color: #999;
-        margin-top: 0.7rem;
-        line-height: 1.6;
-    }
-    
-    /* ===== TABS CUSTOMIZATION ===== */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 1rem;
-        background: white;
-        padding: 0.5rem;
-        border-radius: 16px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-    .stTabs [data-baseweb="tab"] {
-        border-radius: 12px;
-        padding: 0.6rem 1.5rem;
-        font-weight: 600;
-        transition: all 0.3s;
-    }
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white !important;
-    }
-    
-    /* ===== INPUT FIELDS ===== */
-    .stNumberInput input {
-        border-radius: 10px !important;
-        border: 1px solid #e0e0e0 !important;
-        transition: all 0.2s;
-    }
-    .stNumberInput input:focus {
-        border-color: #667eea !important;
-        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
-    }
-    
-    /* ===== BUTTONS ===== */
-    .stButton > button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        border-radius: 12px;
-        padding: 0.7rem 2rem;
-        font-weight: 600;
-        font-size: 1rem;
-        transition: all 0.3s;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        letter-spacing: 0.5px;
-    }
-    .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
-    }
-    
-    /* ===== ANIMATIONS ===== */
-    @keyframes fadeInUp {
-        from { 
-            opacity: 0; 
-            transform: translateY(30px); 
-        }
-        to { 
-            opacity: 1; 
-            transform: translateY(0); 
-        }
-    }
-    
-    /* ===== RESPONSIVE ===== */
+    /* Responsive */
     @media (max-width: 768px) {
         .main-header h1 { font-size: 2rem; }
-        .main-header { padding: 2rem 1rem; }
         .prediction-species { font-size: 2rem; }
-        .prediction-card, .prediction-card-sim { padding: 2rem 1rem; }
-        .stTabs [data-baseweb="tab"] { padding: 0.5rem 0.8rem; font-size: 0.85rem; }
+        .species-grid { grid-template-columns: 1fr; }
+        .stats-container { grid-template-columns: repeat(2, 1fr); }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -367,9 +350,60 @@ st.markdown("""
 <div class="main-header">
     <h1>🐟 Ariidae Fish Classification System</h1>
     <p>Optimized Hybrid CART-SVM | 15 Morphological Features</p>
-    <div class="header-badges">
+    <div>
         <span class="badge">🏆 Real Data: 92.3%</span>
-        <span class="badge badge-green">🏆 Simulated Data: 98.1%</span>
+        <span class="badge" style="background: #2ecc71; margin-left: 0.5rem;">🏆 Simulated Data: 98.1%</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# ============================================
+# DESCRIPTION BOX - NEW
+# ============================================
+st.markdown("""
+<div class="description-box">
+    <h3>📖 About This System</h3>
+    <p>
+        This web-based classification system is developed as part of a Final Year Project 
+        to automatically identify <strong>Ariidae fish species</strong> (sea catfishes) using an 
+        <strong>Optimized Hybrid CART-SVM</strong> machine learning approach. The system combines 
+        <strong>Classification and Regression Trees (CART)</strong> for feature selection with 
+        <strong>Support Vector Machine (SVM)</strong> for robust classification.
+    </p>
+    <p style="margin-top: 0.8rem;">
+        The model was trained on <strong>15 morphological measurements</strong> from 
+        <strong>12 Ariidae species</strong> obtained from the Institute Oceanography and 
+        Environment (INOS), Universiti Malaysia Terengganu. Two classification modes are available: 
+        <strong>Mode 1 (Real Data)</strong> for 6 real-trained species, and 
+        <strong>Mode 2 (Simulated Data)</strong> for all 12 species.
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+# ============================================
+# STATS CARDS - NEW
+# ============================================
+st.markdown("""
+<div class="stats-container">
+    <div class="stat-card green">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-value">98.1%</div>
+        <div class="stat-label">Best Accuracy</div>
+    </div>
+    <div class="stat-card blue">
+        <div class="stat-icon">🐟</div>
+        <div class="stat-value">12</div>
+        <div class="stat-label">Species Covered</div>
+    </div>
+    <div class="stat-card orange">
+        <div class="stat-icon">📏</div>
+        <div class="stat-value">15</div>
+        <div class="stat-label">Morphological Features</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🤖</div>
+        <div class="stat-value">2</div>
+        <div class="stat-label">Classification Modes</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -408,6 +442,22 @@ COMMON_NAMES = {
     "Plicofollis layardi": "Layard's Catfish"
 }
 
+SPECIES_DESCRIPTIONS = {
+    "Arius gagora": "Identified by its relatively deep profile with a compressed body and long maxillary barbels. Found in estuaries and coastal waters of the Bay of Bengal region.",
+    "Arius leptonotacanthus": "Distinguished by its slender body and elongated head shape with relatively thin dorsal and pectoral spines. Flanks are usually silvery.",
+    "Arius maculatus": "Among the commonest Ariidae species in Southeast Asian waters, recognized by dark spots on its body and fins. Commercially important.",
+    "Arius oetik": "A relatively small Ariidae species with a slender body and pointed snout. Usually found in brackish and freshwater areas.",
+    "Arius venosus": "Identified by a characteristic reticulated or veined pattern on the head's dorsal surface. Found in shallow coastal waters.",
+    "Cryptarius truncatus": "Distinct from other Ariidae species due to its truncated or bluntly rounded head shape. Usually found in estuaries.",
+    "Hexanematichthys sagor": "Distinguished by a depressed head and relatively long body with six pairs of barbels. Extremely long maxillary barbels.",
+    "Nemapteryx macronotacantha": "Stands out due to its robust, prominent dorsal spine which is longer than that of related species. Found in coastal waters.",
+    "Nemapteryx nenga": "An Ariidae species which is relatively small with a rounded snout and compressed body. Found in brackish and freshwater.",
+    "Osteogeneiosus militaris": "Easily distinguished by its bony head shield and extremely elongated, tubular snout. Has distinctive silvery coloration.",
+    "Plicofollis argyropleuron": "Characterized by a prominent silver longitudinal band along the side of the body. Found in coastal waters and estuaries.",
+    "Plicofollis layardi": "Identified through its long, thin barbels and rugose (rough) head surface. Usually found in brackish and freshwater habitats."
+}
+
+# Real species (6 species)
 REAL_SPECIES = [
     "Arius maculatus",
     "Arius venosus",
@@ -417,6 +467,7 @@ REAL_SPECIES = [
     "Osteogeneiosus militaris"
 ]
 
+# All 12 species with their status
 ALL_SPECIES = [
     ("Arius gagora", "Simulated"),
     ("Arius leptonotacanthus", "Simulated"),
@@ -534,26 +585,37 @@ def predict_sim_rule_based(vals):
     
     if mandibullary == 0 and mental == 0:
         return "O.MILITARIS"
+    
     if head > 100 and total > 380 and body > 50:
         return "P.LAYARDI"
+    
     if maxillary > 60 and mental > 40 and total > 220:
         return "H.SAGOR"
+    
     if head > 60 and total > 230 and maxillary > 45 and mental > 30 and total < 380:
         return "P.ARGYROPLEURON"
+    
     if eye < 8 and total > 250 and maxillary > 45:
         return "C.TRUNCATUS"
+    
     if maxillary > 55 and mandibullary > 40 and mental > 25:
         return "N.MACRONOTACANTHA"
+    
     if maxillary > 55 and mandibullary > 45 and mental > 25:
         return "N.NENGA"
+    
     if head > 65 and mandibullary < 25 and 25 <= mental <= 35 and 250 <= total <= 280:
         return "A.LEPTONOTACANTHUS"
+    
     if head > 55 and body > 40 and 220 <= total <= 280 and 40 <= maxillary <= 55 and mental < 30:
         return "A.MACULATUS"
+    
     if head > 55 and body > 40 and total > 250 and maxillary < 55 and mandibullary > 25 and mental < 30:
         return "A.GAGORA"
+    
     if head < 45 and body < 30 and total < 200 and mental < 10:
         return "A.OETIK"
+    
     if head < 50 and body < 35 and total < 220 and 15 <= mental <= 30:
         return "A.VENOSUS"
     
@@ -611,13 +673,13 @@ with st.sidebar:
             <span>📊 KNN</span>
             <span class="perf-acc">88.5%</span>
         </div>
-        <div class="perf-item" style="border-bottom: 2px solid #f39c12; padding-bottom: 0.6rem; margin-top: 0.3rem;">
+        <div class="perf-item" style="border-bottom: 2px solid #f39c12; padding-bottom: 0.5rem;">
             <span>🏆 HYBRID</span>
             <span class="perf-acc perf-best">92.3%</span>
         </div>
-        <div style="margin-top: 0.7rem; padding: 0.5rem; background: #fef9e7; border-radius: 8px; font-size: 0.8rem; color: #7d6608;">
+        <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #666;">
             <span>🏆 Simulated: </span>
-            <span style="color: #f39c12; font-weight: 700;">98.1%</span>
+            <span style="color: #f39c12; font-weight: bold;">98.1%</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -632,13 +694,14 @@ with st.sidebar:
     
     for species, status in ALL_SPECIES:
         dot_class = "dot-real" if "Real" in status else "dot-sim"
+        tag_class = "tag-real" if "Real" in status else "tag-sim"
         short = [k for k, v in SHORT_TO_FULL.items() if v == species]
         short_name = short[0] if short else ""
         st.markdown(f"""
-        <div class="species-item">
-            <span class="species-dot {dot_class}"></span>
-            <span style="font-weight: 500; margin-left: 0.3rem;">{short_name}</span>
-            <span style="margin-left: auto; color: #999; font-size: 0.72rem;">{status.replace('✅', '').strip()}</span>
+        <div style="display: flex; align-items: center; padding: 0.3rem 0.5rem; font-size: 0.82rem; border-bottom: 1px solid #f0f0f0;">
+            <span class="species-dot {dot_class}" style="width:8px;height:8px;"></span>
+            <span style="font-weight:500; margin-left:0.5rem;">{short_name}</span>
+            <span style="margin-left:0.3rem; color:#666; font-size:0.75rem;">{status.replace('✅', '')}</span>
         </div>
         """, unsafe_allow_html=True)
     
@@ -654,8 +717,8 @@ st.markdown("## 🔍 Classify Ariidae Fish")
 st.markdown(f"""
 <div class="info-box">
     <strong>📚 Species Coverage:</strong> 12 Ariidae species 
-    <span style="margin-left: 1.5rem; padding: 0.2rem 0.8rem; background: #d5f5e3; border-radius: 12px; color: #1a7a3a;">🟢 Real-trained: 6 species</span>
-    <span style="margin-left: 0.5rem; padding: 0.2rem 0.8rem; background: #fdebd0; border-radius: 12px; color: #a04000;">🟡 Simulated reference: 6 species</span>
+    <span style="margin-left: 1rem;">🟢 Real-trained: 6 species</span>
+    <span style="margin-left: 1rem;">🟡 Simulated reference: 6 species</span>
 </div>
 """, unsafe_allow_html=True)
 
@@ -708,6 +771,7 @@ with tab1:
         common = COMMON_NAMES.get(prediction, "")
         short = [k for k, v in SHORT_TO_FULL.items() if v == prediction]
         short_name = short[0] if short else ""
+        description = SPECIES_DESCRIPTIONS.get(prediction, "")
         
         st.markdown(f"""
         <div class="prediction-card">
@@ -718,6 +782,14 @@ with tab1:
             <div class="prediction-accuracy">🏆 Optimized Hybrid CART-SVM | 92.3% Accuracy</div>
         </div>
         """, unsafe_allow_html=True)
+        
+        if description:
+            st.markdown(f"""
+            <div class="description-box" style="border-left-color: #667eea;">
+                <h3>📝 About {prediction}</h3>
+                <p>{description}</p>
+            </div>
+            """, unsafe_allow_html=True)
         
         img = get_image(prediction)
         if img:
@@ -769,6 +841,7 @@ with tab2:
         pred_short = predict_sim_rule_based(vals)
         pred_full = SHORT_TO_FULL.get(pred_short, pred_short)
         common = COMMON_NAMES.get(pred_full, "")
+        description = SPECIES_DESCRIPTIONS.get(pred_full, "")
         
         st.markdown(f"""
         <div class="prediction-card-sim">
@@ -776,9 +849,17 @@ with tab2:
             <div class="prediction-species">{pred_full}</div>
             <div class="prediction-short">{pred_short}</div>
             <div class="prediction-common">{common}</div>
-            <div class="prediction-accuracy" style="background: rgba(0,0,0,0.12);">🏆 Optimized Hybrid CART-SVM | 98.1% Accuracy (BEST!)</div>
+            <div class="prediction-accuracy" style="background: rgba(0,0,0,0.1);">🏆 Optimized Hybrid CART-SVM | 98.1% Accuracy (BEST!)</div>
         </div>
         """, unsafe_allow_html=True)
+        
+        if description:
+            st.markdown(f"""
+            <div class="description-box" style="border-left-color: #f39c12; background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);">
+                <h3>📝 About {pred_full}</h3>
+                <p>{description}</p>
+            </div>
+            """, unsafe_allow_html=True)
         
         with st.expander("🔧 Debug - Rule Check"):
             st.write("### Input Values")
@@ -827,10 +908,10 @@ st.markdown("""
 <div class="footer">
     <p>🎓 <strong>Final Year Project</strong> | Hybrid CART-SVM for Ariidae Classification</p>
     <p>🏆 98.1% (Simulated) | 92.3% (Real) | 15 Features | 12 Species</p>
-    <p class="footer-species">
-        📚 Arius gagora · Arius leptonotacanthus · Arius maculatus · Arius oetik · 
-        Arius venosus · Cryptarius truncatus · Hexanematichthys sagor · Nemapteryx macronotacantha · 
-        Nemapteryx nenga · Osteogeneiosus militaris · Plicofollis argyropleuron · Plicofollis layardi
+    <p style="font-size: 0.8rem; color: #999; margin-top: 0.5rem;">
+        📚 Species: Arius gagora, Arius leptonotacanthus, Arius maculatus, Arius oetik, 
+        Arius venosus, Cryptarius truncatus, Hexanematichthys sagor, Nemapteryx macronotacantha, 
+        Nemapteryx nenga, Osteogeneiosus militaris, Plicofollis argyropleuron, Plicofollis layardi
     </p>
 </div>
 """, unsafe_allow_html=True)
