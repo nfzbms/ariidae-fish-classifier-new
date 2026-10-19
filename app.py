@@ -4,17 +4,17 @@ import joblib
 import warnings
 from PIL import Image
 import os
-import matplotlib.pyplot as plt
 warnings.filterwarnings('ignore')
 
 st.set_page_config(
     page_title="Ariidae Classification System", 
     page_icon="🐟", 
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 # ============================================
-# CUSTOM CSS - DIPERINDAHKAN
+# CUSTOM CSS - DIPERINDAHKAN & DICANTIKKAN
 # ============================================
 st.markdown("""
 <style>
@@ -28,16 +28,37 @@ st.markdown("""
         margin-bottom: 2rem;
         box-shadow: 0 10px 40px rgba(0,0,0,0.3);
         border-bottom: 4px solid #f39c12;
+        position: relative;
+        overflow: hidden;
+    }
+    .main-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+        background-size: 20px 20px;
+        animation: movePattern 20s linear infinite;
+    }
+    @keyframes movePattern {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
     }
     .main-header h1 {
         font-size: 2.8rem;
         margin-bottom: 0.5rem;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        position: relative;
+        z-index: 1;
     }
     .main-header p {
         font-size: 1.2rem;
         opacity: 0.9;
         margin: 0;
+        position: relative;
+        z-index: 1;
     }
     .main-header .badge {
         display: inline-block;
@@ -48,6 +69,33 @@ st.markdown("""
         font-weight: bold;
         margin-top: 0.5rem;
         font-size: 0.9rem;
+        position: relative;
+        z-index: 1;
+        transition: transform 0.3s;
+    }
+    .main-header .badge:hover {
+        transform: scale(1.05);
+    }
+    
+    /* Description Box - NEW */
+    .description-box {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        padding: 1.5rem 2rem;
+        border-radius: 15px;
+        margin: 1rem 0 2rem 0;
+        border-left: 5px solid #2ecc71;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    .description-box h3 {
+        color: #1b5e20;
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+    }
+    .description-box p {
+        color: #2e7d32;
+        margin: 0;
+        font-size: 0.95rem;
+        line-height: 1.6;
     }
     
     /* Prediction Cards */
@@ -61,6 +109,23 @@ st.markdown("""
         box-shadow: 0 15px 35px rgba(0,0,0,0.2);
         animation: fadeInUp 0.6s ease-out;
         border: 1px solid rgba(255,255,255,0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    .prediction-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #f39c12, #e74c3c, #f39c12);
+        animation: shimmer 2s infinite;
+    }
+    @keyframes shimmer {
+        0% { opacity: 0.5; }
+        50% { opacity: 1; }
+        100% { opacity: 0.5; }
     }
     .prediction-card-sim {
         background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
@@ -72,6 +137,18 @@ st.markdown("""
         box-shadow: 0 15px 35px rgba(0,0,0,0.2);
         animation: fadeInUp 0.6s ease-out;
         border: 1px solid rgba(255,255,255,0.2);
+        position: relative;
+        overflow: hidden;
+    }
+    .prediction-card-sim::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #e74c3c, #f39c12, #e74c3c);
+        animation: shimmer 2s infinite;
     }
     .prediction-species {
         font-size: 2.8rem;
@@ -83,6 +160,7 @@ st.markdown("""
         font-size: 1.3rem;
         opacity: 0.85;
         font-weight: 500;
+        font-style: italic;
     }
     .prediction-common {
         font-size: 1.1rem;
@@ -106,6 +184,7 @@ st.markdown("""
         border-left: 5px solid #2196f3;
         margin: 1rem 0;
         color: #0d47a1;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
     .info-box strong {
         color: #0d3b66;
@@ -178,6 +257,45 @@ st.markdown("""
         border: 1px solid #e0e0e0;
     }
     
+    /* Stats Cards - NEW */
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin: 1.5rem 0;
+    }
+    .stat-card {
+        background: white;
+        padding: 1.2rem;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border-top: 4px solid #667eea;
+        transition: transform 0.3s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+    .stat-card.orange { border-top-color: #f39c12; }
+    .stat-card.green { border-top-color: #2ecc71; }
+    .stat-card.blue { border-top-color: #3498db; }
+    .stat-card .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #1a1a2e;
+        line-height: 1.2;
+    }
+    .stat-card .stat-label {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 0.3rem;
+    }
+    .stat-card .stat-icon {
+        font-size: 1.5rem;
+        margin-bottom: 0.3rem;
+    }
+    
     @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
@@ -190,6 +308,7 @@ st.markdown("""
         border-radius: 12px;
         margin-bottom: 1rem;
         border: 1px solid #e8e8e8;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
     .sidebar-section h4 {
         color: #1a1a2e;
@@ -214,39 +333,12 @@ st.markdown("""
         color: #f39c12;
     }
     
-    /* Metric Cards for Performance */
-    .metric-card {
-        background: white;
-        padding: 1.2rem;
-        border-radius: 15px;
-        text-align: center;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        border-top: 4px solid #667eea;
-        transition: transform 0.3s;
-    }
-    .metric-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-    }
-    .metric-value {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #1a1a2e;
-    }
-    .metric-label {
-        font-size: 0.85rem;
-        color: #666;
-        margin-top: 0.3rem;
-    }
-    .metric-best {
-        border-top-color: #f39c12;
-    }
-    
     /* Responsive */
     @media (max-width: 768px) {
         .main-header h1 { font-size: 2rem; }
         .prediction-species { font-size: 2rem; }
         .species-grid { grid-template-columns: 1fr; }
+        .stats-container { grid-template-columns: repeat(2, 1fr); }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -261,6 +353,57 @@ st.markdown("""
     <div>
         <span class="badge">🏆 Real Data: 92.3%</span>
         <span class="badge" style="background: #2ecc71; margin-left: 0.5rem;">🏆 Simulated Data: 98.1%</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# ============================================
+# DESCRIPTION BOX - NEW
+# ============================================
+st.markdown("""
+<div class="description-box">
+    <h3>📖 About This System</h3>
+    <p>
+        This web-based classification system is developed as part of a Final Year Project 
+        to automatically identify <strong>Ariidae fish species</strong> (sea catfishes) using an 
+        <strong>Optimized Hybrid CART-SVM</strong> machine learning approach. The system combines 
+        <strong>Classification and Regression Trees (CART)</strong> for feature selection with 
+        <strong>Support Vector Machine (SVM)</strong> for robust classification.
+    </p>
+    <p style="margin-top: 0.8rem;">
+        The model was trained on <strong>15 morphological measurements</strong> from 
+        <strong>12 Ariidae species</strong> obtained from the Institute Oceanography and 
+        Environment (INOS), Universiti Malaysia Terengganu. Two classification modes are available: 
+        <strong>Mode 1 (Real Data)</strong> for 6 real-trained species, and 
+        <strong>Mode 2 (Simulated Data)</strong> for all 12 species.
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+# ============================================
+# STATS CARDS - NEW
+# ============================================
+st.markdown("""
+<div class="stats-container">
+    <div class="stat-card green">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-value">98.1%</div>
+        <div class="stat-label">Best Accuracy</div>
+    </div>
+    <div class="stat-card blue">
+        <div class="stat-icon">🐟</div>
+        <div class="stat-value">12</div>
+        <div class="stat-label">Species Covered</div>
+    </div>
+    <div class="stat-card orange">
+        <div class="stat-icon">📏</div>
+        <div class="stat-value">15</div>
+        <div class="stat-label">Morphological Features</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🤖</div>
+        <div class="stat-value">2</div>
+        <div class="stat-label">Classification Modes</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -299,6 +442,22 @@ COMMON_NAMES = {
     "Plicofollis layardi": "Layard's Catfish"
 }
 
+SPECIES_DESCRIPTIONS = {
+    "Arius gagora": "Identified by its relatively deep profile with a compressed body and long maxillary barbels. Found in estuaries and coastal waters of the Bay of Bengal region.",
+    "Arius leptonotacanthus": "Distinguished by its slender body and elongated head shape with relatively thin dorsal and pectoral spines. Flanks are usually silvery.",
+    "Arius maculatus": "Among the commonest Ariidae species in Southeast Asian waters, recognized by dark spots on its body and fins. Commercially important.",
+    "Arius oetik": "A relatively small Ariidae species with a slender body and pointed snout. Usually found in brackish and freshwater areas.",
+    "Arius venosus": "Identified by a characteristic reticulated or veined pattern on the head's dorsal surface. Found in shallow coastal waters.",
+    "Cryptarius truncatus": "Distinct from other Ariidae species due to its truncated or bluntly rounded head shape. Usually found in estuaries.",
+    "Hexanematichthys sagor": "Distinguished by a depressed head and relatively long body with six pairs of barbels. Extremely long maxillary barbels.",
+    "Nemapteryx macronotacantha": "Stands out due to its robust, prominent dorsal spine which is longer than that of related species. Found in coastal waters.",
+    "Nemapteryx nenga": "An Ariidae species which is relatively small with a rounded snout and compressed body. Found in brackish and freshwater.",
+    "Osteogeneiosus militaris": "Easily distinguished by its bony head shield and extremely elongated, tubular snout. Has distinctive silvery coloration.",
+    "Plicofollis argyropleuron": "Characterized by a prominent silver longitudinal band along the side of the body. Found in coastal waters and estuaries.",
+    "Plicofollis layardi": "Identified through its long, thin barbels and rugose (rough) head surface. Usually found in brackish and freshwater habitats."
+}
+
+# Real species (6 species)
 REAL_SPECIES = [
     "Arius maculatus",
     "Arius venosus",
@@ -308,6 +467,7 @@ REAL_SPECIES = [
     "Osteogeneiosus militaris"
 ]
 
+# All 12 species with their status
 ALL_SPECIES = [
     ("Arius gagora", "Simulated"),
     ("Arius leptonotacanthus", "Simulated"),
@@ -425,26 +585,37 @@ def predict_sim_rule_based(vals):
     
     if mandibullary == 0 and mental == 0:
         return "O.MILITARIS"
+    
     if head > 100 and total > 380 and body > 50:
         return "P.LAYARDI"
+    
     if maxillary > 60 and mental > 40 and total > 220:
         return "H.SAGOR"
+    
     if head > 60 and total > 230 and maxillary > 45 and mental > 30 and total < 380:
         return "P.ARGYROPLEURON"
+    
     if eye < 8 and total > 250 and maxillary > 45:
         return "C.TRUNCATUS"
+    
     if maxillary > 55 and mandibullary > 40 and mental > 25:
         return "N.MACRONOTACANTHA"
+    
     if maxillary > 55 and mandibullary > 45 and mental > 25:
         return "N.NENGA"
+    
     if head > 65 and mandibullary < 25 and 25 <= mental <= 35 and 250 <= total <= 280:
         return "A.LEPTONOTACANTHUS"
+    
     if head > 55 and body > 40 and 220 <= total <= 280 and 40 <= maxillary <= 55 and mental < 30:
         return "A.MACULATUS"
+    
     if head > 55 and body > 40 and total > 250 and maxillary < 55 and mandibullary > 25 and mental < 30:
         return "A.GAGORA"
+    
     if head < 45 and body < 30 and total < 200 and mental < 10:
         return "A.OETIK"
+    
     if head < 50 and body < 35 and total < 220 and 15 <= mental <= 30:
         return "A.VENOSUS"
     
@@ -551,7 +722,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-tab1, tab2, tab3 = st.tabs(["📏 Mode 1: Real Data (92.3%)", "📈 Mode 2: Simulated Data (98.1%)", "📊 Performance Analysis"])
+tab1, tab2 = st.tabs(["📏 Mode 1: Real Data (92.3%)", "📈 Mode 2: Simulated Data (98.1%)"])
 
 # ============================================
 # MODE 1: REAL DATA
@@ -600,6 +771,7 @@ with tab1:
         common = COMMON_NAMES.get(prediction, "")
         short = [k for k, v in SHORT_TO_FULL.items() if v == prediction]
         short_name = short[0] if short else ""
+        description = SPECIES_DESCRIPTIONS.get(prediction, "")
         
         st.markdown(f"""
         <div class="prediction-card">
@@ -610,6 +782,14 @@ with tab1:
             <div class="prediction-accuracy">🏆 Optimized Hybrid CART-SVM | 92.3% Accuracy</div>
         </div>
         """, unsafe_allow_html=True)
+        
+        if description:
+            st.markdown(f"""
+            <div class="description-box" style="border-left-color: #667eea;">
+                <h3>📝 About {prediction}</h3>
+                <p>{description}</p>
+            </div>
+            """, unsafe_allow_html=True)
         
         img = get_image(prediction)
         if img:
@@ -661,6 +841,7 @@ with tab2:
         pred_short = predict_sim_rule_based(vals)
         pred_full = SHORT_TO_FULL.get(pred_short, pred_short)
         common = COMMON_NAMES.get(pred_full, "")
+        description = SPECIES_DESCRIPTIONS.get(pred_full, "")
         
         st.markdown(f"""
         <div class="prediction-card-sim">
@@ -671,6 +852,14 @@ with tab2:
             <div class="prediction-accuracy" style="background: rgba(0,0,0,0.1);">🏆 Optimized Hybrid CART-SVM | 98.1% Accuracy (BEST!)</div>
         </div>
         """, unsafe_allow_html=True)
+        
+        if description:
+            st.markdown(f"""
+            <div class="description-box" style="border-left-color: #f39c12; background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);">
+                <h3>📝 About {pred_full}</h3>
+                <p>{description}</p>
+            </div>
+            """, unsafe_allow_html=True)
         
         with st.expander("🔧 Debug - Rule Check"):
             st.write("### Input Values")
@@ -711,255 +900,6 @@ with tab2:
             st.image(img, caption=f"{pred_full} ({pred_short})", use_column_width=True)
         else:
             st.info(f"📸 Image for {pred_full} will be available soon")
-
-# ============================================
-# MODE 3: PERFORMANCE ANALYSIS (NEW TAB)
-# ============================================
-with tab3:
-    st.markdown("## 📊 Performance Analysis")
-    
-    # Info Box
-    st.markdown("""
-    <div class="info-box">
-        <strong>📊 Model Performance Summary:</strong><br>
-        • <strong>Mode 1 (Real Data - 6 species):</strong> Hybrid CART-SVM achieved <strong>92.3% accuracy</strong><br>
-        • <strong>Mode 2 (Simulated Data - 12 species):</strong> Hybrid CART-SVM achieved <strong>98.1% accuracy</strong><br>
-        • <strong>Best Model:</strong> Hybrid CART-SVM outperforms all standalone models!
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Metric Cards
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.markdown("""
-        <div class="metric-card">
-            <div class="metric-value">92.3%</div>
-            <div class="metric-label">Real Data Accuracy</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div class="metric-card metric-best">
-            <div class="metric-value" style="color: #f39c12;">98.1%</div>
-            <div class="metric-label">Simulated Accuracy</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown("""
-        <div class="metric-card">
-            <div class="metric-value">12</div>
-            <div class="metric-label">Species Covered</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col4:
-        st.markdown("""
-        <div class="metric-card">
-            <div class="metric-value">15</div>
-            <div class="metric-label">Morphological Features</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("---")
-    
-    # Model Performance Charts
-    col_chart1, col_chart2 = st.columns(2)
-    
-    with col_chart1:
-        st.markdown("### 📊 Mode 1: Real Data (6 Species)")
-        
-        # Data for chart
-        models_real = ['CART', 'KNN', 'Hybrid', 'SVM']
-        accuracy_real = [69.2, 88.5, 92.3, 92.3]
-        colors_real = ['#e74c3c', '#f39c12', '#2ecc71', '#3498db']
-        
-        fig1, ax1 = plt.subplots(figsize=(8, 5))
-        bars1 = ax1.bar(models_real, accuracy_real, color=colors_real, edgecolor='black', linewidth=1.5)
-        ax1.set_ylabel('Accuracy (%)', fontsize=12, fontweight='bold')
-        ax1.set_title('Model Performance - Real Data', fontsize=14, fontweight='bold')
-        ax1.set_ylim(60, 100)
-        ax1.grid(axis='y', alpha=0.3, linestyle='--')
-        
-        for bar, acc in zip(bars1, accuracy_real):
-            ax1.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.8, 
-                    f'{acc:.1f}%', ha='center', va='bottom', fontweight='bold', fontsize=11)
-        
-        # Highlight best
-        bars1[2].set_edgecolor('#f1c40f')
-        bars1[2].set_linewidth(3)
-        
-        plt.tight_layout()
-        st.pyplot(fig1)
-        
-        st.markdown("""
-        <div style="text-align: center; font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
-            🏆 Hybrid CART-SVM achieves 92.3% accuracy
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col_chart2:
-        st.markdown("### 📈 Mode 2: Simulated Data (12 Species)")
-        
-        # Data for chart
-        models_sim = ['CART', 'SVM', 'KNN', 'Hybrid']
-        accuracy_sim = [85.0, 95.0, 96.0, 98.1]
-        colors_sim = ['#e74c3c', '#3498db', '#f39c12', '#2ecc71']
-        
-        fig2, ax2 = plt.subplots(figsize=(8, 5))
-        bars2 = ax2.bar(models_sim, accuracy_sim, color=colors_sim, edgecolor='black', linewidth=1.5)
-        ax2.set_ylabel('Accuracy (%)', fontsize=12, fontweight='bold')
-        ax2.set_title('Model Performance - Simulated Data', fontsize=14, fontweight='bold')
-        ax2.set_ylim(80, 100)
-        ax2.grid(axis='y', alpha=0.3, linestyle='--')
-        
-        for bar, acc in zip(bars2, accuracy_sim):
-            ax2.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.5, 
-                    f'{acc:.1f}%', ha='center', va='bottom', fontweight='bold', fontsize=11)
-        
-        # Highlight best
-        bars2[3].set_edgecolor('#f1c40f')
-        bars2[3].set_linewidth(3)
-        
-        plt.tight_layout()
-        st.pyplot(fig2)
-        
-        st.markdown("""
-        <div style="text-align: center; font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
-            🏆 Hybrid CART-SVM achieves 98.1% accuracy (BEST!)
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("---")
-    
-    # Feature Importance Chart
-    st.markdown("### 🔬 Feature Importance Analysis")
-    
-    feature_names = [
-        'Head Length', 'Body Depth', 'Eye Diameter', 'Snout Length',
-        'Maxillary Barbell', 'Mandibullary Barbell', 'Mental Barbell',
-        'Dorsal Fin Ray', 'Anal Fin Ray', 'Pre-dorsal Length',
-        'Pre-pelvic Length', 'Pectoral Fin Ray', 'Head Width',
-        'Inter-orbital Space', 'Total Length'
-    ]
-    
-    importance_values = [0.162, 0.185, 0.075, 0.125, 0.148, 0.087, 0.055, 
-                         0.098, 0.065, 0.042, 0.038, 0.035, 0.048, 0.028, 0.179]
-    
-    sorted_data = sorted(zip(feature_names, importance_values), key=lambda x: x[1], reverse=True)
-    sorted_features = [x[0] for x in sorted_data]
-    sorted_importance = [x[1] for x in sorted_data]
-    
-    fig3, ax3 = plt.subplots(figsize=(10, 6))
-    colors_fi = plt.cm.RdYlGn_r([i/len(sorted_importance) for i in range(len(sorted_importance))])
-    bars_fi = ax3.barh(sorted_features[::-1], sorted_importance[::-1], color=colors_fi, edgecolor='black', linewidth=1)
-    ax3.set_xlabel('Importance Score', fontsize=12, fontweight='bold')
-    ax3.set_title('Feature Importance for Ariidae Classification', fontsize=14, fontweight='bold')
-    ax3.set_xlim(0, max(sorted_importance) + 0.02)
-    ax3.grid(axis='x', alpha=0.3, linestyle='--')
-    
-    for bar, imp in zip(bars_fi, sorted_importance[::-1]):
-        ax3.text(bar.get_width() + 0.003, bar.get_y() + bar.get_height()/2, 
-                f'{imp:.3f}', va='center', fontweight='bold', fontsize=10)
-    
-    plt.tight_layout()
-    st.pyplot(fig3)
-    
-    st.markdown("""
-    <div class="info-box" style="margin-top: 1rem;">
-        <strong>💡 Key Insights:</strong><br>
-        • <strong>Body Depth (0.185)</strong> and <strong>Total Length (0.179)</strong> are the most important features<br>
-        • <strong>Head Length (0.162)</strong> and <strong>Maxillary Barbell (0.148)</strong> also contribute significantly<br>
-        • All 15 features contribute to classification, with the top 4 accounting for ~67% of total importance
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("---")
-    
-    # Cross-Validation Results
-    st.markdown("### 🔄 5-Fold Cross-Validation Results")
-    
-    col_cv1, col_cv2 = st.columns(2)
-    
-    with col_cv1:
-        st.markdown("#### Real Data (6 Species)")
-        
-        cv_folds_real = [1, 2, 3, 4, 5]
-        cv_scores_real = [0.915, 0.922, 0.908, 0.925, 0.918]
-        cv_mean_real = np.mean(cv_scores_real)
-        cv_std_real = np.std(cv_scores_real)
-        
-        fig_cv1, ax_cv1 = plt.subplots(figsize=(8, 4))
-        ax_cv1.plot(cv_folds_real, cv_scores_real, 'o-', color='#2ecc71', linewidth=2.5, markersize=10)
-        ax_cv1.axhline(y=cv_mean_real, color='#e74c3c', linestyle='--', linewidth=2, label=f'Mean: {cv_mean_real:.4f}')
-        ax_cv1.fill_between(cv_folds_real, 
-                           [s - cv_std_real for s in cv_scores_real], 
-                           [s + cv_std_real for s in cv_scores_real], 
-                           alpha=0.2, color='#2ecc71')
-        ax_cv1.set_xlabel('Fold Number', fontsize=11)
-        ax_cv1.set_ylabel('F1-Score', fontsize=11)
-        ax_cv1.set_title('5-Fold CV - Real Data', fontsize=12, fontweight='bold')
-        ax_cv1.set_ylim(0.89, 0.94)
-        ax_cv1.legend(loc='lower right')
-        ax_cv1.grid(True, alpha=0.3)
-        plt.tight_layout()
-        st.pyplot(fig_cv1)
-        
-        st.metric("Mean F1-Score", f"{cv_mean_real:.4f}", f"±{cv_std_real:.4f}")
-    
-    with col_cv2:
-        st.markdown("#### Simulated Data (12 Species)")
-        
-        cv_folds_sim = [1, 2, 3, 4, 5]
-        cv_scores_sim = [0.951, 0.958, 0.945, 0.962, 0.955]
-        cv_mean_sim = np.mean(cv_scores_sim)
-        cv_std_sim = np.std(cv_scores_sim)
-        
-        fig_cv2, ax_cv2 = plt.subplots(figsize=(8, 4))
-        ax_cv2.plot(cv_folds_sim, cv_scores_sim, 'o-', color='#f39c12', linewidth=2.5, markersize=10)
-        ax_cv2.axhline(y=cv_mean_sim, color='#e74c3c', linestyle='--', linewidth=2, label=f'Mean: {cv_mean_sim:.4f}')
-        ax_cv2.fill_between(cv_folds_sim, 
-                           [s - cv_std_sim for s in cv_scores_sim], 
-                           [s + cv_std_sim for s in cv_scores_sim], 
-                           alpha=0.2, color='#f39c12')
-        ax_cv2.set_xlabel('Fold Number', fontsize=11)
-        ax_cv2.set_ylabel('F1-Score', fontsize=11)
-        ax_cv2.set_title('5-Fold CV - Simulated Data', fontsize=12, fontweight='bold')
-        ax_cv2.set_ylim(0.93, 0.97)
-        ax_cv2.legend(loc='lower right')
-        ax_cv2.grid(True, alpha=0.3)
-        plt.tight_layout()
-        st.pyplot(fig_cv2)
-        
-        st.metric("Mean F1-Score", f"{cv_mean_sim:.4f}", f"±{cv_std_sim:.4f}")
-    
-    st.markdown("---")
-    
-    # Comparison Table
-    st.markdown("### 📋 Complete Performance Comparison")
-    
-    comparison_data = {
-        'Model': ['CART', 'SVM', 'KNN', '🏆 Hybrid CART-SVM'],
-        'Real Data (6 species)': ['69.2%', '92.3%', '88.5%', '92.3%'],
-        'Simulated Data (12 species)': ['85.0%', '95.0%', '96.0%', '98.1%']
-    }
-    
-    import pandas as pd
-    comparison_df = pd.DataFrame(comparison_data)
-    st.dataframe(comparison_df, use_container_width=True, hide_index=True)
-    
-    # Improvement summary
-    st.markdown("""
-    <div class="info-box">
-        <strong>🏆 Key Findings:</strong><br>
-        • <strong>Real Data:</strong> Hybrid CART-SVM achieves 92.3% accuracy (best)<br>
-        • <strong>Simulated Data:</strong> Hybrid CART-SVM achieves 98.1% accuracy (best)<br>
-        • <strong>Improvement:</strong> Hybrid outperforms all standalone models in both modes<br>
-        • <strong>Cross-validation:</strong> Low standard deviation indicates stable performance
-    </div>
-    """, unsafe_allow_html=True)
 
 # ============================================
 # FOOTER
